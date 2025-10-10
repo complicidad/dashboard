@@ -208,7 +208,26 @@
   .oculto{ display: none !important;}
   
   footer{margin-top:80px;text-align:center;color:var(--muted);font-size:14px;padding-bottom:20px}
-  
+.btn-flotante{
+  position:fixed;
+  bottom:22px;
+  right:22px;
+  background:linear-gradient(135deg, var(--accent), #FF8B6A);
+  color:#fff;
+  font-weight:700;
+  font-size:15px;
+  padding:14px 20px;
+  border-radius:999px;
+  text-decoration:none;
+  box-shadow:0 8px 20px rgba(217,107,79,0.3);
+  transition:.25s;
+  z-index:9999;
+}
+.btn-flotante:hover{
+  transform:translateY(-3px);
+  box-shadow:0 10px 24px rgba(217,107,79,0.4);
+  opacity:.95;
+}  
 </style>
   
 </head>
@@ -530,7 +549,13 @@
       
       
     </section> 
-
+    
+<!-- 🔸 BOTÓN FLOTANTE HACIA EL LANDING -->
+<a href="https://complicidad.github.io/landing/" class="btn-flotante" title="Volver al inicio">
+  🚀 Únete ahora
+</a>
+    
+    
  <footer>© 2025 Latam5S — Renovado para emprendedores peruanos</footer>    
     
   </main>
