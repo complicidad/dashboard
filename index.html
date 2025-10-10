@@ -4,50 +4,211 @@
   <meta charset="UTF-8" />
   <title>Panel del Cliente</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root{
-      --bg:#f7f8fa; --card:#fff; --ink:#2c3e50; --muted:#6b7b8c;
-      --pri:#2c7be5; --ok:#27ae60; --warn:#f39c12; --danger:#e74c3c;
-      --line:#e5e7eb;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-    header{background:var(--ink);color:#fff;padding:16px 20px}
-    header h1{margin:0;font-size:20px}
-    header p{margin:4px 0 0;color:#e5eefb}
-    nav{background:#34495e;padding:8px 16px;display:flex;gap:16px}
-    nav a{color:#fff;text-decoration:none;font-weight:600;font-size:14px;opacity:.9}
-    nav a:hover{opacity:1;text-decoration:underline}
-    main{padding:20px;max-width:1200px;margin:auto}
-    h2{margin:0 0 12px}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px}
-    .acciones{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;margin-bottom:14px}
-    .btn{border:1px solid var(--line);background:#fff;padding:9px 12px;border-radius:8px;cursor:pointer;font-weight:600}
-    .btn:hover{background:#f4f7fb}
-    .btn.primary{background:var(--pri);border-color:var(--pri);color:#fff}
-    .btn.ghost{background:#fff}
-    .btn.small{padding:6px 8px;font-size:12px}
-    .filtros{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:6px 0 14px}
-    .filtros label{font-size:13px;color:var(--muted)}
-    .filtros input,.filtros select{padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff}
-    .lote{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin:8px 0 10px}
-    .lote-left{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    .lote-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
-    th,td{border-top:1px solid var(--line);padding:10px;text-align:left;font-size:13px;vertical-align:top}
-    thead th{background:#f5f7fb;font-size:12px;color:#4e5d6c}
-    tbody tr:hover{background:#fafcff}
-    .oculto{display:none}
-    .badge{padding:3px 8px;border-radius:999px;font-size:12px;font-weight:700;display:inline-block}
-    .b-pendiente{background:#fff8e6;color:#8a6100;border:1px solid #ffd27a}
-    .b-enviado{background:#e8f2ff;color:#0b57d0;border:1px solid #a7c8ff}
-    .b-entregado{background:#e7f7ef;color:#1b7f3a;border:1px solid #bfe7cd}
-    .b-reprogramado{background:#fff0f3;color:#a1253a;border:1px solid #ffb9c6}
-    .status-select{padding:6px;border:1px solid var(--line);border-radius:8px;background:#fff}
-    .toast{position:fixed;right:16px;bottom:16px;background:#111;color:#fff;padding:10px 14px;border-radius:8px;opacity:0;transform:translateY(8px);transition:.25s}
-    .toast.show{opacity:1;transform:translateY(0)}
-    .nowrap{white-space:nowrap}
-  </style>
+<style>
+  :root {
+    --bg: #fffaf6;
+    --card: #ffffff;
+    --text: #2b2b2b;
+    --muted: #6b6b6b;
+    --accent: #D96B4F;
+    --accent-2: #C9B5E6;
+    --radius: 14px;
+    font-family: "Quicksand", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:linear-gradient(180deg,var(--bg),#fff);
+    color:var(--text);
+    font-family:var(--font);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
+  /* ---------- HEADER ---------- */
+  header {
+    background:linear-gradient(90deg,var(--accent),#FF8B6A);
+    color:#fff;
+    padding:18px 24px;
+    box-shadow:0 6px 20px rgba(217,107,79,0.25);
+  }
+  header h1{margin:0;font-size:22px;font-weight:700;}
+  header p{margin:4px 0 0;font-size:14px;opacity:.9;}
+
+  /* ---------- NAV ---------- */
+  nav{
+    background:#fff;
+    border-bottom:1px solid rgba(0,0,0,0.06);
+    display:flex;
+    gap:18px;
+    padding:10px 20px;
+    justify-content:center;
+  }
+  nav a{
+    color:var(--text);
+    text-decoration:none;
+    font-weight:600;
+    font-size:14px;
+    transition:.2s;
+  }
+  nav a:hover{color:var(--accent);}
+
+  /* ---------- CONTENIDO PRINCIPAL ---------- */
+  main{
+    padding:24px;
+    max-width:1200px;
+    margin:auto;
+  }
+  h2{margin:0 0 14px;font-size:20px;color:var(--accent);}
+
+  .card{
+    background:var(--card);
+    border-radius:var(--radius);
+    box-shadow:0 10px 30px rgba(15,20,25,0.05);
+    padding:20px;
+    border:1px solid rgba(0,0,0,0.04);
+  }
+
+  /* ---------- BOTONES ---------- */
+  .acciones{
+    display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;margin-bottom:14px;
+  }
+  .btn{
+    border:0;
+    padding:10px 14px;
+    border-radius:var(--radius);
+    cursor:pointer;
+    font-weight:700;
+    transition:.2s;
+  }
+  .btn.primary{
+    background:linear-gradient(90deg,var(--accent),#FF8B6A);
+    color:#fff;
+    box-shadow:0 4px 10px rgba(217,107,79,0.2);
+  }
+  .btn.primary:hover{opacity:.9;}
+  .btn.ghost{
+    background:#fff;
+    border:1px solid rgba(0,0,0,0.06);
+    color:var(--accent);
+  }
+  .btn.ghost:hover{background:#fff3ef;}
+
+  .btn.small{padding:6px 10px;font-size:13px;}
+
+  /* ---------- FILTROS ---------- */
+  .filtros{
+    display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:6px 0 14px;
+  }
+  .filtros label{
+    font-size:13px;color:var(--muted);font-weight:600;
+  }
+  .filtros input,.filtros select{
+    padding:9px;
+    border:1px solid rgba(0,0,0,0.08);
+    border-radius:10px;
+    background:#fff;
+    font-family:inherit;
+  }
+
+  /* ---------- LOTE ---------- */
+  .lote{
+    display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin:8px 0 10px;
+  }
+  .lote-left,.lote-right{
+    display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+  }
+
+  /* ---------- TABLA ---------- */
+  table{
+    width:100%;
+    border-collapse:collapse;
+    background:#fff;
+    border-radius:var(--radius);
+    overflow:hidden;
+    box-shadow:0 6px 20px rgba(15,20,25,0.04);
+  }
+  th,td{
+    border-top:1px solid rgba(0,0,0,0.05);
+    padding:10px;
+    text-align:left;
+    font-size:13px;
+    vertical-align:top;
+  }
+  thead th{
+    background:#fff3ef;
+    color:var(--accent);
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.3px;
+  }
+  tbody tr:hover{
+    background:#fff7f3;
+    transition:.2s;
+  }
+
+  /* ---------- BADGES ---------- */
+  .badge{
+    padding:4px 10px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:700;
+    display:inline-block;
+  }
+  .b-pendiente{
+    background:#fff6e6;
+    color:#9a6200;
+    border:1px solid #ffd899;
+  }
+  .b-enviado{
+    background:#fce8e2;
+    color:var(--accent);
+    border:1px solid #ffd3c1;
+  }
+  .b-entregado{
+    background:#e9f8ee;
+    color:#1b7f3a;
+    border:1px solid #bfe7cd;
+  }
+  .b-reprogramado{
+    background:#fae9f9;
+    color:#a84ca8;
+    border:1px solid #e3b4f1;
+  }
+
+  /* ---------- SELECT ESTADO ---------- */
+  .status-select{
+    padding:6px;
+    border:1px solid rgba(0,0,0,0.08);
+    border-radius:10px;
+    background:#fff;
+  }
+
+  /* ---------- TOAST ---------- */
+  .toast{
+    position:fixed;
+    right:16px;
+    bottom:16px;
+    background:linear-gradient(90deg,var(--accent),#FF8B6A);
+    color:#fff;
+    padding:10px 16px;
+    border-radius:12px;
+    box-shadow:0 8px 20px rgba(217,107,79,0.25);
+    opacity:0;
+    transform:translateY(8px);
+    transition:.25s;
+  }
+  .toast.show{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  .nowrap{white-space:nowrap;}
+  
+  .oculto{ display: none !important;}
+  
+</style>
+  
 </head>
 <body>
   <header>
@@ -154,7 +315,6 @@
               <td>2025-08-20</td>
               <td class="estado"><span class="badge b-enviado">Enviado</span></td>
             </tr>
-            
             <tr data-tipo="SHALOM" data-cliente="912345678" data-fechaenvio="2025-08-20">
               <td><input type="checkbox" class="rowCheck" /></td>
               <td>2025-08-18</td>
@@ -170,7 +330,6 @@
               <td>2025-08-20</td>
               <td class="estado"><span class="badge b-enviado">Enviado</span></td>
             </tr>
-            
             <tr data-tipo="DELIVERY" data-cliente="987654321" data-fechaenvio="2025-08-22">
               <td><input type="checkbox" class="rowCheck" /></td>
               <td>2025-08-20</td>
@@ -186,7 +345,6 @@
               <td>2025-08-22</td>
               <td class="estado"><span class="badge b-pendiente">Pendiente</span></td>
             </tr>
-            
             <tr data-tipo="DELIVERY" data-cliente="900111222" data-fechaenvio="2025-08-23">
               <td><input type="checkbox" class="rowCheck" /></td>
               <td>2025-08-21</td>
@@ -202,7 +360,7 @@
               <td>2025-08-23</td>
               <td class="estado"><span class="badge b-pendiente">Pendiente</span></td>
             </tr>
-            
+
             <tr data-tipo="SHALOM" data-cliente="911223344" data-fechaenvio="2025-08-25">
               <td><input type="checkbox" class="rowCheck" /></td>
               <td>2025-08-22</td>
@@ -218,7 +376,7 @@
               <td>2025-08-25</td>
               <td class="estado"><span class="badge b-pendiente">Pendiente</span></td>
             </tr>
-            
+
             <tr data-tipo="DELIVERY" data-cliente="987111222" data-fechaenvio="2025-08-26">
               <td><input type="checkbox" class="rowCheck" /></td>
               <td>2025-08-23</td>
@@ -234,7 +392,7 @@
               <td>2025-08-26</td>
               <td class="estado"><span class="badge b-entregado">Entregado</span></td>
             </tr>
-            
+
             <tr data-tipo="SHALOM" data-cliente="915556677" data-fechaenvio="2025-08-27">
               <td><input type="checkbox" class="rowCheck" /></td>
               <td>2025-08-24</td>
@@ -250,7 +408,7 @@
               <td>2025-08-27</td>
               <td class="estado"><span class="badge b-enviado">Enviado</span></td>
             </tr>
-            
+
             <tr data-tipo="DELIVERY" data-cliente="944332211" data-fechaenvio="2025-08-28">
               <td><input type="checkbox" class="rowCheck" /></td>
               <td>2025-08-25</td>
@@ -266,7 +424,7 @@
               <td>2025-08-28</td>
               <td class="estado"><span class="badge b-pendiente">Pendiente</span></td>
             </tr>
-            
+
             <tr data-tipo="SHALOM" data-cliente="988667755" data-fechaenvio="2025-08-29">
               <td><input type="checkbox" class="rowCheck" /></td>
               <td>2025-08-26</td>
@@ -282,7 +440,7 @@
               <td>2025-08-29</td>
               <td class="estado"><span class="badge b-reprogramado">Reprogramado</span></td>
             </tr>
-            
+
             <tr data-tipo="DELIVERY" data-cliente="900555888" data-fechaenvio="2025-08-30">
               <td><input type="checkbox" class="rowCheck" /></td>
               <td>2025-08-27</td>
@@ -298,7 +456,7 @@
               <td>2025-08-30</td>
               <td class="estado"><span class="badge b-entregado">Entregado</span></td>
             </tr>
-            
+
             <tr data-tipo="SHALOM" data-cliente="913456789" data-fechaenvio="2025-09-01">
               <td><input type="checkbox" class="rowCheck" /></td>
               <td>2025-08-29</td>
@@ -314,7 +472,7 @@
               <td>2025-09-01</td>
               <td class="estado"><span class="badge b-pendiente">Pendiente</span></td>
             </tr>
-            
+
             <tr data-tipo="DELIVERY" data-cliente="922333444" data-fechaenvio="2025-09-02">
               <td><input type="checkbox" class="rowCheck" /></td>
               <td>2025-08-30</td>
@@ -330,7 +488,7 @@
               <td>2025-09-02</td>
               <td class="estado"><span class="badge b-enviado">Enviado</span></td>
             </tr>
-            
+
             <tr data-tipo="DELIVERY" data-cliente="933999777" data-fechaenvio="2025-09-03">
               <td><input type="checkbox" class="rowCheck" /></td>
               <td>2025-08-31</td>
@@ -346,7 +504,7 @@
               <td>2025-09-03</td>
               <td class="estado"><span class="badge b-entregado">Entregado</span></td>
             </tr>
-            
+
             <tr data-tipo="SHALOM" data-cliente="955666333" data-fechaenvio="2025-09-04">
               <td><input type="checkbox" class="rowCheck" /></td>
               <td>2025-09-01</td>
@@ -361,7 +519,8 @@
               <td class="col-agencia">Trujillo / La Libertad / Trujillo / Terminal Centro</td>
               <td>2025-09-04</td>
               <td class="estado"><span class="badge b-enviado">Enviado</span></td>
-            </tr>
+            </tr>            
+            
             
           </tbody>
         </table>
