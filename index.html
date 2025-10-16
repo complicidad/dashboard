@@ -1,723 +1,639 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Panel del Cliente</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8" />
+    <title>Panel de Control — Latam5S</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+
 <style>
-  :root {
-    --bg: #fffaf6;
-    --card: #ffffff;
-    --text: #2b2b2b;
-    --muted: #6b6b6b;
-    --accent: #D96B4F;
-    --accent-2: #C9B5E6;
-    --radius: 14px;
-    font-family: "Quicksand", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-  }
+    :root {
+        --bg: #fffaf6;
+        --card: #ffffff;
+        --text: #2b2b2b;
+        --muted: #6b6b6b;
+        --accent: #D96B4F;
+        --accent-alt: '#FF8B6A';
+        --radius: 14px;
+        --border-color: rgba(0,0,0,0.08);
+        font-family: "Quicksand", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    }
 
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{
-    background:linear-gradient(180deg,var(--bg),#fff);
-    color:var(--text);
-    font-family:var(--font);
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-  }
+    *{box-sizing:border-box;margin:0;padding:0}
+    
+    html { scroll-behavior: smooth; }
 
-  /* ---------- HEADER ---------- */
-  header {
-    background:linear-gradient(90deg,var(--accent),#FF8B6A);
-    color:#fff;
-    padding:18px 24px;
-    box-shadow:0 6px 20px rgba(217,107,79,0.25);
-  }
-  header h1{margin:0;font-size:22px;font-weight:700;}
-  header p{margin:4px 0 0;font-size:14px;opacity:.9;}
+    body{
+        background: var(--bg);
+        color: var(--text);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        line-height: 1.6;
+    }
 
-  /* ---------- NAV ---------- */
-  nav{
-    background:#fff;
-    border-bottom:1px solid rgba(0,0,0,0.06);
-    display:flex;
-    gap:18px;
-    padding:10px 20px;
-    justify-content:right;
-  }
-  nav a{
-    color:var(--text);
-    text-decoration:none;
-    font-weight:600;
-    font-size:14px;
-    transition:.2s;
-  }
-  nav a:hover{color:var(--accent);}
+    /* ---------- HEADER ---------- */
+    header {
+        background:linear-gradient(90deg,var(--accent),#FF8B6A);
+        color:#fff;
+        padding:18px 24px;
+        box-shadow:0 6px 20px rgba(217,107,79,0.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+    }
+    #headerLogo {
+        height: 50px;
+        border-radius: 8px;
+        display: none;
+        object-fit: cover;
+        background-color: white;
+    }
+    header h1{margin:0;font-size:22px;font-weight:700;}
+    header p{margin:4px 0 0;font-size:14px;opacity:.9;}
 
-  /* ---------- CONTENIDO PRINCIPAL ---------- */
-  main{
-    padding:24px;
-    max-width:auto;
-    margin:auto;
-  }
-  h2{margin:0 0 14px;font-size:20px;color:var(--accent);}
+    /* ---------- NAV ---------- */
+    nav{
+        background:#fff;
+        border-bottom:1px solid var(--border-color);
+        display:flex;
+        gap: 10px;
+        padding: 12px 20px;
+        justify-content: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        backdrop-filter: blur(8px);
+        background-color: rgba(255,255,255,0.8);
+    }
+    nav a{
+        color: var(--muted);
+        text-decoration:none;
+        font-weight:600;
+        font-size:14px;
+        transition: color 0.2s;
+        padding: 8px 12px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    nav a:hover{ color:var(--text); }
+    nav a.active {
+        background-color: #fff3ef;
+        color: var(--accent);
+    }
 
-  .card{
-    background:var(--card);
-    border-radius:var(--radius);
-    box-shadow:0 10px 30px rgba(15,20,25,0.05);
-    padding:20px;
-    border:1px solid rgba(0,0,0,0.04);
-  }
+    /* ---------- CONTENIDO PRINCIPAL ---------- */
+    main{ padding: 24px; max-width: 1200px; margin:auto; }
+    main > section { display: none; }
+    main > section.active { display: block; }
+    
+    h2{
+        margin:0 0 16px;
+        font-size:24px;
+        color:var(--accent);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
 
-  /* ---------- BOTONES ---------- */
-  .acciones{
-    display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;margin-bottom:14px;
-  }
-  .btn{
-    border:0;
-    padding:10px 14px;
-    border-radius:var(--radius);
-    cursor:pointer;
-    font-weight:700;
-    transition:.2s;
-  }
-  .btn.primary{
-    background:linear-gradient(90deg,var(--accent),#FF8B6A);
-    color:#fff;
-    box-shadow:0 4px 10px rgba(217,107,79,0.2);
-  }
-  .btn.primary:hover{opacity:.9;}
-  .btn.ghost{
-    background:#fff;
-    border:1px solid rgba(0,0,0,0.06);
-    color:var(--accent);
-  }
-  .btn.ghost:hover{background:#fff3ef;}
+    .card{
+        background:var(--card);
+        border-radius:var(--radius);
+        box-shadow:0 10px 30px rgba(15,20,25,0.05);
+        padding:24px;
+        border:1px solid var(--border-color);
+        margin-bottom: 24px;
+    }
 
-  .btn.small{padding:6px 10px;font-size:13px;}
+    /* ---------- BOTONES & INPUTS ---------- */
+    .acciones{ display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;margin-bottom:16px; }
+    
+    .btn{
+        border:0;
+        padding:10px 16px;
+        border-radius:10px;
+        cursor:pointer;
+        font-weight:700;
+        transition: all .2s;
+        font-family: inherit;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .btn.primary{
+        background:linear-gradient(90deg,var(--accent),#FF8B6A);
+        color:#fff;
+        box-shadow:0 4px 10px rgba(217,107,79,0.2);
+    }
+    .btn.primary:hover{ transform: translateY(-2px); box-shadow:0 6px 14px rgba(217,107,79,0.3); }
+    .btn.ghost{
+        background:transparent;
+        border: 1px solid var(--border-color);
+        color:var(--text);
+    }
+    .btn.ghost:hover{background:#f8f9fa; border-color: #ccc;}
 
-  /* ---------- FILTROS ---------- */
-  .filtros{
-    display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:6px 0 14px;
-  }
-  .filtros label{
-    font-size:13px;color:var(--muted);font-weight:600;
-  }
-  .filtros input,.filtros select{
-    padding:9px;
-    border:1px solid rgba(0,0,0,0.08);
-    border-radius:10px;
-    background:#fff;
-    font-family:inherit;
-  }
+    .input, .select {
+        padding:10px;
+        border:1px solid var(--border-color);
+        border-radius:10px;
+        background:#fff;
+        font-family:inherit;
+        width: 100%;
+        font-size: 14px;
+    }
+    .input:focus, .select:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px #ffe8e1;
+    }
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+        display: block;
+        font-size: 14px;
+        color: var(--muted);
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
 
-  /* ---------- LOTE ---------- */
-  .lote{
-    display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin:8px 0 10px;
-  }
-  .lote-left,.lote-right{
-    display:flex;gap:10px;align-items:center;flex-wrap:wrap;
-  }
+    /* ---------- FILTROS & LOTE ---------- */
+    .filtros{ display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:10px 0 20px; }
+    .filtros label { font-size:13px;color:var(--muted);font-weight:600; }
+    .filtros input,.filtros select { padding:9px; border-radius:10px; font-family:inherit; }
 
-  /* ---------- TABLA ---------- */
-  table{
-    width:100%;
-    border-collapse:collapse;
-    background:#fff;
-    border-radius:var(--radius);
-    overflow:hidden;
-    box-shadow:0 6px 20px rgba(15,20,25,0.04);
-  }
-  th,td{
-    border-top:1px solid rgba(0,0,0,0.05);
-    padding:10px;
-    text-align:left;
-    font-size:13px;
-    vertical-align:top;
-  }
-  thead th{
-    background:#fff3ef;
-    color:var(--accent);
-    font-size:12px;
-    font-weight:700;
-    letter-spacing:0.3px;
-  }
-  tbody tr:hover{
-    background:#fff7f3;
-    transition:.2s;
-  }
+    .lote{ display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin:12px 0 16px; }
+    .lote-left,.lote-right{ display:flex;gap:10px;align-items:center;flex-wrap:wrap; }
 
-  /* ---------- BADGES ---------- */
-  .badge{
-    padding:4px 10px;
-    border-radius:999px;
-    font-size:12px;
-    font-weight:700;
-    display:inline-block;
-  }
-  .b-pendiente{
-    background:#fff6e6;
-    color:#9a6200;
-    border:1px solid #ffd899;
-  }
-  .b-enviado{
-    background:#fce8e2;
-    color:var(--accent);
-    border:1px solid #ffd3c1;
-  }
-  .b-entregado{
-    background:#e9f8ee;
-    color:#1b7f3a;
-    border:1px solid #bfe7cd;
-  }
-  .b-reprogramado{
-    background:#fae9f9;
-    color:#a84ca8;
-    border:1px solid #e3b4f1;
-  }
+    /* ---------- TABLA ---------- */
+    .table-wrapper { overflow-x: auto; }
+    table{ width:100%; border-collapse:collapse; background:#fff; border-radius:var(--radius); overflow:hidden; box-shadow:0 6px 20px rgba(15,20,25,0.04); }
+    th,td{ border-top:1px solid var(--border-color); padding:12px 14px; text-align:left; font-size:13px; vertical-align:middle; }
+    thead th{ background:#fff8f6; color:var(--accent); font-size:12px; font-weight:700; text-transform: uppercase; letter-spacing:0.5px; }
+    tbody tr:hover{ background:#fffaf6; }
+    .nowrap{white-space:nowrap;}
 
-  /* ---------- SELECT ESTADO ---------- */
-  .status-select{
-    padding:6px;
-    border:1px solid rgba(0,0,0,0.08);
-    border-radius:10px;
-    background:#fff;
-  }
+    /* ---------- BADGES & OTROS ---------- */
+    .badge{ padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; display:inline-block; border:1px solid; }
+    .b-pendiente{ background:#fff6e6; color:#9a6200; border-color: #ffd899; }
+    .b-enviado{ background:#fce8e2; color:var(--accent); border-color: #ffd3c1; }
+    .b-entregado{ background:#e9f8ee; color:#1b7f3a; border-color: #bfe7cd; }
+    .b-reprogramado{ background:#f3e9f9; color:#8e44ad; border-color: #d7bde2; }
+    
+    .toast{ position:fixed; right:20px; bottom:20px; background:linear-gradient(90deg,var(--accent),#FF8B6A); color:#fff; padding:12px 20px; border-radius:12px; box-shadow:0 8px 20px rgba(217,107,79,0.25); opacity:0; transform:translateY(10px); transition: all .3s ease-out; z-index: 1000;}
+    .toast.show{ opacity:1; transform:translateY(0); }
 
-  /* ---------- TOAST ---------- */
-  .toast{
-    position:fixed;
-    right:16px;
-    bottom:16px;
-    background:linear-gradient(90deg,var(--accent),#FF8B6A);
-    color:#fff;
-    padding:10px 16px;
-    border-radius:12px;
-    box-shadow:0 8px 20px rgba(217,107,79,0.25);
-    opacity:0;
-    transform:translateY(8px);
-    transition:.25s;
-  }
-  .toast.show{
-    opacity:1;
-    transform:translateY(0);
-  }
+    .oculto{ display: none !important;}
+    footer{
+        margin-top:80px;
+        padding-bottom:20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        color: var(--muted);
+        font-size: 14px;
+    }
+    
+    /* Grid Layout para Secciones */
+    .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+    
+    /* Estilos para sección Link Mágico */
+    #linkUnicoContainer { display: flex; gap: 10px; }
+    #linkUnicoInput { flex-grow: 1; background-color: #f8f9fa; }
 
-  .nowrap{white-space:nowrap;}
-  
-  .oculto{ display: none !important;}
-  
-  footer{margin-top:80px;text-align:center;color:var(--muted);font-size:14px;padding-bottom:20px}
-.btn-flotante{
-  position:fixed;
-  bottom:22px;
-  right:22px;
-  background:linear-gradient(135deg, var(--accent), #FF8B6A);
-  color:#fff;
-  font-weight:700;
-  font-size:15px;
-  padding:14px 20px;
-  border-radius:999px;
-  text-decoration:none;
-  box-shadow:0 8px 20px rgba(217,107,79,0.3);
-  transition:.25s;
-  z-index:9999;
-}
-.btn-flotante:hover{
-  transform:translateY(-3px);
-  box-shadow:0 10px 24px rgba(217,107,79,0.4);
-  opacity:.95;
-}  
+    /* Estilos para Reportes */
+    .stat-card { text-align: center; background-color: #fff8f6; padding: 20px; border-radius: var(--radius); }
+    .stat-card .value { font-size: 36px; font-weight: 700; color: var(--accent); }
+    .stat-card .label { font-size: 14px; color: var(--muted); }
+
+    /* Estilos para Configuración */
+    .setting-card { display: flex; flex-direction: column; gap: 15px; }
+    #logoPreview { max-height: 80px; border-radius: 8px; object-fit: contain; border: 1px dashed var(--border-color); padding: 5px; display: none; margin-top: 10px;}
+
+    @media (max-width: 768px) {
+        nav { flex-wrap: wrap; gap: 5px; }
+        nav a { flex-grow: 1; justify-content: center; }
+        .filtros, .lote { flex-direction: column; align-items: stretch; }
+        .lote-right { justify-content: flex-end; }
+    }
 </style>
-  
 </head>
 <body>
-  <header>
-    <div style="display:flex;align-items:center;gap:15px;justify-content:center;">
-      <!-- Logo dinámico -->
-      <img id="headerLogo" src="" alt="Logo Emprendimiento" style="height:50px; display:none; border-radius:6px;">
-
-      <!-- Título -->
-      <div>
-        <h1 style="margin:0;">📋 Panel del Control</h1>
-        <p style="margin:4px 0 0;color:#e5eefb">Bienvenido, <strong>[Nombre del emprendimiento]</strong></p>
-      </div>
-    </div>
-  </header>
-
-  <nav>
-    <a href="#envios">🚀 Envíos</a>
-    <a href="#link">🔗 Link único</a>
-    <a href="#reportes">📊 Reportes</a>
-    <a href="#cuenta">⚙️ Mi Cuenta</a>
-  </nav>
-
-  <main>
-    <section class="card" id="envios">
-      <h2>🚀 Mis Envíos</h2>
-
-      <!-- Botonera superior -->
-      <div class="acciones">
-        <button class="btn ghost" id="btnTplShalom">📥 Descargar Plantilla SHALOM</button>
-        <button class="btn ghost" id="btnTplDinsides">📥 Descargar Plantilla DINSIDES</button>
-        <button class="btn" id="btnEtiquetas">🏷️ Imprimir Etiquetas</button>
-      </div>
-
-      <!-- Filtros -->
-      <div class="filtros">
-        <label>Cliente (Celular)
-          <input type="text" id="filtroCliente" placeholder="Ej: 987654321" />
-        </label>
-        <label>Fecha de Envío
-          <input type="date" id="filtroFecha" />
-        </label>
-        <label>Tipo
-          <select id="filtroTipo">
-            <option value="DELIVERY" selected>DELIVERY</option>
-            <option value="SHALOM">SHALOM</option>
-            <option value="">Todos</option> <!-- ✅ Nueva opción -->
-          </select>
-        </label>
-
-        <button class="btn" id="btnAplicarFiltros">Filtrar</button>
-      </div>
-
-      <!-- Acciones en lote -->
-      <div class="lote">
-        <div class="lote-left">
-          <label class="nowrap"><input type="checkbox" id="checkTodos" /> Seleccionar todo</label>
-          <span style="color:var(--muted);font-size:13px" id="selCount">0 seleccionados</span>
+    <header>
+        <img id="headerLogo" src="" alt="Logo Emprendimiento">
+        <div>
+            <h1 id="headerTitle">📋 Panel de Control</h1>
+            <p>Bienvenido, <strong id="headerBusinessName">[Nombre del emprendimiento]</strong></p>
         </div>
-        <div class="lote-right">
-          <select id="accionLote" class="status-select">
-            <option value="" selected>Acción en lote…</option>
-            <option value="ENVIADO">Marcar como Enviado</option>
-            <option value="ENTREGADO">Marcar como Entregado</option>
-            <option value="REPROGRAMADO">Reprogramar</option>
-          </select>
-          <input type="date" id="fechaReprog" class="oculto" />
-          <button class="btn primary" id="btnAplicarLote">Aplicar</button>
-        </div>
-      </div>
+    </header>
 
-      <!-- Tabla -->
-      <div style="overflow:auto">
-        <table id="tablaEnvios">
-          <thead>
-            <tr>
-              <th style="width:36px"><input type="checkbox" id="thCheckTodos" /></th>
-              <th>Fecha de Registro</th>
-              <th>Cliente (Celular)</th>
-              <th>Tipo</th>
-              <th>Nombre</th>
-              <th>Teléfono</th>
-              <th class="col-distrito">Distrito</th>
-              <th class="col-direccion">Dirección</th>
-              <th class="col-referencia">Referencia</th>
-              <th class="col-dni">DNI/CE</th>
-              <th class="col-agencia">Agencia</th>
-              <th>Fecha de Envío</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody id="tbodyEnvios">
-            <!-- Datos de ejemplo -->
-            <tr data-tipo="SHALOM" data-cliente="912345678" data-fechaenvio="2025-08-20">
-              <td><input type="checkbox" class="rowCheck" /></td>
-              <td>2025-08-18</td>
-              <td>912345678</td>
-              <td>SHALOM</td>
-              <td>María López</td>
-              <td>912345678</td>
-              <td class="col-distrito">-</td>
-              <td class="col-direccion">-</td>
-              <td class="col-referencia">-</td>
-              <td class="col-dni">87654321</td>
-              <td class="col-agencia">Lima / Lima / Chorrillos / Chorrillos Los Faisanes</td>
-              <td>2025-08-20</td>
-              <td class="estado"><span class="badge b-enviado">Enviado</span></td>
-            </tr>
-            <tr data-tipo="SHALOM" data-cliente="912345678" data-fechaenvio="2025-08-20">
-              <td><input type="checkbox" class="rowCheck" /></td>
-              <td>2025-08-18</td>
-              <td>912345678</td>
-              <td>SHALOM</td>
-              <td>María López</td>
-              <td>912345678</td>
-              <td class="col-distrito">-</td>
-              <td class="col-direccion">-</td>
-              <td class="col-referencia">-</td>
-              <td class="col-dni">87654321</td>
-              <td class="col-agencia">	Ancash / Huaraz / Huaraz / Huaraz</td>
-              <td>2025-08-20</td>
-              <td class="estado"><span class="badge b-enviado">Enviado</span></td>
-            </tr>
-            <tr data-tipo="DELIVERY" data-cliente="987654321" data-fechaenvio="2025-08-22">
-              <td><input type="checkbox" class="rowCheck" /></td>
-              <td>2025-08-20</td>
-              <td>987654321</td>
-              <td>DELIVERY</td>
-              <td>Juan Pérez</td>
-              <td>987654321</td>
-              <td class="col-distrito">Lima</td>
-              <td class="col-direccion">Av. Principal 123</td>
-              <td class="col-referencia">Frente al parque</td>
-              <td class="col-dni">-</td>
-              <td class="col-agencia">-</td>
-              <td>2025-08-22</td>
-              <td class="estado"><span class="badge b-pendiente">Pendiente</span></td>
-            </tr>
-            <tr data-tipo="DELIVERY" data-cliente="900111222" data-fechaenvio="2025-08-23">
-              <td><input type="checkbox" class="rowCheck" /></td>
-              <td>2025-08-21</td>
-              <td>900111222</td>
-              <td>DELIVERY</td>
-              <td>Pedro Rojas</td>
-              <td>900111222</td>
-              <td class="col-distrito">Miraflores</td>
-              <td class="col-direccion">Calle 9 #456</td>
-              <td class="col-referencia">2do piso</td>
-              <td class="col-dni">-</td>
-              <td class="col-agencia">-</td>
-              <td>2025-08-23</td>
-              <td class="estado"><span class="badge b-pendiente">Pendiente</span></td>
-            </tr>
+    <nav>
+        <a href="#envios" class="nav-link active"><i data-feather="truck"></i>Envíos</a>
+        <a href="#link" class="nav-link"><i data-feather="link"></i>Link Mágico</a>
+        <a href="#reportes" class="nav-link"><i data-feather="bar-chart-2"></i>Reportes</a>
+        <a href="#cuenta" class="nav-link"><i data-feather="settings"></i>Mi Cuenta</a>
+    </nav>
 
-            <tr data-tipo="SHALOM" data-cliente="911223344" data-fechaenvio="2025-08-25">
-              <td><input type="checkbox" class="rowCheck" /></td>
-              <td>2025-08-22</td>
-              <td>911223344</td>
-              <td>SHALOM</td>
-              <td>Lucía Gutiérrez</td>
-              <td>911223344</td>
-              <td class="col-distrito">-</td>
-              <td class="col-direccion">-</td>
-              <td class="col-referencia">-</td>
-              <td class="col-dni">75342190</td>
-              <td class="col-agencia">Lima / Lima / Los Olivos / Mega Plaza</td>
-              <td>2025-08-25</td>
-              <td class="estado"><span class="badge b-pendiente">Pendiente</span></td>
-            </tr>
+    <main>
+        <!-- ======================= SECCIÓN ENVÍOS ======================= -->
+        <section class="active" id="envios">
+            <div class="card">
+                <h2><i data-feather="truck"></i>Mis Envíos</h2>
+                <div class="acciones">
+                    <button class="btn ghost" id="btnTplShalom"><i data-feather="download"></i>Plantilla SHALOM</button>
+                    <button class="btn ghost" id="btnTplOlva"><i data-feather="download"></i>Plantilla OLVA</button>
+                    <button class="btn primary" id="btnEtiquetas"><i data-feather="tag"></i>Imprimir Etiquetas</button>
+                </div>
+                <div class="filtros">
+                    <label>Cliente (Celular)<input type="text" id="filtroCliente" placeholder="Ej: 987654321" class="input" /></label>
+                    <label>Fecha de Envío<input type="date" id="filtroFecha" class="input" /></label>
+                    <label>Courier
+                        <select id="filtroTipo" class="select">
+                            <option value="">Todos</option>
+                            <option value="DELIVERY">Delivery Propio</option>
+                            <option value="SHALOM">Shalom</option>
+                            <option value="OLVA">Olva</option>
+                        </select>
+                    </label>
+                    <button class="btn primary" id="btnAplicarFiltros">Filtrar</button>
+                </div>
+                <div class="lote">
+                    <div class="lote-left">
+                        <label class="nowrap"><input type="checkbox" id="checkTodos" /> Seleccionar todo</label>
+                        <span style="color:var(--muted);font-size:13px" id="selCount">0 seleccionados</span>
+                    </div>
+                    <div class="lote-right">
+                        <select id="accionLote" class="select">
+                            <option value="" selected>Acción en lote…</option>
+                            <option value="ENVIADO">Marcar como Enviado</option>
+                            <option value="ENTREGADO">Marcar como Entregado</option>
+                            <option value="REPROGRAMADO">Reprogramar</option>
+                        </select>
+                        <input type="date" id="fechaReprog" class="input oculto" />
+                        <button class="btn primary" id="btnAplicarLote">Aplicar</button>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table id="tablaEnvios">
+                        <thead>
+                            <tr>
+                                <th style="width:36px"><input type="checkbox" id="thCheckTodos" /></th>
+                                <th>Fecha Reg.</th>
+                                <th>Cliente</th>
+                                <th>Courier</th>
+                                <th>Destinatario</th>
+                                <th class="col-distrito">Distrito</th>
+                                <th class="col-direccion">Dirección</th>
+                                <th class="col-dni">DNI/CE</th>
+                                <th class="col-agencia">Agencia</th>
+                                <th>Fecha Envío</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyEnvios">
+                            <!-- JS llenará esta tabla -->
+                            <tr><td colspan="11" style="text-align:center;padding:40px;color:var(--muted);">No hay envíos para mostrar.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
 
-            <tr data-tipo="DELIVERY" data-cliente="987111222" data-fechaenvio="2025-08-26">
-              <td><input type="checkbox" class="rowCheck" /></td>
-              <td>2025-08-23</td>
-              <td>987111222</td>
-              <td>DELIVERY</td>
-              <td>Rosa Valdivia</td>
-              <td>987111222</td>
-              <td class="col-distrito">San Miguel</td>
-              <td class="col-direccion">Av. Universitaria 240</td>
-              <td class="col-referencia">Frente al Metro</td>
-              <td class="col-dni">-</td>
-              <td class="col-agencia">-</td>
-              <td>2025-08-26</td>
-              <td class="estado"><span class="badge b-entregado">Entregado</span></td>
-            </tr>
+        <!-- ======================= SECCIÓN LINK MÁGICO ======================= -->
+        <section id="link">
+            <div class="card">
+                <h2><i data-feather="link"></i>Tu Enlace Mágico</h2>
+                <p class="text-muted" style="margin-bottom: 20px;">Comparte este link único con tus clientes. Ellos completarán sus datos de envío directamente y la información aparecerá en tu panel, ¡sin errores y sin que tengas que transcribir nada!</p>
+                <div class="form-group">
+                    <label for="linkUnicoInput">Tu enlace personal</label>
+                    <div id="linkUnicoContainer">
+                        <input type="text" id="linkUnicoInput" class="input" value="https://latam5s.com/form/tu-tienda" readonly>
+                        <button class="btn primary" id="btnCopiarLink"><i data-feather="copy"></i>Copiar</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- ======================= SECCIÓN REPORTES ======================= -->
+        <section id="reportes">
+             <div class="card">
+                <h2><i data-feather="bar-chart-2"></i>Reportes (Este Mes)</h2>
+                <div class="grid-container">
+                    <div class="stat-card">
+                        <div class="value" id="statTotal">128</div>
+                        <div class="label">Envíos Totales</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value" id="statPendientes">15</div>
+                        <div class="label">Pendientes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value" id="statCompletados">113</div>
+                        <div class="label">Completados</div>
+                    </div>
+                     <div class="stat-card">
+                        <div class="value" id="statCourier">Shalom</div>
+                        <div class="label">Courier Más Usado</div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-            <tr data-tipo="SHALOM" data-cliente="915556677" data-fechaenvio="2025-08-27">
-              <td><input type="checkbox" class="rowCheck" /></td>
-              <td>2025-08-24</td>
-              <td>915556677</td>
-              <td>SHALOM</td>
-              <td>Carla Torres</td>
-              <td>915556677</td>
-              <td class="col-distrito">-</td>
-              <td class="col-direccion">-</td>
-              <td class="col-referencia">-</td>
-              <td class="col-dni">87431209</td>
-              <td class="col-agencia">Cusco / Cusco / Wanchaq / Terminal Terrestre</td>
-              <td>2025-08-27</td>
-              <td class="estado"><span class="badge b-enviado">Enviado</span></td>
-            </tr>
+        <!-- ======================= SECCIÓN MI CUENTA ======================= -->
+        <section id="cuenta">
+            <h2><i data-feather="settings"></i>Configuración de tu Cuenta</h2>
+            <div class="grid-container">
+                <div class="card setting-card">
+                    <h3><i data-feather="briefcase"></i> Perfil del Negocio</h3>
+                    <div class="form-group">
+                        <label for="businessName">Nombre del Emprendimiento</label>
+                        <input type="text" id="businessName" class="input" placeholder="Ej: La Tiendita de Ana">
+                    </div>
+                    <div class="form-group">
+                        <label for="logoInput">Logo del Negocio</label>
+                        <input type="file" id="logoInput" class="input" accept="image/*">
+                        <img id="logoPreview" src="" alt="Vista previa del logo">
+                    </div>
+                </div>
 
-            <tr data-tipo="DELIVERY" data-cliente="944332211" data-fechaenvio="2025-08-28">
-              <td><input type="checkbox" class="rowCheck" /></td>
-              <td>2025-08-25</td>
-              <td>944332211</td>
-              <td>DELIVERY</td>
-              <td>José Fernández</td>
-              <td>944332211</td>
-              <td class="col-distrito">Surco</td>
-              <td class="col-direccion">Calle Los Jazmines 123</td>
-              <td class="col-referencia">Cerca al Wong</td>
-              <td class="col-dni">-</td>
-              <td class="col-agencia">-</td>
-              <td>2025-08-28</td>
-              <td class="estado"><span class="badge b-pendiente">Pendiente</span></td>
-            </tr>
+                <div class="card setting-card">
+                    <h3><i data-feather="package"></i> Opciones de Envío</h3>
+                    <p style="font-size:14px; color:var(--muted);">Selecciona los couriers que ofreces. Tus clientes solo verán estas opciones en el formulario.</p>
+                    <div class="form-group">
+                        <label><input type="checkbox" checked> Delivery Propio</label>
+                        <label><input type="checkbox" checked> Shalom</label>
+                        <label><input type="checkbox"> Olva</label>
+                        <label><input type="checkbox"> Otro (próximamente)</label>
+                    </div>
+                </div>
 
-            <tr data-tipo="SHALOM" data-cliente="988667755" data-fechaenvio="2025-08-29">
-              <td><input type="checkbox" class="rowCheck" /></td>
-              <td>2025-08-26</td>
-              <td>988667755</td>
-              <td>SHALOM</td>
-              <td>Valeria Campos</td>
-              <td>988667755</td>
-              <td class="col-distrito">-</td>
-              <td class="col-direccion">-</td>
-              <td class="col-referencia">-</td>
-              <td class="col-dni">78451236</td>
-              <td class="col-agencia">Piura / Piura / Castilla / Piura Central</td>
-              <td>2025-08-29</td>
-              <td class="estado"><span class="badge b-reprogramado">Reprogramado</span></td>
-            </tr>
+                <div class="card setting-card">
+                    <h3><i data-feather="calendar"></i> Fechas y Horarios</h3>
+                     <div class="form-group">
+                        <label for="cutoffTime">Hora de Cierre de Pedidos</label>
+                        <input type="time" id="cutoffTime" class="input">
+                    </div>
+                    <div class="form-group">
+                         <label>Días de Despacho Habilitados</label>
+                         <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                            <label><input type="checkbox"> Lun</label>
+                            <label><input type="checkbox" checked> Mar</label>
+                            <label><input type="checkbox"> Mié</label>
+                            <label><input type="checkbox" checked> Jue</label>
+                            <label><input type="checkbox"> Vie</label>
+                            <label><input type="checkbox" checked> Sáb</label>
+                            <label><input type="checkbox"> Dom</label>
+                         </div>
+                    </div>
+                </div>
 
-            <tr data-tipo="DELIVERY" data-cliente="900555888" data-fechaenvio="2025-08-30">
-              <td><input type="checkbox" class="rowCheck" /></td>
-              <td>2025-08-27</td>
-              <td>900555888</td>
-              <td>DELIVERY</td>
-              <td>Camila Morales</td>
-              <td>900555888</td>
-              <td class="col-distrito">La Molina</td>
-              <td class="col-direccion">Av. El Sol 777</td>
-              <td class="col-referencia">Al costado del BCP</td>
-              <td class="col-dni">-</td>
-              <td class="col-agencia">-</td>
-              <td>2025-08-30</td>
-              <td class="estado"><span class="badge b-entregado">Entregado</span></td>
-            </tr>
+                <div class="card setting-card">
+                    <h3><i data-feather="users"></i> Gestión de Equipo</h3>
+                    <p style="font-size:14px; color:var(--muted);">Invita a miembros de tu equipo para gestionar los envíos (Función del Plan Consolidado).</p>
+                    <button class="btn ghost" disabled><i data-feather="plus"></i>Invitar Usuario</button>
+                </div>
+            </div>
+            <div style="display:flex; justify-content: flex-end; margin-top: 20px;">
+                <button class="btn primary" id="btnGuardarConfig"><i data-feather="save"></i>Guardar Cambios</button>
+            </div>
+        </section>
+        
+        <footer>
+            <span>Powered by</span>
+            <svg height="20" viewBox="0 0 90 22" xmlns="http://www.w3.org/2000/svg">
+                <text x="0" y="18" style="font-family: Quicksand, sans-serif; font-size: 20px; font-weight: 700; fill: rgb(217, 107, 79);">Latam5S</text>
+            </svg>
+        </footer>
+    </main>
 
-            <tr data-tipo="SHALOM" data-cliente="913456789" data-fechaenvio="2025-09-01">
-              <td><input type="checkbox" class="rowCheck" /></td>
-              <td>2025-08-29</td>
-              <td>913456789</td>
-              <td>SHALOM</td>
-              <td>Fiorella Vega</td>
-              <td>913456789</td>
-              <td class="col-distrito">-</td>
-              <td class="col-direccion">-</td>
-              <td class="col-referencia">-</td>
-              <td class="col-dni">70892135</td>
-              <td class="col-agencia">Arequipa / Arequipa / Cerro Colorado / Principal</td>
-              <td>2025-09-01</td>
-              <td class="estado"><span class="badge b-pendiente">Pendiente</span></td>
-            </tr>
+    <div class="toast" id="toast">Acción aplicada</div>
 
-            <tr data-tipo="DELIVERY" data-cliente="922333444" data-fechaenvio="2025-09-02">
-              <td><input type="checkbox" class="rowCheck" /></td>
-              <td>2025-08-30</td>
-              <td>922333444</td>
-              <td>DELIVERY</td>
-              <td>Daniela Silva</td>
-              <td>922333444</td>
-              <td class="col-distrito">San Isidro</td>
-              <td class="col-direccion">Av. Javier Prado 350</td>
-              <td class="col-referencia">Frente a Real Plaza</td>
-              <td class="col-dni">-</td>
-              <td class="col-agencia">-</td>
-              <td>2025-09-02</td>
-              <td class="estado"><span class="badge b-enviado">Enviado</span></td>
-            </tr>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    feather.replace();
 
-            <tr data-tipo="DELIVERY" data-cliente="933999777" data-fechaenvio="2025-09-03">
-              <td><input type="checkbox" class="rowCheck" /></td>
-              <td>2025-08-31</td>
-              <td>933999777</td>
-              <td>DELIVERY</td>
-              <td>Andrea Navarro</td>
-              <td>933999777</td>
-              <td class="col-distrito">Barranco</td>
-              <td class="col-direccion">Jr. Unión 222</td>
-              <td class="col-referencia">3er piso</td>
-              <td class="col-dni">-</td>
-              <td class="col-agencia">-</td>
-              <td>2025-09-03</td>
-              <td class="estado"><span class="badge b-entregado">Entregado</span></td>
-            </tr>
+    // --- NAVEGACIÓN PRINCIPAL ---
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('main > section');
 
-            <tr data-tipo="SHALOM" data-cliente="955666333" data-fechaenvio="2025-09-04">
-              <td><input type="checkbox" class="rowCheck" /></td>
-              <td>2025-09-01</td>
-              <td>955666333</td>
-              <td>SHALOM</td>
-              <td>Gabriela Ruiz</td>
-              <td>955666333</td>
-              <td class="col-distrito">-</td>
-              <td class="col-direccion">-</td>
-              <td class="col-referencia">-</td>
-              <td class="col-dni">75643218</td>
-              <td class="col-agencia">Trujillo / La Libertad / Trujillo / Terminal Centro</td>
-              <td>2025-09-04</td>
-              <td class="estado"><span class="badge b-enviado">Enviado</span></td>
-            </tr>            
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = link.getAttribute('href').substring(1);
             
-            
-          </tbody>
-        </table>
-      </div>
-      
-      
-    </section> 
-    
-<!-- 🔸 BOTÓN FLOTANTE HACIA EL LANDING -->
-<a href="https://complicidad.github.io/landing/" class="btn-flotante" title="Volver al inicio">
-  🚀 Únete ahora
-</a>
-    
-    
- <footer>© 2025 Latam5S — Renovado para emprendedores peruanos</footer>    
-    
-  </main>
+            navLinks.forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
 
-  <div class="toast" id="toast">Acción aplicada</div>
-  
-  
-  <script>
+            sections.forEach(sec => {
+                sec.classList.toggle('active', sec.id === targetId);
+            });
+        });
+    });
+
+    // --- SECCIÓN ENVÍOS ---
     const filtroTipo = document.getElementById('filtroTipo');
     const filtroCliente = document.getElementById('filtroCliente');
     const filtroFecha = document.getElementById('filtroFecha');
     const btnAplicarFiltros = document.getElementById('btnAplicarFiltros');
-
-    const fechaReprog = document.getElementById('fechaReprog');
-    const accionLote = document.getElementById('accionLote');
-    const btnAplicarLote = document.getElementById('btnAplicarLote');
-
     const tbody = document.getElementById('tbodyEnvios');
     const checkTodos = document.getElementById('checkTodos');
     const thCheckTodos = document.getElementById('thCheckTodos');
     const selCount = document.getElementById('selCount');
-    const toast = document.getElementById('toast');
+    const accionLote = document.getElementById('accionLote');
+    const fechaReprog = document.getElementById('fechaReprog');
+    const btnAplicarLote = document.getElementById('btnAplicarLote');
+    
+    // Datos de ejemplo
+    const sampleData = [
+        { id: 1, tipo: "SHALOM", cliente: "912345678", fechaEnvio: "2025-08-20", fechaReg: "2025-08-18", nombre: "María López", dni: "87654321", agencia: "Lima / Lima / Chorrillos", estado: "ENVIADO" },
+        { id: 2, tipo: "DELIVERY", cliente: "987654321", fechaEnvio: "2025-08-22", fechaReg: "2025-08-20", nombre: "Juan Pérez", distrito: "Miraflores", direccion: "Av. Principal 123", estado: "PENDIENTE" },
+        { id: 3, tipo: "OLVA", cliente: "911223344", fechaEnvio: "2025-08-25", fechaReg: "2025-08-22", nombre: "Lucía Gutiérrez", dni: "75342190", agencia: "Lima / Lima / Los Olivos", estado: "PENDIENTE" },
+        { id: 4, tipo: "DELIVERY", cliente: "987111222", fechaEnvio: "2025-08-26", fechaReg: "2025-08-23", nombre: "Rosa Valdivia", distrito: "San Miguel", direccion: "Av. Universitaria 240", estado: "ENTREGADO" },
+        { id: 5, tipo: "SHALOM", cliente: "988667755", fechaEnvio: "2025-08-29", fechaReg: "2025-08-26", nombre: "Valeria Campos", dni: "78451236", agencia: "Piura / Piura / Castilla", estado: "REPROGRAMADO" },
+    ];
+    
+    function renderTable(data) {
+        tbody.innerHTML = '';
+        if (data.length === 0) {
+             tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--muted);">No hay envíos que coincidan con los filtros.</td></tr>';
+             return;
+        }
+        data.forEach(item => {
+            const row = document.createElement('tr');
+            row.dataset.id = item.id; // Asignar ID único a la fila
+            row.dataset.tipo = item.tipo;
+            row.dataset.cliente = item.cliente;
+            row.dataset.fechaenvio = item.fechaEnvio;
+            
+            const badgeMap = {
+                "PENDIENTE": '<span class="badge b-pendiente">Pendiente</span>',
+                "ENVIADO": '<span class="badge b-enviado">Enviado</span>',
+                "ENTREGADO": '<span class="badge b-entregado">Entregado</span>',
+                "REPROGRAMADO": '<span class="badge b-reprogramado">Reprogramado</span>',
+            };
 
-    // ---------- Columnas dinámicas por tipo + filtrado de filas ----------
-    function aplicarFiltros() {
-      const tipo = filtroTipo.value;
-      const cel = filtroCliente.value.trim().toLowerCase();
-      const fecha = filtroFecha.value; // yyyy-mm-dd
-
-      // Mostrar todas las columnas primero
-      document.querySelectorAll('.col-distrito,.col-direccion,.col-referencia,.col-dni,.col-agencia')
-        .forEach(el => el.classList.remove('oculto'));
-
-      // Ocultar columnas según tipo
-      if (tipo === 'DELIVERY') {
-        document.querySelectorAll('.col-dni,.col-agencia').forEach(el => el.classList.add('oculto'));
-      } else if (tipo === 'SHALOM') {
-        document.querySelectorAll('.col-distrito,.col-direccion,.col-referencia').forEach(el => el.classList.add('oculto'));
-      }
-
-      // Filtrar filas por tipo + cliente + fecha de envío
-      [...tbody.rows].forEach(tr => {
-        const t = tr.dataset.tipo || '';
-        const c = (tr.dataset.cliente || '').toLowerCase();
-        let f = tr.dataset.fechaenvio || '';
-
-        // Recortar ISO con "T" si viniera así
-        if (typeof f === 'string' && f.includes('T')) f = f.split('T')[0];
-
-        const okTipo = (tipo === '' || t === tipo);     // si quisieras "Todos" usa opción vacía
-        const okCli  = (cel === '' || c.includes(cel));
-        const okFec  = (fecha === '' || f === fecha);
-
-        tr.style.display = (okTipo && okCli && okFec) ? '' : 'none';
-      });
-
-      // Al cambiar filtros, limpia selección
-      deseleccionarTodo();
+            row.innerHTML = `
+                <td><input type="checkbox" class="rowCheck" /></td>
+                <td class="nowrap">${item.fechaReg}</td>
+                <td>${item.cliente}</td>
+                <td>${item.tipo}</td>
+                <td>${item.nombre}</td>
+                <td class="col-distrito">${item.distrito || '-'}</td>
+                <td class="col-direccion">${item.direccion || '-'}</td>
+                <td class="col-dni">${item.dni || '-'}</td>
+                <td class="col-agencia">${item.agencia || '-'}</td>
+                <td class="nowrap">${item.fechaEnvio}</td>
+                <td class="estado">${badgeMap[item.estado] || item.estado}</td>
+            `;
+            tbody.appendChild(row);
+        });
     }
 
-    // ---------- Selección múltiple ----------
+    function aplicarFiltros() {
+        const tipo = filtroTipo.value;
+        const cel = filtroCliente.value.trim().toLowerCase();
+        const fecha = filtroFecha.value;
+        
+        // 1. Filtrar los datos primero
+        const filteredData = sampleData.filter(item => {
+            const okTipo = !tipo || item.tipo === tipo;
+            const okCli = !cel || item.cliente.includes(cel);
+            const okFec = !fecha || item.fechaEnvio === fecha;
+            return okTipo && okCli && okFec;
+        });
+        
+        // 2. Renderizar la tabla con los datos filtrados
+        renderTable(filteredData);
+        
+        // 3. Ahora, aplicar la visibilidad de columnas a la tabla recién renderizada
+        document.querySelectorAll('.col-distrito,.col-direccion,.col-dni,.col-agencia').forEach(el => el.style.display = ''); // Resetear visibilidad
+        
+        if (tipo === 'DELIVERY') { 
+            document.querySelectorAll('.col-dni,.col-agencia').forEach(el => el.style.display = 'none'); 
+        } else if (tipo === 'SHALOM' || tipo === 'OLVA') { 
+            document.querySelectorAll('.col-distrito,.col-direccion').forEach(el => el.style.display = 'none'); 
+        }
+
+        // 4. Deseleccionar todas las filas
+        deseleccionarTodo();
+    }
+
     function contarSeleccionados(){
-      const count = document.querySelectorAll('.rowCheck:checked').length;
-      selCount.textContent = count + ' seleccionados';
+        const count = tbody.querySelectorAll('.rowCheck:checked').length;
+        selCount.textContent = `${count} seleccionados`;
     }
     function seleccionarTodo(checked){
-      document.querySelectorAll('.rowCheck').forEach(cb => {
-        const row = cb.closest('tr');
-        if (row.style.display !== 'none') cb.checked = checked; // solo visibles
-      });
-      thCheckTodos.checked = checked;
-      checkTodos.checked = checked;
-      contarSeleccionados();
+        tbody.querySelectorAll('.rowCheck').forEach(cb => cb.checked = checked);
+        thCheckTodos.checked = checked;
+        checkTodos.checked = checked;
+        contarSeleccionados();
     }
     function deseleccionarTodo(){ seleccionarTodo(false); }
 
     checkTodos.addEventListener('change', e => seleccionarTodo(e.target.checked));
     thCheckTodos.addEventListener('change', e => seleccionarTodo(e.target.checked));
     tbody.addEventListener('change', e => { if(e.target.classList.contains('rowCheck')) contarSeleccionados(); });
-
-    // ---------- Acción en lote ----------
+    
     accionLote.addEventListener('change', () => {
-      const v = accionLote.value;
-      fechaReprog.classList.toggle('oculto', v !== 'REPROGRAMADO');
-      if (v !== 'REPROGRAMADO') fechaReprog.value = '';
+        fechaReprog.classList.toggle('oculto', accionLote.value !== 'REPROGRAMADO');
+        if (accionLote.value !== 'REPROGRAMADO') fechaReprog.value = '';
     });
 
     btnAplicarLote.addEventListener('click', () => {
-      const action = accionLote.value;
-      if (!action){ showToast('Elige una acción en lote'); return; }
+        const action = accionLote.value;
+        if (!action){ showToast('Elige una acción en lote'); return; }
+        if (action === 'REPROGRAMADO' && !fechaReprog.value){ showToast('Selecciona fecha para reprogramar'); return; }
+        const seleccionados = [...tbody.querySelectorAll('.rowCheck:checked')];
+        if (seleccionados.length === 0){ showToast('No hay envíos seleccionados'); return; }
+        
+        const selectedIds = seleccionados.map(cb => parseInt(cb.closest('tr').dataset.id, 10));
 
-      if (action === 'REPROGRAMADO' && !fechaReprog.value){
-        showToast('Selecciona fecha para reprogramar'); return;
-      }
+        // Actualizar los datos en el array principal
+        selectedIds.forEach(id => {
+            const item = sampleData.find(d => d.id === id);
+            if (item) {
+                if (action === 'REPROGRAMADO') {
+                    item.estado = 'REPROGRAMADO';
+                    item.fechaEnvio = fechaReprog.value;
+                } else {
+                    item.estado = action; // Aplica ENVIADO o ENTREGADO
+                }
+            }
+        });
 
-      const seleccionados = [...document.querySelectorAll('.rowCheck:checked')].map(cb => cb.closest('tr'));
-      if (seleccionados.length === 0){ showToast('No hay envíos seleccionados'); return; }
+        showToast(`Acción aplicada a ${seleccionados.length} envío(s)`);
+        
+        // Refrescar la tabla para mostrar los cambios
+        aplicarFiltros();
+    });
+    
+    btnAplicarFiltros.addEventListener('click', aplicarFiltros);
 
-      // “Aplicar” visualmente en la tabla (mock)
-      seleccionados.forEach(tr => {
-        const tdEstado = tr.querySelector('.estado');
-        if (action === 'ENVIADO') {
-          tdEstado.innerHTML = '<span class="badge b-enviado">Enviado</span>';
-        } else if (action === 'ENTREGADO') {
-          tdEstado.innerHTML = '<span class="badge b-entregado">Entregado</span>';
-        } else if (action === 'REPROGRAMADO') {
-          // Actualiza fecha de envío + estado
-          tr.dataset.fechaenvio = fechaReprog.value;
-          tr.cells[11].textContent = fechaReprog.value; // Columna "Fecha de Envío"
-          tdEstado.innerHTML = '<span class="badge b-reprogramado">Reprogramado</span>';
-        }
-      });
-
-      showToast('Acción aplicada a ' + seleccionados.length + ' envío(s)');
-      deseleccionarTodo();
-
-      // 👉 Aquí tu socio debe:
-      // - Enviar los IDs/filas seleccionadas + acción + (fechaReprog si aplica) al backend (Apps Script / API)
-      // - Actualizar Google Sheets y responder con éxito/errores
+    // --- SECCIÓN LINK MÁGICO ---
+    const btnCopiarLink = document.getElementById('btnCopiarLink');
+    const linkUnicoInput = document.getElementById('linkUnicoInput');
+    btnCopiarLink.addEventListener('click', () => {
+        navigator.clipboard.writeText(linkUnicoInput.value).then(() => {
+            showToast('¡Enlace copiado al portapapeles!');
+        }).catch(err => {
+            showToast('Error al copiar el enlace.');
+        });
     });
 
-    // ---------- Botones de plantillas / etiquetas (mock) ----------
-    document.getElementById('btnTplShalom').onclick   = () => showToast('Descargando plantilla SHALOM...');
-    document.getElementById('btnTplDinsides').onclick = () => showToast('Descargando plantilla DINSIDES...');
-    document.getElementById('btnEtiquetas').onclick   = () => showToast('Abriendo impresor de etiquetas...');
+    // --- SECCIÓN MI CUENTA ---
+    const businessNameInput = document.getElementById('businessName');
+    const headerBusinessName = document.getElementById('headerBusinessName');
+    const logoInput = document.getElementById('logoInput');
+    const logoPreview = document.getElementById('logoPreview');
+    const headerLogo = document.getElementById('headerLogo');
+    const btnGuardarConfig = document.getElementById('btnGuardarConfig');
 
-    // ---------- Utilidades ----------
+    businessNameInput.addEventListener('input', () => {
+        headerBusinessName.textContent = businessNameInput.value || '[Nombre del emprendimiento]';
+    });
+
+    logoInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imageUrl = e.target.result;
+                logoPreview.src = imageUrl;
+                logoPreview.style.display = "block";
+                headerLogo.src = imageUrl;
+                headerLogo.style.display = "block";
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    btnGuardarConfig.addEventListener('click', () => {
+        showToast('Configuración guardada exitosamente.');
+        // Aquí iría la lógica para guardar los datos en el backend.
+    });
+
+    // --- UTILIDADES ---
+    const toast = document.getElementById('toast');
     function showToast(msg){
-      toast.textContent = msg;
-      toast.classList.add('show');
-      setTimeout(()=> toast.classList.remove('show'), 2000);
+        toast.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2500);
     }
 
-    // Estado inicial: filtrar por DELIVERY
-    btnAplicarFiltros.addEventListener('click', aplicarFiltros);
-    window.addEventListener('load', aplicarFiltros);
-  
-    // Mostrar vista previa del logo y actualizar el header
-    const logoInput = document.getElementById("logoInput");
-    const logoPreview = document.getElementById("logoPreview");
-    const headerLogo = document.getElementById("headerLogo");
-
-    logoInput.addEventListener("change", function() {
-      const file = this.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          logoPreview.src = e.target.result;
-          logoPreview.style.display = "block";
-
-          // ✅ Actualizar logo en el header
-          headerLogo.src = e.target.result;
-          headerLogo.style.display = "block";
-        };
-        reader.readAsDataURL(file);
-      } else {
-        logoPreview.style.display = "none";
-        headerLogo.style.display = "none";
-      }
-    });
-  
-  </script>
+    // --- INICIALIZACIÓN ---
+    renderTable(sampleData);
+    aplicarFiltros();
+});
+</script>
 </body>
 </html>
+
+
+
