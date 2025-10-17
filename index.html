@@ -136,7 +136,7 @@
         </a>
     </nav>
 
-    <main class="p-6 max-w-7xl mx-auto">
+    <main class="p-6">
         
         <!-- ======================= SECCIÓN ENVÍOS ======================= -->
         <section class="active" id="envios">
@@ -189,32 +189,43 @@
                     </div>
                 </div>
                 
-                <!-- Tabla de Envíos -->
-                <div class="overflow-x-auto shadow-lg shadow-gray-100 rounded-xl border border-gray-200">
-                    <table id="tablaEnvios" class="w-full border-collapse bg-white">
-                        <thead>
-                            <tr>
-                                <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50 rounded-tl-xl w-12"><input type="checkbox" id="thCheckTodos" class="rounded border-gray-300 text-accent focus:ring-accent" /></th>
-                                <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Fecha Reg.</th>
-                                <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Cliente</th>
-                                <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Courier</th>
-                                <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Destinatario</th>
-                                <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Teléfono</th>
-                                <th class="col-distrito border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Distrito</th>
-                                <th class="col-direccion border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Dirección</th>
-                                <th class="col-referencia border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Referencia</th>
-                                <th class="col-dni border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">DNI/CE</th>
-                                <th class="col-agencia border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Agencia</th>
-                                <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Fecha Envío</th>
-                                <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Estado</th>
-                                <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50 rounded-tr-xl">Notificar</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbodyEnvios">
-                            <!-- JS llenará esta tabla -->
-                            <tr><td colspan="14" class="text-center p-10 text-gray-500">No hay envíos para mostrar.</td></tr>
-                        </tbody>
-                    </table>
+                <!-- Contenedor de la Tabla -->
+                <div id="tableContainer">
+                    <div class="overflow-x-auto shadow-lg shadow-gray-100 rounded-xl border border-gray-200">
+                        <table id="tablaEnvios" class="w-full border-collapse bg-white">
+                            <thead>
+                                <tr>
+                                    <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50 rounded-tl-xl w-12"><input type="checkbox" id="thCheckTodos" class="rounded border-gray-300 text-accent focus:ring-accent" /></th>
+                                    <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Fecha Reg.</th>
+                                    <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Cliente</th>
+                                    <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Courier</th>
+                                    <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Destinatario</th>
+                                    <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Teléfono</th>
+                                    <th class="col-distrito border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Distrito</th>
+                                    <th class="col-direccion border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Dirección</th>
+                                    <th class="col-referencia border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Referencia</th>
+                                    <th class="col-dni border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">DNI/CE</th>
+                                    <th class="col-agencia border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Agencia</th>
+                                    <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Fecha Envío</th>
+                                    <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Estado</th>
+                                    <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50 rounded-tr-xl">Notificar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyEnvios">
+                                <!-- JS llenará esta tabla -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Contenedor de Estado Vacío (Onboarding) -->
+                <div id="emptyStateContainer" class="hidden text-center p-10 border-2 border-dashed rounded-xl mt-4">
+                    <i data-feather="gift" class="w-16 h-16 mx-auto text-gray-300"></i>
+                    <h3 class="mt-4 text-xl font-bold text-gray-800">¡Bienvenido a tu panel de control!</h3>
+                    <p class="mt-2 text-sm text-gray-500 max-w-sm mx-auto">Aún no tienes envíos registrados. El primer paso es configurar tu 'Link Mágico' y compartirlo con tus clientes.</p>
+                    <button id="goToAccountBtn" class="mt-6 btn primary bg-gradient-to-r from-accent to-accent-alt text-white shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2">
+                        <i data-feather="settings" class="w-4 h-4"></i> Ir a Configuración
+                    </button>
                 </div>
             </div>
         </section>
@@ -381,6 +392,21 @@
                         </div>
                     </div>
                     
+                    <!-- Card: Seguridad de la Cuenta -->
+                    <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200">
+                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2 border-b border-gray-200 pb-3 mb-4"><i data-feather="lock" class="w-5 h-5 text-accent"></i> Seguridad de la Cuenta</h3>
+                        <div class="space-y-4">
+                            <div class="form-group">
+                                <label for="userEmail" class="block text-sm text-gray-500 font-semibold mb-1.5">Email de la Cuenta</label>
+                                <input type="email" id="userEmail" class="input p-2.5 border border-gray-200 rounded-xl bg-gray-100 w-full text-sm text-gray-600 cursor-not-allowed" value="ana.ventas@email.com" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="newPassword" class="block text-sm text-gray-500 font-semibold mb-1.5">Nueva Contraseña</label>
+                                <input type="password" id="newPassword" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" placeholder="Deja en blanco para no cambiar">
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Card: Gestión de Equipo -->
                     <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200">
                         <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2 border-b border-gray-200 pb-3 mb-4"><i data-feather="users" class="w-5 h-5 text-accent"></i> Gestión de Equipo</h3>
@@ -504,8 +530,8 @@
             </div>
         </form>
         <div class="p-4 bg-white border-t border-gray-200 flex justify-end gap-3">
-            <button id="cancelEditBtn" class="btn ghost bg-transparent border border-gray-200 text-gray-900 hover:bg-gray-50 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm">Cancelar</button>
-            <button id="saveEditBtn" class="btn primary bg-accent text-white py-2.5 px-4 rounded-xl font-bold text-sm shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200">Guardar Cambios</button>
+            <button type="button" id="cancelEditBtn" class="btn ghost bg-transparent border border-gray-200 text-gray-900 hover:bg-gray-50 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm">Cancelar</button>
+            <button type="button" id="saveEditBtn" class="btn primary bg-accent text-white py-2.5 px-4 rounded-xl font-bold text-sm shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-md disabled:hover:-translate-y-0" disabled>Guardar Cambios</button>
         </div>
     </aside>
 
@@ -561,6 +587,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const accionLote = document.getElementById('accionLote');
     const fechaReprog = document.getElementById('fechaReprog');
     const btnAplicarLote = document.getElementById('btnAplicarLote');
+    
+    // Contenedores para la tabla y el estado vacío
+    const tableContainer = document.getElementById('tableContainer');
+    const emptyStateContainer = document.getElementById('emptyStateContainer');
+    const goToAccountBtn = document.getElementById('goToAccountBtn');
     
     // Botones de funciones nuevas
     const btnTplDelivery = document.getElementById('btnTplDelivery'); // Nuevo botón para Delivery
@@ -647,6 +678,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Mostrar panel y overlay
         editPanelOverlay.classList.remove('hidden');
         editPanel.classList.remove('translate-x-full');
+        
+        // Deshabilitar el botón de guardar al abrir
+        saveEditBtn.disabled = true;
     }
 
     function closeEditPanel() {
@@ -687,6 +721,20 @@ document.addEventListener('DOMContentLoaded', () => {
         closeEditPanel();
         aplicarFiltros(); // Refrescar la tabla
         showToast('Envío actualizado con éxito.');
+
+        // **NUEVO: Feedback Visual Inmediato**
+        const updatedRow = tbody.querySelector(`tr[data-id="${shipmentId}"]`);
+        if (updatedRow) {
+            updatedRow.classList.add('bg-orange-100');
+            setTimeout(() => {
+                updatedRow.classList.remove('bg-orange-100');
+            }, 2500); // El resaltado dura 2.5 segundos
+        }
+    });
+
+    // Habilitar el botón de guardar cuando se detecta un cambio en el formulario
+    editForm.addEventListener('input', () => {
+        saveEditBtn.disabled = false;
     });
 
     closeEditPanelBtn.addEventListener('click', closeEditPanel);
@@ -710,15 +758,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // Función para renderizar la tabla
     function renderTable(data) {
         currentData = data; // Actualiza los datos actuales
-        tbody.innerHTML = '';
+        
+        // **NUEVO: Lógica de Onboarding / Estado Vacío**
         if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="14" class="text-center p-10 text-gray-500">No hay envíos para mostrar.</td></tr>';
+            tableContainer.classList.add('hidden');
+            emptyStateContainer.classList.remove('hidden');
             return;
         }
+        
+        tableContainer.classList.remove('hidden');
+        emptyStateContainer.classList.add('hidden');
+        tbody.innerHTML = '';
+
 
         data.forEach(item => {
             const row = document.createElement('tr');
-            row.classList.add('hover:bg-orange-50', 'transition-colors', 'cursor-pointer');
+            // **NUEVO: Transición añadida para el feedback visual**
+            row.classList.add('hover:bg-orange-50', 'transition-colors', 'duration-1000', 'ease-out', 'cursor-pointer');
             // Almacena información en data attributes para un fácil acceso
             row.dataset.id = item.id;
             row.dataset.tipo = item.tipo;
@@ -766,7 +822,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const cel = filtroCliente.value.trim().toLowerCase();
         const fecha = filtroFecha.value;
         
-        // 1. Filtrar los datos primero
+        // **NUEVO: Simular estado vacío si se quitan todos los datos**
+        // Descomenta la siguiente línea para probar la pantalla de Onboarding
+        // const filteredData = []; 
         const filteredData = sampleData.filter(item => {
             const okTipo = !tipo || item.tipo === tipo;
             const okCli = !cel || item.cliente.includes(cel);
@@ -1199,6 +1257,16 @@ document.addEventListener('DOMContentLoaded', () => {
         // Aquí iría la lógica para guardar los datos en el backend (Firestore).
     });
 
+    // **NUEVO: Botón de Onboarding para ir a 'Mi Cuenta'**
+    goToAccountBtn.addEventListener('click', () => {
+        // Simula un clic en el enlace de navegación de 'Mi Cuenta'
+        const accountNavLink = document.querySelector('a.nav-link[href="#cuenta"]');
+        if(accountNavLink) {
+            accountNavLink.click();
+        }
+    });
+
+
     // --- UTILIDADES ---
     const toast = document.getElementById('toast');
     let toastTimeout;
@@ -1221,6 +1289,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
-
-
