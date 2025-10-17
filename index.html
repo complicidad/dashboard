@@ -172,11 +172,12 @@
                         <span class="text-gray-500 text-sm" id="selCount">0 seleccionados</span>
                     </div>
                     <div class="lote-right flex gap-2 items-center flex-wrap justify-end">
-                        <select id="accionLote" class="select p-2.5 border border-gray-200 rounded-xl bg-white w-40 text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                        <select id="accionLote" class="select p-2.5 border border-gray-200 rounded-xl bg-white w-auto text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
                             <option value="" selected>Acción en lote…</option>
                             <option value="ENVIADO">Marcar como Enviado</option>
                             <option value="ENTREGADO">Marcar como Entregado</option>
                             <option value="REPROGRAMADO">Reprogramar</option>
+                            <option value="ELIMINAR" class="text-red-600 font-semibold">Eliminar Seleccionados</option>
                         </select>
                         <input type="date" id="fechaReprog" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-40 text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100 oculto" />
                         <button class="btn primary bg-accent text-white py-2.5 px-4 rounded-xl font-bold text-sm shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200" id="btnAplicarLote">Aplicar</button>
@@ -198,12 +199,13 @@
                                 <th class="col-dni border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">DNI/CE</th>
                                 <th class="col-agencia border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Agencia</th>
                                 <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Fecha Envío</th>
-                                <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50 rounded-tr-xl">Estado</th>
+                                <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Estado</th>
+                                <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50 rounded-tr-xl">Notificar</th>
                             </tr>
                         </thead>
                         <tbody id="tbodyEnvios">
                             <!-- JS llenará esta tabla -->
-                            <tr><td colspan="11" class="text-center p-10 text-gray-500">No hay envíos para mostrar.</td></tr>
+                            <tr><td colspan="12" class="text-center p-10 text-gray-500">No hay envíos para mostrar.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -259,58 +261,144 @@
             <h2 class="text-2xl font-bold text-accent mb-4 flex items-center gap-2">
                 <i data-feather="settings" class="w-6 h-6"></i>Configuración de tu Cuenta
             </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                <div class="card setting-card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200 flex flex-col gap-4">
-                    <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2"><i data-feather="briefcase" class="w-5 h-5 text-accent"></i> Perfil del Negocio</h3>
-                    <div class="form-group">
-                        <label for="businessName" class="block text-sm text-gray-500 font-semibold mb-1.5">Nombre del Emprendimiento</label>
-                        <input type="text" id="businessName" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" placeholder="Ej: La Tiendita de Ana" value="Mi Tienda de Prueba">
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                
+                <!-- Columna Izquierda: Configuraciones Principales y Frecuentes -->
+                <div class="lg:col-span-3 space-y-6">
+                    <!-- Card: Perfil del Negocio -->
+                    <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200">
+                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2 border-b border-gray-200 pb-3 mb-4"><i data-feather="briefcase" class="w-5 h-5 text-accent"></i> Perfil del Negocio</h3>
+                        <div class="space-y-4">
+                            <div class="form-group">
+                                <label for="businessName" class="block text-sm text-gray-500 font-semibold mb-1.5">Nombre del Emprendimiento</label>
+                                <input type="text" id="businessName" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" placeholder="Ej: La Tiendita de Ana" value="Mi Tienda de Prueba">
+                            </div>
+                            <div class="form-group">
+                                <label for="logoInput" class="block text-sm text-gray-500 font-semibold mb-1.5">Logo del Negocio</label>
+                                <input type="file" id="logoInput" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm file:mr-4 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-accent hover:file:bg-orange-100" accept="image/*">
+                                <img id="logoPreview" src="" alt="Vista previa del logo" class="max-h-20 rounded-lg object-contain border border-dashed border-gray-300 p-1 mt-3 hidden">
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="logoInput" class="block text-sm text-gray-500 font-semibold mb-1.5">Logo del Negocio</label>
-                        <input type="file" id="logoInput" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm file:mr-4 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-accent hover:file:bg-orange-100" accept="image/*">
-                        <img id="logoPreview" src="" alt="Vista previa del logo" class="max-h-20 rounded-lg object-contain border border-dashed border-gray-300 p-1 mt-3 hidden">
+                    
+                    <!-- Card: Opciones de Despacho -->
+                    <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200">
+                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2 border-b border-gray-200 pb-3 mb-4"><i data-feather="calendar" class="w-5 h-5 text-accent"></i> Opciones de Despacho</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-3">
+                                <label class="block text-sm text-gray-500 font-semibold">Couriers Habilitados</label>
+                                <div class="space-y-2">
+                                    <label class="block text-sm text-gray-900"><input type="checkbox" checked class="rounded border-gray-300 text-accent focus:ring-accent mr-2"> Delivery Propio</label>
+                                    <label class="block text-sm text-gray-900"><input type="checkbox" checked class="rounded border-gray-300 text-accent focus:ring-accent mr-2"> Shalom</label>
+                                    <label class="block text-sm text-gray-900"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-2"> Olva</label>
+                                    <label class="block text-sm text-gray-900"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-2"> Dinsides</label>
+                                </div>
+                            </div>
+                             <div class="space-y-3">
+                                <label class="block text-sm text-gray-500 font-semibold">Días de Despacho</label>
+                                <div class="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                                    <label class="inline-flex items-center"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Lun</label>
+                                    <label class="inline-flex items-center"><input type="checkbox" checked class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Mar</label>
+                                    <label class="inline-flex items-center"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Mié</label>
+                                    <label class="inline-flex items-center"><input type="checkbox" checked class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Jue</label>
+                                    <label class="inline-flex items-center"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Vie</label>
+                                    <label class="inline-flex items-center"><input type="checkbox" checked class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Sáb</label>
+                                    <label class="inline-flex items-center"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Dom</label>
+                                </div>
+                            </div>
+                            <div class="form-group md:col-span-2">
+                                <label for="cutoffTime" class="block text-sm text-gray-500 font-semibold mb-1.5">Hora de Cierre de Pedidos</label>
+                                <input type="time" id="cutoffTime" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full md:w-auto text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                <div class="card setting-card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200 flex flex-col gap-4">
-                    <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2"><i data-feather="package" class="w-5 h-5 text-accent"></i> Opciones de Envío</h3>
-                    <p class="text-sm text-gray-500">Selecciona los couriers que ofreces. Tus clientes solo verán estas opciones en el formulario.</p>
-                    <div class="form-group space-y-2">
-                        <label class="block text-sm text-gray-900"><input type="checkbox" checked class="rounded border-gray-300 text-accent focus:ring-accent mr-2"> Delivery Propio</label>
-                        <label class="block text-sm text-gray-900"><input type="checkbox" checked class="rounded border-gray-300 text-accent focus:ring-accent mr-2"> Shalom</label>
-                        <label class="block text-sm text-gray-900"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-2"> Olva</label>
-                        <label class="block text-sm text-gray-900"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-2" disabled> Otro (próximamente)</label>
-                    </div>
-                </div>
-
-                <div class="card setting-card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200 flex flex-col gap-4">
-                    <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2"><i data-feather="calendar" class="w-5 h-5 text-accent"></i> Fechas y Horarios</h3>
-                    <div class="form-group">
-                        <label for="cutoffTime" class="block text-sm text-gray-500 font-semibold mb-1.5">Hora de Cierre de Pedidos</label>
-                        <input type="time" id="cutoffTime" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
-                    </div>
-                    <div class="form-group">
-                        <label class="block text-sm text-gray-500 font-semibold mb-1.5">Días de Despacho Habilitados</label>
-                        <div class="flex flex-wrap gap-2 text-sm">
-                            <label class="inline-flex items-center"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Lun</label>
-                            <label class="inline-flex items-center"><input type="checkbox" checked class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Mar</label>
-                            <label class="inline-flex items-center"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Mié</label>
-                            <label class="inline-flex items-center"><input type="checkbox" checked class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Jue</label>
-                            <label class="inline-flex items-center"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Vie</label>
-                            <label class="inline-flex items-center"><input type="checkbox" checked class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Sáb</label>
-                            <label class="inline-flex items-center"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Dom</label>
+                    <!-- Card: Redes Sociales -->
+                    <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200">
+                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2 border-b border-gray-200 pb-3 mb-4"><i data-feather="share-2" class="w-5 h-5 text-accent"></i> Redes Sociales</h3>
+                        <div class="space-y-4">
+                            <p class="text-sm text-gray-500 -mt-2">Estos enlaces aparecerán en tu formulario para que tus clientes puedan contactarte.</p>
+                            <div class="form-group">
+                                <label for="instagramUser" class="block text-sm text-gray-500 font-semibold mb-1.5">Usuario de Instagram</label>
+                                <div class="relative">
+                                    <i data-feather="instagram" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"></i>
+                                    <input type="text" id="instagramUser" class="input p-2.5 pl-9 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" placeholder="mitiendaonline">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="whatsappNumber" class="block text-sm text-gray-500 font-semibold mb-1.5">Número de WhatsApp</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">+51</span>
+                                    <input type="number" id="whatsappNumber" class="input p-2.5 pl-10 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" placeholder="987654321">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="facebookUser" class="block text-sm text-gray-500 font-semibold mb-1.5">Usuario de Facebook</label>
+                                <div class="relative">
+                                    <i data-feather="facebook" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"></i>
+                                    <input type="text" id="facebookUser" class="input p-2.5 pl-9 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" placeholder="mitiendaonlinefb">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="tiktokUser" class="block text-sm text-gray-500 font-semibold mb-1.5">Usuario de TikTok</label>
+                                <div class="relative">
+                                    <i data-feather="music" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"></i>
+                                    <input type="text" id="tiktokUser" class="input p-2.5 pl-9 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" placeholder="mitienda.tiktok">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="card setting-card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200 flex flex-col gap-4">
-                    <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2"><i data-feather="users" class="w-5 h-5 text-accent"></i> Gestión de Equipo</h3>
-                    <p class="text-sm text-gray-500">Invita a miembros de tu equipo para gestionar los envíos (Función del Plan Consolidado).</p>
-                    <button class="btn ghost bg-transparent border border-gray-200 text-gray-500 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200" disabled><i data-feather="plus" class="w-4 h-4"></i>Invitar Usuario</button>
+                <!-- Columna Derecha: Información de Cuenta y Funciones Avanzadas -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Card: Suscripción -->
+                    <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200">
+                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2 border-b border-gray-200 pb-3 mb-4"><i data-feather="award" class="w-5 h-5 text-accent"></i> Tu Suscripción</h3>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-500">Plan Actual:</span>
+                                <span class="font-bold text-gray-900">Crecimiento</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-500">Estado:</span>
+                                <span class="font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full text-xs">Activo</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-500">Próximo Pago:</span>
+                                <span class="font-bold text-gray-900">15 Nov, 2025</span>
+                            </div>
+                            <div class="pt-2">
+                                <button class="btn ghost bg-transparent border border-gray-200 text-gray-900 hover:bg-gray-50 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2 w-full justify-center">Administrar Suscripción</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card: Gestión de Equipo -->
+                    <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200">
+                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2 border-b border-gray-200 pb-3 mb-4"><i data-feather="users" class="w-5 h-5 text-accent"></i> Gestión de Equipo</h3>
+                        <div class="space-y-4">
+                            <p class="text-sm text-gray-500 -mt-2">Invita a miembros de tu equipo para que colaboren en la gestión de envíos (Función del Plan Consolidado).</p>
+                            <div class="flex gap-2">
+                                <input type="email" placeholder="email@ejemplo.com" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100 flex-grow">
+                                <button class="btn primary bg-accent text-white py-2.5 px-4 rounded-xl font-bold text-sm shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap">Invitar</button>
+                            </div>
+                            <div class="space-y-2 pt-2">
+                                <label class="block text-sm text-gray-500 font-semibold mb-1">Miembros Actuales:</label>
+                                <div class="flex justify-between items-center text-sm p-2 bg-gray-50 rounded-lg">
+                                    <span>ana.ventas@email.com (Tú)</span>
+                                    <span class="font-bold text-accent">Admin</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm p-2 bg-gray-50 rounded-lg">
+                                    <span>carlos.logistica@email.com</span>
+                                    <span class="text-gray-500">Miembro</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="flex justify-end mt-5">
+            <div class="flex justify-end mt-6">
                 <button class="btn primary bg-gradient-to-r from-accent to-accent-alt text-white shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2" id="btnGuardarConfig"><i data-feather="save" class="w-4 h-4"></i>Guardar Cambios</button>
             </div>
         </section>
@@ -326,6 +414,32 @@
 
     <!-- Toast de Notificación -->
     <div class="toast fixed right-5 bottom-5 bg-gradient-to-r from-accent to-accent-alt text-white p-3 rounded-xl shadow-xl shadow-accent/25 opacity-0 translate-y-2 transition-all duration-300 z-50" id="toast">Acción aplicada</div>
+
+    <!-- Modal de Confirmación para Eliminar -->
+    <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md text-center">
+            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0">
+                <i data-feather="alert-triangle" class="h-6 w-6 text-red-600"></i>
+            </div>
+            <h3 class="text-lg leading-6 font-bold text-gray-900 mt-4" id="modal-title">
+                Confirmar Eliminación
+            </h3>
+            <div class="mt-2">
+                <p class="text-sm text-gray-500" id="modalMessage">
+                    ¿Estás seguro de que quieres eliminar los envíos seleccionados? Esta acción no se puede deshacer.
+                </p>
+            </div>
+            <div class="mt-6 flex justify-center gap-4">
+                <button type="button" id="confirmDeleteBtn" class="inline-flex justify-center rounded-xl border border-transparent shadow-sm px-6 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                    Eliminar
+                </button>
+                <button type="button" id="cancelDeleteBtn" class="inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-6 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -386,7 +500,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnEtiquetas = document.getElementById('btnEtiquetas');
 
     // Datos de ejemplo (Simulación de datos cargados desde Firestore)
-    const sampleData = [
+    let sampleData = [
         // Datos de Shalom (Courier con agencia, DNI/CE)
         { id: 1, tipo: "SHALOM", cliente: "912345678", fechaEnvio: "2025-08-20", fechaReg: "2025-08-18", nombre: "María López", dni: "87654321", agencia: "Lima / Lima / Chorrillos", estado: "ENVIADO", producto: "Paquete Pequeño" },
         // Datos de Delivery (Courier con dirección y distrito)
@@ -399,6 +513,35 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 5, tipo: "SHALOM", cliente: "988667755", fechaEnvio: "2025-08-29", fechaReg: "2025-08-26", nombre: "Valeria Campos", dni: "78451236", agencia: "Piura / Piura / Castilla", estado: "REPROGRAMADO", producto: "Mochila" },
     ];
     let currentData = [...sampleData]; // Los datos actualmente mostrados/filtrados
+
+
+    // --- MODAL DE CONFIRMACIÓN ---
+    const deleteModal = document.getElementById('deleteModal');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+    const modalMessage = document.getElementById('modalMessage');
+    let idsToDelete = [];
+
+    function openDeleteModal(ids) {
+        idsToDelete = ids;
+        modalMessage.textContent = `¿Estás seguro de que quieres eliminar ${ids.length} envío(s) seleccionados? Esta acción no se puede deshacer.`;
+        deleteModal.classList.remove('hidden');
+    }
+
+    function closeDeleteModal() {
+        idsToDelete = [];
+        deleteModal.classList.add('hidden');
+    }
+
+    confirmDeleteBtn.addEventListener('click', () => {
+        // Filtra el array principal para excluir los IDs a eliminar
+        sampleData = sampleData.filter(item => !idsToDelete.includes(item.id));
+        showToast(`${idsToDelete.length} envío(s) eliminado(s) permanentemente.`);
+        closeDeleteModal();
+        aplicarFiltros(); // Refresca la tabla
+    });
+    
+    cancelDeleteBtn.addEventListener('click', closeDeleteModal);
 
 
     // Función para obtener los IDs de los envíos seleccionados
@@ -419,7 +562,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentData = data; // Actualiza los datos actuales
         tbody.innerHTML = '';
         if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="11" class="text-center p-10 text-gray-500">No hay envíos para mostrar.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="12" class="text-center p-10 text-gray-500">No hay envíos para mostrar.</td></tr>';
             return;
         }
 
@@ -453,9 +596,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td class="col-agencia border-t border-gray-200 p-3 text-xs text-gray-700">${item.agencia || '-'}</td>
                 <td class="border-t border-gray-200 p-3 text-xs text-gray-700 nowrap">${item.fechaEnvio}</td>
                 <td class="estado border-t border-gray-200 p-3">${estadoBadge}</td>
+                <td class="border-t border-gray-200 p-3 text-center">
+                    <a href="#" class="whatsapp-link text-green-500 hover:text-green-700 transition-colors" data-id="${item.id}" title="Enviar resumen por WhatsApp">
+                        <i data-feather="send" class="w-5 h-5"></i>
+                    </a>
+                </td>
             `;
             tbody.appendChild(row);
         });
+        // Es importante volver a inicializar los iconos después de agregarlos dinámicamente
+        feather.replace();
     }
 
     // Función principal de filtros y visibilidad de columnas
@@ -499,12 +649,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function contarSeleccionados(){
         const count = tbody.querySelectorAll('.rowCheck:checked').length;
         selCount.textContent = `${count} seleccionados`;
-
-        // Deshabilitar/Habilitar botones de acción
-        const disableActions = count === 0;
-        // Solo deshabilitamos los botones de impresión/lote que trabajan con la selección.
-        btnEtiquetas.disabled = disableActions; 
-        btnAplicarLote.disabled = disableActions;
     }
     function seleccionarTodo(checked){
         tbody.querySelectorAll('.rowCheck').forEach(cb => cb.checked = checked);
@@ -519,6 +663,38 @@ document.addEventListener('DOMContentLoaded', () => {
     thCheckTodos.addEventListener('change', e => seleccionarTodo(e.target.checked));
     tbody.addEventListener('change', e => { if(e.target.classList.contains('rowCheck')) contarSeleccionados(); });
     
+    // Evento para los links de WhatsApp (usando delegación de eventos)
+    tbody.addEventListener('click', e => {
+        const link = e.target.closest('.whatsapp-link');
+        if (!link) return;
+
+        e.preventDefault();
+        const shipmentId = parseInt(link.dataset.id, 10);
+        const shipment = sampleData.find(item => item.id === shipmentId);
+
+        if (!shipment) {
+            showToast('Error: No se encontró el envío.');
+            return;
+        }
+
+        const businessName = document.getElementById('businessName').value || 'tu tienda';
+        
+        let details = '';
+        if (shipment.tipo === 'DELIVERY') {
+            details = `Courier: ${shipment.tipo}\nDistrito: ${shipment.distrito}\nDirección: ${shipment.direccion}`;
+        } else {
+            details = `Courier: ${shipment.tipo}\nAgencia: ${shipment.agencia}\nDNI/CE: ${shipment.dni}`;
+        }
+
+        const message = `¡Hola ${shipment.nombre}! 👋 Te enviamos los detalles de tu envío con ${businessName}:\n\n${details}\n\nFecha de Envío Programada: ${shipment.fechaEnvio}\n\n¡Gracias por tu compra! 😊`;
+        
+        const encodedMessage = encodeURIComponent(message);
+        const phoneNumber = shipment.cliente;
+        const whatsappUrl = `https://wa.me/51${phoneNumber}?text=${encodedMessage}`;
+
+        window.open(whatsappUrl, '_blank');
+    });
+
     // Evento de acción en lote
     accionLote.addEventListener('change', () => {
         fechaReprog.classList.toggle('oculto', accionLote.value !== 'REPROGRAMADO');
@@ -529,9 +705,16 @@ document.addEventListener('DOMContentLoaded', () => {
     btnAplicarLote.addEventListener('click', () => {
         const action = accionLote.value;
         if (!action){ showToast('Elige una acción en lote'); return; }
-        if (action === 'REPROGRAMADO' && !fechaReprog.value){ showToast('Selecciona fecha para reprogramar'); return; }
+        
         const seleccionados = getSelectedIds();
         if (seleccionados.length === 0){ showToast('No hay envíos seleccionados'); return; }
+
+        if (action === 'ELIMINAR') {
+            openDeleteModal(seleccionados);
+            return; // Detiene la ejecución aquí, el modal se encargará del resto
+        }
+
+        if (action === 'REPROGRAMADO' && !fechaReprog.value){ showToast('Selecciona fecha para reprogramar'); return; }
         
         // Actualizar los datos en el array principal (simulando actualización de Firestore)
         seleccionados.forEach(id => {
@@ -875,3 +1058,4 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
