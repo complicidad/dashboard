@@ -53,6 +53,51 @@
 
         /* Estilos específicos para la tabla (para manejar el nowrap y el ancho) */
         .nowrap { white-space: nowrap; }
+
+        /* Estilos para la impresión de etiquetas */
+        @media print {
+            body > * { display: none; } /* Oculta todo por defecto */
+            .print-container { 
+                display: block; 
+                width: 100%;
+                /* Ajustes para un formato de etiqueta común, por ejemplo 4x6 pulgadas o similar a un A4, usando CSS columns */
+                column-count: 2; 
+                column-gap: 1.5cm;
+                padding: 1cm;
+            }
+            .label-card {
+                /* Esto asegura que la tarjeta de etiqueta no se corte a través de la columna */
+                break-inside: avoid-column; 
+                page-break-inside: avoid;
+                margin-bottom: 1.5cm; /* Espacio entre etiquetas */
+                border: 1px solid #000;
+                padding: 10px;
+                width: 100%; /* Ocupa el ancho de la columna */
+                min-height: 100px;
+            }
+            .label-header {
+                font-size: 14px;
+                font-weight: bold;
+                border-bottom: 1px dashed #000;
+                padding-bottom: 5px;
+                margin-bottom: 5px;
+            }
+            .label-info {
+                font-size: 12px;
+                margin-top: 5px;
+            }
+            .qr-placeholder {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 10px;
+                border: 1px solid #ccc;
+                padding: 5px;
+                height: 50px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body class="font-sans bg-bg-soft text-gray-900 antialiased">
@@ -97,8 +142,11 @@
                 
                 <!-- Acciones Principales -->
                 <div class="flex gap-2 flex-wrap justify-end mb-4">
-                    <button class="btn ghost bg-transparent border border-gray-200 text-gray-900 hover:bg-gray-50 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2" id="btnTplShalom"><i data-feather="download" class="w-4 h-4"></i>Plantilla SHALOM</button>
-                    <button class="btn ghost bg-transparent border border-gray-200 text-gray-900 hover:bg-gray-50 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2" id="btnTplOlva"><i data-feather="download" class="w-4 h-4"></i>Plantilla OLVA</button>
+                    <!-- Nuevo Botón para Plantilla DELIVERY -->
+                    <button class="btn ghost bg-transparent border border-gray-200 text-gray-900 hover:bg-gray-50 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2" id="btnTplDelivery"><i data-feather="download" class="w-4 h-4"></i>Plantilla DELIVERY (.csv)</button>
+                    <!-- Los otros botones se mantienen -->
+                    <button class="btn ghost bg-transparent border border-gray-200 text-gray-900 hover:bg-gray-50 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2" id="btnTplShalom"><i data-feather="download" class="w-4 h-4"></i>Plantilla SHALOM (.csv)</button>
+                    <button class="btn ghost bg-transparent border border-gray-200 text-gray-900 hover:bg-gray-50 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2" id="btnTplOlva"><i data-feather="download" class="w-4 h-4"></i>Plantilla OLVA (.csv)</button>
                     <button class="btn primary bg-gradient-to-r from-accent to-accent-alt text-white shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2" id="btnEtiquetas"><i data-feather="tag" class="w-4 h-4"></i>Imprimir Etiquetas</button>
                 </div>
                 
@@ -216,7 +264,7 @@
                     <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2"><i data-feather="briefcase" class="w-5 h-5 text-accent"></i> Perfil del Negocio</h3>
                     <div class="form-group">
                         <label for="businessName" class="block text-sm text-gray-500 font-semibold mb-1.5">Nombre del Emprendimiento</label>
-                        <input type="text" id="businessName" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" placeholder="Ej: La Tiendita de Ana">
+                        <input type="text" id="businessName" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" placeholder="Ej: La Tiendita de Ana" value="Mi Tienda de Prueba">
                     </div>
                     <div class="form-group">
                         <label for="logoInput" class="block text-sm text-gray-500 font-semibold mb-1.5">Logo del Negocio</label>
@@ -284,6 +332,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Inicializa Feather Icons
     feather.replace();
 
+    // --- VARIABLES GLOBALES DEL EMPRENDIMIENTO (SIMULADAS) ---
+    // En una implementación real con Firebase, estos vendrían de un documento de configuración.
+    const businessName = document.getElementById('businessName').value || 'Mi Tienda de Prueba';
+
     // --- NAVEGACIÓN PRINCIPAL ---
     const navLinks = document.querySelectorAll('.nav-link');
     const sections = document.querySelectorAll('main > section');
@@ -327,26 +379,54 @@ document.addEventListener('DOMContentLoaded', () => {
     const fechaReprog = document.getElementById('fechaReprog');
     const btnAplicarLote = document.getElementById('btnAplicarLote');
     
-    // Datos de ejemplo
+    // Botones de funciones nuevas
+    const btnTplDelivery = document.getElementById('btnTplDelivery'); // Nuevo botón para Delivery
+    const btnTplShalom = document.getElementById('btnTplShalom');
+    const btnTplOlva = document.getElementById('btnTplOlva');
+    const btnEtiquetas = document.getElementById('btnEtiquetas');
+
+    // Datos de ejemplo (Simulación de datos cargados desde Firestore)
     const sampleData = [
-        { id: 1, tipo: "SHALOM", cliente: "912345678", fechaEnvio: "2025-08-20", fechaReg: "2025-08-18", nombre: "María López", dni: "87654321", agencia: "Lima / Lima / Chorrillos", estado: "ENVIADO" },
-        { id: 2, tipo: "DELIVERY", cliente: "987654321", fechaEnvio: "2025-08-22", fechaReg: "2025-08-20", nombre: "Juan Pérez", distrito: "Miraflores", direccion: "Av. Principal 123", estado: "PENDIENTE" },
-        { id: 3, tipo: "OLVA", cliente: "911223344", fechaEnvio: "2025-08-25", fechaReg: "2025-08-22", nombre: "Lucía Gutiérrez", dni: "75342190", agencia: "Lima / Lima / Los Olivos", estado: "PENDIENTE" },
-        { id: 4, tipo: "DELIVERY", cliente: "987111222", fechaEnvio: "2025-08-26", fechaReg: "2025-08-23", nombre: "Rosa Valdivia", distrito: "San Miguel", direccion: "Av. Universitaria 240", estado: "ENTREGADO" },
-        { id: 5, tipo: "SHALOM", cliente: "988667755", fechaEnvio: "2025-08-29", fechaReg: "2025-08-26", nombre: "Valeria Campos", dni: "78451236", agencia: "Piura / Piura / Castilla", estado: "REPROGRAMADO" },
+        // Datos de Shalom (Courier con agencia, DNI/CE)
+        { id: 1, tipo: "SHALOM", cliente: "912345678", fechaEnvio: "2025-08-20", fechaReg: "2025-08-18", nombre: "María López", dni: "87654321", agencia: "Lima / Lima / Chorrillos", estado: "ENVIADO", producto: "Paquete Pequeño" },
+        // Datos de Delivery (Courier con dirección y distrito)
+        { id: 2, tipo: "DELIVERY", cliente: "987654321", fechaEnvio: "2025-08-22", fechaReg: "2025-08-20", nombre: "Juan Pérez", distrito: "Miraflores", direccion: "Av. Principal 123", estado: "PENDIENTE", producto: "Caja de Regalo" },
+        // Datos de Olva (Courier con agencia, DNI/CE)
+        { id: 3, tipo: "OLVA", cliente: "911223344", fechaEnvio: "2025-08-25", fechaReg: "2025-08-22", nombre: "Lucía Gutiérrez", dni: "75342190", agencia: "Lima / Lima / Los Olivos", estado: "PENDIENTE", producto: "Sobre con Documentos" },
+        // Datos de Delivery (Courier con dirección y distrito)
+        { id: 4, tipo: "DELIVERY", cliente: "987111222", fechaEnvio: "2025-08-26", fechaReg: "2025-08-23", nombre: "Rosa Valdivia", distrito: "San Miguel", direccion: "Av. Universitaria 240", estado: "ENTREGADO", producto: "Kit de Maquillaje" },
+        // Datos de Shalom (Courier con agencia, DNI/CE)
+        { id: 5, tipo: "SHALOM", cliente: "988667755", fechaEnvio: "2025-08-29", fechaReg: "2025-08-26", nombre: "Valeria Campos", dni: "78451236", agencia: "Piura / Piura / Castilla", estado: "REPROGRAMADO", producto: "Mochila" },
     ];
+    let currentData = [...sampleData]; // Los datos actualmente mostrados/filtrados
+
+
+    // Función para obtener los IDs de los envíos seleccionados
+    function getSelectedIds() {
+        return [...tbody.querySelectorAll('.rowCheck:checked')]
+            .map(cb => parseInt(cb.closest('tr').dataset.id, 10));
+    }
+
+    // Función para obtener los envíos seleccionados como objetos
+    function getSelectedShipments() {
+        const selectedIds = getSelectedIds();
+        // Usamos filter en sampleData, no currentData, para asegurar obtener los objetos completos originales
+        return sampleData.filter(item => selectedIds.includes(item.id));
+    }
     
     // Función para renderizar la tabla
     function renderTable(data) {
+        currentData = data; // Actualiza los datos actuales
         tbody.innerHTML = '';
         if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="11" class="text-center p-10 text-gray-500">No hay envíos que coincidan con los filtros.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="11" class="text-center p-10 text-gray-500">No hay envíos para mostrar.</td></tr>';
             return;
         }
 
         data.forEach(item => {
             const row = document.createElement('tr');
             row.classList.add('hover:bg-orange-50', 'transition-colors');
+            // Almacena información en data attributes para un fácil acceso
             row.dataset.id = item.id;
             row.dataset.tipo = item.tipo;
             row.dataset.cliente = item.cliente;
@@ -419,6 +499,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function contarSeleccionados(){
         const count = tbody.querySelectorAll('.rowCheck:checked').length;
         selCount.textContent = `${count} seleccionados`;
+
+        // Deshabilitar/Habilitar botones de acción
+        const disableActions = count === 0;
+        // Solo deshabilitamos los botones de impresión/lote que trabajan con la selección.
+        btnEtiquetas.disabled = disableActions; 
+        btnAplicarLote.disabled = disableActions;
     }
     function seleccionarTodo(checked){
         tbody.querySelectorAll('.rowCheck').forEach(cb => cb.checked = checked);
@@ -444,13 +530,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const action = accionLote.value;
         if (!action){ showToast('Elige una acción en lote'); return; }
         if (action === 'REPROGRAMADO' && !fechaReprog.value){ showToast('Selecciona fecha para reprogramar'); return; }
-        const seleccionados = [...tbody.querySelectorAll('.rowCheck:checked')];
+        const seleccionados = getSelectedIds();
         if (seleccionados.length === 0){ showToast('No hay envíos seleccionados'); return; }
         
-        const selectedIds = seleccionados.map(cb => parseInt(cb.closest('tr').dataset.id, 10));
-
-        // Actualizar los datos en el array principal
-        selectedIds.forEach(id => {
+        // Actualizar los datos en el array principal (simulando actualización de Firestore)
+        seleccionados.forEach(id => {
             const item = sampleData.find(d => d.id === id);
             if (item) {
                 if (action === 'REPROGRAMADO') {
@@ -467,8 +551,230 @@ document.addEventListener('DOMContentLoaded', () => {
         // Refrescar la tabla para mostrar los cambios
         aplicarFiltros();
     });
-    
+
     btnAplicarFiltros.addEventListener('click', aplicarFiltros);
+
+    // --- FUNCIONALIDADES DE PLANTILLAS Y ETIQUETAS ---
+
+    /**
+     * @param {string} fileName Nombre del archivo a descargar
+     * @param {string} data Contenido del archivo (ya en formato CSV/texto)
+     */
+    function downloadCSV(fileName, data) {
+        // Se añade el BOM (Byte Order Mark) para UTF-8. Crucial para que Excel
+        // abra el archivo CSV correctamente con caracteres especiales (acentos, ñ).
+        const BOM = '\uFEFF'; 
+        const csvWithBOM = BOM + data;
+
+        // El tipo MIME se mantiene como CSV para compatibilidad.
+        const blob = new Blob([csvWithBOM], { type: 'text/csv;charset=utf-8;' });
+        
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        // El nombre del archivo ahora USA .csv
+        link.setAttribute('download', fileName); 
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    /**
+     * Función para "limpiar" un valor antes de exportarlo al CSV.
+     * Reemplaza comillas dobles con un espacio para evitar problemas de formato.
+     * @param {string} value El valor de la celda.
+     * @returns {string} El valor sanitizado.
+     */
+    function sanitizeValue(value) {
+        if (value === null || value === undefined) return '';
+        // Convierte a string y reemplaza cualquier comilla doble interna con un espacio
+        return String(value).replace(/"/g, ' '); 
+    }
+
+
+    /**
+     * Genera el contenido CSV para un courier específico.
+     * @param {string} courier 'SHALOM', 'OLVA' o 'DELIVERY'
+     * @param {Array<Object>} shipments Lista de envíos seleccionados
+     */
+    function generateCourierCSV(courier, shipments) {
+        // Filtra solo los envíos que son del tipo de courier solicitado
+        const filteredShipments = shipments.filter(s => s.tipo === courier);
+
+        if (filteredShipments.length === 0) {
+            showToast(`No se encontraron envíos de ${courier} seleccionados para exportar.`);
+            return;
+        }
+
+        let csvContent = '';
+        let fileName = '';
+
+        // --- DEFINIMOS EL DELIMITADOR: Punto y coma (;) para mayor compatibilidad con Excel en Latinoamérica ---
+        const DELIMITER = ';'; 
+
+        if (courier === 'SHALOM' || courier === 'OLVA') {
+            fileName = `${courier.toLowerCase()}_plantilla_${new Date().toISOString().slice(0, 10)}.csv`; 
+            
+            // Usamos el DELIMITER para el encabezado
+            csvContent = `FechaEnvio${DELIMITER}NombreDestinatario${DELIMITER}DNI_CE${DELIMITER}Agencia_Recojo${DELIMITER}Producto\n`; 
+            
+            filteredShipments.forEach(item => {
+                const row = [
+                    sanitizeValue(item.fechaEnvio),
+                    sanitizeValue(item.nombre),
+                    sanitizeValue(item.dni),
+                    sanitizeValue(item.agencia),
+                    sanitizeValue(item.producto)
+                ];
+                // Usamos el DELIMITER para unir los campos
+                csvContent += row.join(DELIMITER) + '\n';
+            });
+        } 
+        
+        else if (courier === 'DELIVERY') {
+            fileName = `delivery_propio_plantilla_${new Date().toISOString().slice(0, 10)}.csv`;
+            
+            // Encabezado para Delivery Propio (usando Distrito y Dirección)
+            csvContent = `FechaEnvio${DELIMITER}NombreDestinatario${DELIMITER}Celular${DELIMITER}Distrito${DELIMITER}Direccion\n`;
+            
+            filteredShipments.forEach(item => {
+                const row = [
+                    sanitizeValue(item.fechaEnvio),
+                    sanitizeValue(item.nombre),
+                    sanitizeValue(item.cliente), // Usamos 'cliente' que contiene el número de celular
+                    sanitizeValue(item.distrito),
+                    sanitizeValue(item.direccion)
+                ];
+                // Usamos el DELIMITER para unir los campos
+                csvContent += row.join(DELIMITER) + '\n';
+            });
+        }
+        
+        // Si hay contenido, proceder a la descarga
+        if (csvContent) {
+            downloadCSV(fileName, csvContent);
+            showToast(`Plantilla ${courier} generada con ${filteredShipments.length} envío(s).`);
+        }
+    }
+
+    // Eventos de botones de plantillas
+    btnTplDelivery.addEventListener('click', () => { // Nuevo evento
+        const selected = getSelectedShipments();
+        generateCourierCSV('DELIVERY', selected);
+    });
+    
+    btnTplShalom.addEventListener('click', () => {
+        const selected = getSelectedShipments();
+        generateCourierCSV('SHALOM', selected);
+    });
+
+    btnTplOlva.addEventListener('click', () => {
+        const selected = getSelectedShipments();
+        generateCourierCSV('OLVA', selected);
+    });
+
+    // Función para imprimir etiquetas
+    btnEtiquetas.addEventListener('click', () => {
+        const shipments = getSelectedShipments();
+        if (shipments.length === 0) {
+            showToast('Selecciona al menos un envío para imprimir etiquetas.');
+            return;
+        }
+
+        // Genera el HTML para las etiquetas
+        let labelsHtml = shipments.map((item, index) => {
+            const isDelivery = item.tipo === 'DELIVERY';
+            const location = isDelivery ? 
+                `<strong>Distrito:</strong> ${item.distrito}<br><strong>Dirección:</strong> ${item.direccion}` :
+                `<strong>Agencia:</strong> ${item.agencia}<br><strong>DNI/CE:</strong> ${item.dni}`;
+
+            return `
+                <div class="label-card">
+                    <div class="label-header">
+                        ETIQUETA ${index + 1}/${shipments.length} | ${item.tipo}
+                    </div>
+                    <div class="label-info">
+                        <p><strong>Remitente:</strong> ${businessName}</p>
+                        <p><strong>Destinatario:</strong> ${item.nombre} (${item.cliente})</p>
+                        <p><strong>Fecha Envío:</strong> ${item.fechaEnvio}</p>
+                        <p><strong>Producto:</strong> ${item.producto || 'N/A'}</p>
+                        <p>${location}</p>
+                    </div>
+                    <div class="qr-placeholder">
+                        [Código de Rastreo ${item.id} / QR Placeholder]
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        const printWindow = window.open('', 'PrintLabels', 'height=600,width=800');
+        
+        // Estructura mínima para la ventana de impresión, incluyendo los estilos CSS
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Impresión de Etiquetas</title>
+                <style>
+                    /* Estilos para el contenedor de impresión */
+                    .print-container { 
+                        width: 100%;
+                        column-count: 2; 
+                        column-gap: 1.5cm;
+                        padding: 1cm;
+                        box-sizing: border-box;
+                    }
+                    /* Estilos de la tarjeta de etiqueta */
+                    .label-card {
+                        break-inside: avoid-column; 
+                        page-break-inside: avoid;
+                        margin-bottom: 1.5cm; 
+                        border: 1px solid #000;
+                        padding: 10px;
+                        width: 100%;
+                        box-sizing: border-box;
+                    }
+                    .label-header {
+                        font-size: 14px;
+                        font-weight: bold;
+                        border-bottom: 1px dashed #000;
+                        padding-bottom: 5px;
+                        margin-bottom: 5px;
+                    }
+                    .label-info {
+                        font-size: 12px;
+                        margin-top: 5px;
+                    }
+                    .qr-placeholder {
+                        text-align: center;
+                        margin-top: 10px;
+                        font-size: 10px;
+                        border: 1px solid #ccc;
+                        padding: 5px;
+                        height: 50px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="print-container">
+                    ${labelsHtml}
+                </div>
+                <script>
+                    // Espera a que el contenido se cargue antes de imprimir
+                    window.onload = function() {
+                        window.print();
+                        window.close();
+                    };
+                <\/script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+        showToast('Ventana de impresión de etiquetas abierta.');
+    });
+
 
     // --- SECCIÓN LINK MÁGICO ---
     const btnCopiarLink = document.getElementById('btnCopiarLink');
@@ -512,6 +818,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const headerLogo = document.getElementById('headerLogo');
     const btnGuardarConfig = document.getElementById('btnGuardarConfig');
 
+    // Inicializa el nombre del negocio en el encabezado
+    headerBusinessName.textContent = businessNameInput.value || '[Nombre del emprendimiento]';
+    
     // Actualiza el nombre del negocio en el encabezado
     businessNameInput.addEventListener('input', () => {
         headerBusinessName.textContent = businessNameInput.value || '[Nombre del emprendimiento]';
@@ -561,6 +870,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- INICIALIZACIÓN ---
     aplicarFiltros();
+    contarSeleccionados(); // Inicializa el estado de los botones
 });
 </script>
 </body>
