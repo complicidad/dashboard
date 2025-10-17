@@ -54,6 +54,11 @@
         /* Estilos específicos para la tabla (para manejar el nowrap y el ancho) */
         .nowrap { white-space: nowrap; }
 
+        /* Animación para el panel de edición */
+        #editPanel {
+            transition: transform 0.3s ease-in-out;
+        }
+
         /* Estilos para la impresión de etiquetas */
         @media print {
             body > * { display: none; } /* Oculta todo por defecto */
@@ -440,6 +445,64 @@
         </div>
     </div>
 
+    <!-- Panel Lateral de Edición -->
+    <div id="editPanelOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden"></div>
+    <aside id="editPanel" class="fixed top-0 right-0 h-full w-full max-w-md bg-bg-soft shadow-2xl transform translate-x-full z-30 flex flex-col">
+        <div class="flex justify-between items-center p-4 border-b border-gray-200">
+            <h2 class="text-lg font-bold text-accent flex items-center gap-2"><i data-feather="edit" class="w-5 h-5"></i>Editar Envío</h2>
+            <button id="closeEditPanel" class="p-2 rounded-full hover:bg-gray-200">
+                <i data-feather="x" class="w-6 h-6 text-gray-600"></i>
+            </button>
+        </div>
+        <form id="editForm" class="flex-grow p-6 space-y-4 overflow-y-auto">
+            <input type="hidden" id="editShipmentId">
+            <!-- Campos del formulario de edición -->
+            <div class="form-group">
+                <label for="editNombre" class="block text-sm text-gray-500 font-semibold mb-1.5">Nombre del Destinatario</label>
+                <input type="text" id="editNombre" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+            </div>
+            <div class="form-group">
+                <label for="editCliente" class="block text-sm text-gray-500 font-semibold mb-1.5">Celular del Cliente</label>
+                <input type="text" id="editCliente" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+            </div>
+             <div class="form-group">
+                <label for="editProducto" class="block text-sm text-gray-500 font-semibold mb-1.5">Producto</label>
+                <input type="text" id="editProducto" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+            </div>
+            <div class="form-group">
+                <label for="editFechaEnvio" class="block text-sm text-gray-500 font-semibold mb-1.5">Fecha de Envío</label>
+                <input type="date" id="editFechaEnvio" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+            </div>
+
+            <!-- Campos Condicionales -->
+            <div id="editFieldsDelivery" class="space-y-4">
+                <div class="form-group">
+                    <label for="editDistrito" class="block text-sm text-gray-500 font-semibold mb-1.5">Distrito</label>
+                    <input type="text" id="editDistrito" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                </div>
+                <div class="form-group">
+                    <label for="editDireccion" class="block text-sm text-gray-500 font-semibold mb-1.5">Dirección</label>
+                    <input type="text" id="editDireccion" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                </div>
+            </div>
+
+            <div id="editFieldsCourier" class="space-y-4">
+                <div class="form-group">
+                    <label for="editDni" class="block text-sm text-gray-500 font-semibold mb-1.5">DNI/CE</label>
+                    <input type="text" id="editDni" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                </div>
+                <div class="form-group">
+                    <label for="editAgencia" class="block text-sm text-gray-500 font-semibold mb-1.5">Agencia</label>
+                    <input type="text" id="editAgencia" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                </div>
+            </div>
+        </form>
+        <div class="p-4 bg-white border-t border-gray-200 flex justify-end gap-3">
+            <button id="cancelEditBtn" class="btn ghost bg-transparent border border-gray-200 text-gray-900 hover:bg-gray-50 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm">Cancelar</button>
+            <button id="saveEditBtn" class="btn primary bg-accent text-white py-2.5 px-4 rounded-xl font-bold text-sm shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200">Guardar Cambios</button>
+        </div>
+    </aside>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -544,6 +607,91 @@ document.addEventListener('DOMContentLoaded', () => {
     cancelDeleteBtn.addEventListener('click', closeDeleteModal);
 
 
+    // --- PANEL DE EDICIÓN ---
+    const editPanel = document.getElementById('editPanel');
+    const editPanelOverlay = document.getElementById('editPanelOverlay');
+    const closeEditPanelBtn = document.getElementById('closeEditPanel');
+    const saveEditBtn = document.getElementById('saveEditBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    const editForm = document.getElementById('editForm');
+    
+    function openEditPanel(shipmentId) {
+        const shipment = sampleData.find(item => item.id === shipmentId);
+        if (!shipment) return;
+
+        // Poblar el formulario
+        document.getElementById('editShipmentId').value = shipment.id;
+        document.getElementById('editNombre').value = shipment.nombre || '';
+        document.getElementById('editCliente').value = shipment.cliente || '';
+        document.getElementById('editProducto').value = shipment.producto || '';
+        document.getElementById('editFechaEnvio').value = shipment.fechaEnvio || '';
+        
+        // Mostrar/ocultar campos según el tipo de courier
+        const deliveryFields = document.getElementById('editFieldsDelivery');
+        const courierFields = document.getElementById('editFieldsCourier');
+        
+        if (shipment.tipo === 'DELIVERY') {
+            deliveryFields.classList.remove('hidden');
+            courierFields.classList.add('hidden');
+            document.getElementById('editDistrito').value = shipment.distrito || '';
+            document.getElementById('editDireccion').value = shipment.direccion || '';
+        } else {
+            deliveryFields.classList.add('hidden');
+            courierFields.classList.remove('hidden');
+            document.getElementById('editDni').value = shipment.dni || '';
+            document.getElementById('editAgencia').value = shipment.agencia || '';
+        }
+
+        // Mostrar panel y overlay
+        editPanelOverlay.classList.remove('hidden');
+        editPanel.classList.remove('translate-x-full');
+    }
+
+    function closeEditPanel() {
+        editPanel.classList.add('translate-x-full');
+        editPanelOverlay.classList.add('hidden');
+        editForm.reset(); // Limpia el formulario
+    }
+
+    saveEditBtn.addEventListener('click', () => {
+        const shipmentId = parseInt(document.getElementById('editShipmentId').value, 10);
+        const shipmentIndex = sampleData.findIndex(item => item.id === shipmentId);
+
+        if (shipmentIndex === -1) {
+            showToast('Error: No se pudo guardar el envío.');
+            return;
+        }
+
+        const updatedShipment = { ...sampleData[shipmentIndex] };
+
+        // Actualizar datos comunes
+        updatedShipment.nombre = document.getElementById('editNombre').value;
+        updatedShipment.cliente = document.getElementById('editCliente').value;
+        updatedShipment.producto = document.getElementById('editProducto').value;
+        updatedShipment.fechaEnvio = document.getElementById('editFechaEnvio').value;
+        
+        // Actualizar datos condicionales
+        if (updatedShipment.tipo === 'DELIVERY') {
+            updatedShipment.distrito = document.getElementById('editDistrito').value;
+            updatedShipment.direccion = document.getElementById('editDireccion').value;
+        } else {
+            updatedShipment.dni = document.getElementById('editDni').value;
+            updatedShipment.agencia = document.getElementById('editAgencia').value;
+        }
+
+        // Reemplazar el objeto antiguo con el nuevo en el array de datos
+        sampleData[shipmentIndex] = updatedShipment;
+        
+        closeEditPanel();
+        aplicarFiltros(); // Refrescar la tabla
+        showToast('Envío actualizado con éxito.');
+    });
+
+    closeEditPanelBtn.addEventListener('click', closeEditPanel);
+    cancelEditBtn.addEventListener('click', closeEditPanel);
+    editPanelOverlay.addEventListener('click', closeEditPanel);
+
+
     // Función para obtener los IDs de los envíos seleccionados
     function getSelectedIds() {
         return [...tbody.querySelectorAll('.rowCheck:checked')]
@@ -568,7 +716,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         data.forEach(item => {
             const row = document.createElement('tr');
-            row.classList.add('hover:bg-orange-50', 'transition-colors');
+            row.classList.add('hover:bg-orange-50', 'transition-colors', 'cursor-pointer');
             // Almacena información en data attributes para un fácil acceso
             row.dataset.id = item.id;
             row.dataset.tipo = item.tipo;
@@ -661,38 +809,44 @@ document.addEventListener('DOMContentLoaded', () => {
     // Eventos de selección
     checkTodos.addEventListener('change', e => seleccionarTodo(e.target.checked));
     thCheckTodos.addEventListener('change', e => seleccionarTodo(e.target.checked));
-    tbody.addEventListener('change', e => { if(e.target.classList.contains('rowCheck')) contarSeleccionados(); });
     
-    // Evento para los links de WhatsApp (usando delegación de eventos)
+    // Evento unificado en el cuerpo de la tabla para abrir panel de edición y manejar checkboxes
     tbody.addEventListener('click', e => {
-        const link = e.target.closest('.whatsapp-link');
-        if (!link) return;
-
-        e.preventDefault();
-        const shipmentId = parseInt(link.dataset.id, 10);
-        const shipment = sampleData.find(item => item.id === shipmentId);
-
-        if (!shipment) {
-            showToast('Error: No se encontró el envío.');
+        const target = e.target;
+        
+        // Si se hace clic en un checkbox, solo contamos los seleccionados
+        if (target.classList.contains('rowCheck')) {
+            contarSeleccionados();
             return;
         }
 
-        const businessName = document.getElementById('businessName').value || 'tu tienda';
-        
-        let details = '';
-        if (shipment.tipo === 'DELIVERY') {
-            details = `Courier: ${shipment.tipo}\nDistrito: ${shipment.distrito}\nDirección: ${shipment.direccion}`;
-        } else {
-            details = `Courier: ${shipment.tipo}\nAgencia: ${shipment.agencia}\nDNI/CE: ${shipment.dni}`;
+        const whatsAppLink = target.closest('.whatsapp-link');
+        const row = target.closest('tr');
+
+        // Si se hace clic en el link de WhatsApp, se maneja y se detiene la ejecución
+        if (whatsAppLink) {
+            e.preventDefault();
+            const shipmentId = parseInt(whatsAppLink.dataset.id, 10);
+            const shipment = sampleData.find(item => item.id === shipmentId);
+
+            if (shipment) {
+                const businessName = document.getElementById('businessName').value || 'tu tienda';
+                let details = (shipment.tipo === 'DELIVERY') ?
+                    `Courier: ${shipment.tipo}\nDistrito: ${shipment.distrito}\nDirección: ${shipment.direccion}` :
+                    `Courier: ${shipment.tipo}\nAgencia: ${shipment.agencia}\nDNI/CE: ${shipment.dni}`;
+                
+                const message = `¡Hola ${shipment.nombre}! 👋 Te enviamos los detalles de tu envío con ${businessName}:\n\n${details}\n\nFecha de Envío Programada: ${shipment.fechaEnvio}\n\n¡Gracias por tu compra! 😊`;
+                const whatsappUrl = `https://wa.me/51${shipment.cliente}?text=${encodeURIComponent(message)}`;
+                window.open(whatsappUrl, '_blank');
+            }
+            return;
         }
 
-        const message = `¡Hola ${shipment.nombre}! 👋 Te enviamos los detalles de tu envío con ${businessName}:\n\n${details}\n\nFecha de Envío Programada: ${shipment.fechaEnvio}\n\n¡Gracias por tu compra! 😊`;
-        
-        const encodedMessage = encodeURIComponent(message);
-        const phoneNumber = shipment.cliente;
-        const whatsappUrl = `https://wa.me/51${phoneNumber}?text=${encodedMessage}`;
-
-        window.open(whatsappUrl, '_blank');
+        // Si se hizo clic en cualquier otra parte de la fila, abre el panel de edición
+        if (row && row.dataset.id) {
+            const shipmentId = parseInt(row.dataset.id, 10);
+            openEditPanel(shipmentId);
+        }
     });
 
     // Evento de acción en lote
@@ -842,16 +996,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Eventos de botones de plantillas
     btnTplDelivery.addEventListener('click', () => { // Nuevo evento
         const selected = getSelectedShipments();
+        if (selected.length === 0) { showToast('Selecciona envíos de tipo DELIVERY para exportar.'); return; }
         generateCourierCSV('DELIVERY', selected);
     });
     
     btnTplShalom.addEventListener('click', () => {
         const selected = getSelectedShipments();
+        if (selected.length === 0) { showToast('Selecciona envíos de tipo SHALOM para exportar.'); return; }
         generateCourierCSV('SHALOM', selected);
     });
 
     btnTplOlva.addEventListener('click', () => {
         const selected = getSelectedShipments();
+        if (selected.length === 0) { showToast('Selecciona envíos de tipo OLVA para exportar.'); return; }
         generateCourierCSV('OLVA', selected);
     });
 
