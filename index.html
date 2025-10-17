@@ -3,303 +3,159 @@
 <head>
     <meta charset="UTF-8" />
     <title>Panel de Control — Latam5S</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Google Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/feather-icons"></script>
-
-<style>
-    :root {
-        --bg: #fffaf6;
-        --card: #ffffff;
-        --text: #2b2b2b;
-        --muted: #6b6b6b;
-        --accent: #D96B4F;
-        --accent-alt: '#FF8B6A';
-        --radius: 14px;
-        --border-color: rgba(0,0,0,0.08);
-        font-family: "Quicksand", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-    }
-
-    *{box-sizing:border-box;margin:0;padding:0}
     
-    html { scroll-behavior: smooth; }
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Configuración de Tailwind para usar colores y fuentes personalizados
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'accent': '#D96B4F', // El color principal (Terracota)
+                        'accent-alt': '#FF8B6A', // El color secundario (Naranja claro)
+                        'bg-soft': '#fffaf6', // El color de fondo original
+                        'badge-pending': '#9a6200',
+                        'badge-sent': '#D96B4F',
+                        'badge-delivered': '#1b7f3a',
+                        'badge-rescheduled': '#8e44ad',
+                        // Se añade 'brand-accent' para que coincida con la clase del héroe
+                        'brand-accent': '#D96B4F', 
+                    },
+                    fontFamily: {
+                        sans: ['Quicksand', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Arial', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'xl': '14px', // Mantenemos el radio de borde original
+                    }
+                },
+            }
+        }
+    </script>
+    <style>
+        /* Estilos base (Mínimo CSS necesario) */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body { background-color: #fffaf6; color: #2b2b2b; line-height: 1.6; }
 
-    body{
-        background: var(--bg);
-        color: var(--text);
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        line-height: 1.6;
-    }
+        /* Clases de utilidad */
+        .oculto { display: none !important; }
 
-    /* ---------- HEADER ---------- */
-    header {
-        background:linear-gradient(90deg,var(--accent),#FF8B6A);
-        color:#fff;
-        padding:18px 24px;
-        box-shadow:0 6px 20px rgba(217,107,79,0.25);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 15px;
-    }
-    #headerLogo {
-        height: 50px;
-        border-radius: 8px;
-        display: none;
-        object-fit: cover;
-        background-color: white;
-    }
-    header h1{margin:0;font-size:22px;font-weight:700;}
-    header p{margin:4px 0 0;font-size:14px;opacity:.9;}
+        /* Manejo de secciones (ya no lo hace el CSS, sino el JS que añade 'active') */
+        main > section { display: none; }
+        main > section.active { display: block; }
 
-    /* ---------- NAV ---------- */
-    nav{
-        background:#fff;
-        border-bottom:1px solid var(--border-color);
-        display:flex;
-        gap: 10px;
-        padding: 12px 20px;
-        justify-content: center;
-        position: sticky;
-        top: 0;
-        z-index: 100;
-        backdrop-filter: blur(8px);
-        background-color: rgba(255,255,255,0.8);
-    }
-    nav a{
-        color: var(--muted);
-        text-decoration:none;
-        font-weight:600;
-        font-size:14px;
-        transition: color 0.2s;
-        padding: 8px 12px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-    nav a:hover{ color:var(--text); }
-    nav a.active {
-        background-color: #fff3ef;
-        color: var(--accent);
-    }
-
-    /* ---------- CONTENIDO PRINCIPAL ---------- */
-    main{ padding: 24px; max-width: 1200px; margin:auto; }
-    main > section { display: none; }
-    main > section.active { display: block; }
-    
-    h2{
-        margin:0 0 16px;
-        font-size:24px;
-        color:var(--accent);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .card{
-        background:var(--card);
-        border-radius:var(--radius);
-        box-shadow:0 10px 30px rgba(15,20,25,0.05);
-        padding:24px;
-        border:1px solid var(--border-color);
-        margin-bottom: 24px;
-    }
-
-    /* ---------- BOTONES & INPUTS ---------- */
-    .acciones{ display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;margin-bottom:16px; }
-    
-    .btn{
-        border:0;
-        padding:10px 16px;
-        border-radius:10px;
-        cursor:pointer;
-        font-weight:700;
-        transition: all .2s;
-        font-family: inherit;
-        font-size: 14px;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-    }
-    .btn.primary{
-        background:linear-gradient(90deg,var(--accent),#FF8B6A);
-        color:#fff;
-        box-shadow:0 4px 10px rgba(217,107,79,0.2);
-    }
-    .btn.primary:hover{ transform: translateY(-2px); box-shadow:0 6px 14px rgba(217,107,79,0.3); }
-    .btn.ghost{
-        background:transparent;
-        border: 1px solid var(--border-color);
-        color:var(--text);
-    }
-    .btn.ghost:hover{background:#f8f9fa; border-color: #ccc;}
-
-    .input, .select {
-        padding:10px;
-        border:1px solid var(--border-color);
-        border-radius:10px;
-        background:#fff;
-        font-family:inherit;
-        width: 100%;
-        font-size: 14px;
-    }
-    .input:focus, .select:focus {
-        outline: none;
-        border-color: var(--accent);
-        box-shadow: 0 0 0 3px #ffe8e1;
-    }
-    .form-group { margin-bottom: 16px; }
-    .form-group label {
-        display: block;
-        font-size: 14px;
-        color: var(--muted);
-        font-weight: 600;
-        margin-bottom: 6px;
-    }
-
-    /* ---------- FILTROS & LOTE ---------- */
-    .filtros{ display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:10px 0 20px; }
-    .filtros label { font-size:13px;color:var(--muted);font-weight:600; }
-    .filtros input,.filtros select { padding:9px; border-radius:10px; font-family:inherit; }
-
-    .lote{ display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin:12px 0 16px; }
-    .lote-left,.lote-right{ display:flex;gap:10px;align-items:center;flex-wrap:wrap; }
-
-    /* ---------- TABLA ---------- */
-    .table-wrapper { overflow-x: auto; }
-    table{ width:100%; border-collapse:collapse; background:#fff; border-radius:var(--radius); overflow:hidden; box-shadow:0 6px 20px rgba(15,20,25,0.04); }
-    th,td{ border-top:1px solid var(--border-color); padding:12px 14px; text-align:left; font-size:13px; vertical-align:middle; }
-    thead th{ background:#fff8f6; color:var(--accent); font-size:12px; font-weight:700; text-transform: uppercase; letter-spacing:0.5px; }
-    tbody tr:hover{ background:#fffaf6; }
-    .nowrap{white-space:nowrap;}
-
-    /* ---------- BADGES & OTROS ---------- */
-    .badge{ padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; display:inline-block; border:1px solid; }
-    .b-pendiente{ background:#fff6e6; color:#9a6200; border-color: #ffd899; }
-    .b-enviado{ background:#fce8e2; color:var(--accent); border-color: #ffd3c1; }
-    .b-entregado{ background:#e9f8ee; color:#1b7f3a; border-color: #bfe7cd; }
-    .b-reprogramado{ background:#f3e9f9; color:#8e44ad; border-color: #d7bde2; }
-    
-    .toast{ position:fixed; right:20px; bottom:20px; background:linear-gradient(90deg,var(--accent),#FF8B6A); color:#fff; padding:12px 20px; border-radius:12px; box-shadow:0 8px 20px rgba(217,107,79,0.25); opacity:0; transform:translateY(10px); transition: all .3s ease-out; z-index: 1000;}
-    .toast.show{ opacity:1; transform:translateY(0); }
-
-    .oculto{ display: none !important;}
-    footer{
-        margin-top:80px;
-        padding-bottom:20px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 8px;
-        color: var(--muted);
-        font-size: 14px;
-    }
-    
-    /* Grid Layout para Secciones */
-    .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-    
-    /* Estilos para sección Link Mágico */
-    #linkUnicoContainer { display: flex; gap: 10px; }
-    #linkUnicoInput { flex-grow: 1; background-color: #f8f9fa; }
-
-    /* Estilos para Reportes */
-    .stat-card { text-align: center; background-color: #fff8f6; padding: 20px; border-radius: var(--radius); }
-    .stat-card .value { font-size: 36px; font-weight: 700; color: var(--accent); }
-    .stat-card .label { font-size: 14px; color: var(--muted); }
-
-    /* Estilos para Configuración */
-    .setting-card { display: flex; flex-direction: column; gap: 15px; }
-    #logoPreview { max-height: 80px; border-radius: 8px; object-fit: contain; border: 1px dashed var(--border-color); padding: 5px; display: none; margin-top: 10px;}
-
-    @media (max-width: 768px) {
-        nav { flex-wrap: wrap; gap: 5px; }
-        nav a { flex-grow: 1; justify-content: center; }
-        .filtros, .lote { flex-direction: column; align-items: stretch; }
-        .lote-right { justify-content: flex-end; }
-    }
-</style>
+        /* Estilos específicos para la tabla (para manejar el nowrap y el ancho) */
+        .nowrap { white-space: nowrap; }
+    </style>
 </head>
-<body>
-    <header>
-        <img id="headerLogo" src="" alt="Logo Emprendimiento">
+<body class="font-sans bg-bg-soft text-gray-900 antialiased">
+    <!-- ---------- HEADER ---------- -->
+    <header class="bg-gradient-to-br from-brand-accent to-orange-400 text-white p-6 shadow-xl shadow-accent/25 flex items-center justify-center md:justify-start gap-4">
+        <img id="headerLogo" src="" alt="Logo Emprendimiento" class="h-12 w-12 rounded-lg object-cover bg-white p-1 hidden">
         <div>
-            <h1 id="headerTitle">📋 Panel de Control</h1>
-            <p>Bienvenido, <strong id="headerBusinessName">[Nombre del emprendimiento]</strong></p>
+            <h1 id="headerTitle" class="text-2xl font-bold">📋 Panel de Control</h1>
+            <p class="mt-1 text-sm opacity-90">Bienvenido, <strong id="headerBusinessName">[Nombre del emprendimiento]</strong></p>
         </div>
     </header>
 
-    <nav>
-        <a href="#envios" class="nav-link active"><i data-feather="truck"></i>Envíos</a>
-        <a href="#link" class="nav-link"><i data-feather="link"></i>Link Mágico</a>
-        <a href="#reportes" class="nav-link"><i data-feather="bar-chart-2"></i>Reportes</a>
-        <a href="#cuenta" class="nav-link"><i data-feather="settings"></i>Mi Cuenta</a>
+    <!-- ---------- NAV ---------- -->
+    <nav class="bg-white/80 backdrop-blur-sm border-b border-gray-200 flex flex-wrap gap-1 p-3 sticky top-0 z-10 justify-center">
+        <a href="#envios" class="nav-link active text-gray-500 font-semibold text-sm transition-colors p-2.5 rounded-lg flex items-center gap-1.5 
+            hover:text-gray-900 w-full justify-center sm:w-auto 
+            active:bg-orange-100 active:text-accent sm:active:text-accent">
+            <i data-feather="truck" class="w-4 h-4"></i>Envíos
+        </a>
+        <a href="#link" class="nav-link text-gray-500 font-semibold text-sm transition-colors p-2.5 rounded-lg flex items-center gap-1.5 
+            hover:text-gray-900 w-full justify-center sm:w-auto">
+            <i data-feather="link" class="w-4 h-4"></i>Link Mágico
+        </a>
+        <a href="#reportes" class="nav-link text-gray-500 font-semibold text-sm transition-colors p-2.5 rounded-lg flex items-center gap-1.5 
+            hover:text-gray-900 w-full justify-center sm:w-auto">
+            <i data-feather="bar-chart-2" class="w-4 h-4"></i>Reportes
+        </a>
+        <a href="#cuenta" class="nav-link text-gray-500 font-semibold text-sm transition-colors p-2.5 rounded-lg flex items-center gap-1.5 
+            hover:text-gray-900 w-full justify-center sm:w-auto">
+            <i data-feather="settings" class="w-4 h-4"></i>Mi Cuenta
+        </a>
     </nav>
 
-    <main>
+    <main class="p-6 max-w-7xl mx-auto">
+        
         <!-- ======================= SECCIÓN ENVÍOS ======================= -->
         <section class="active" id="envios">
-            <div class="card">
-                <h2><i data-feather="truck"></i>Mis Envíos</h2>
-                <div class="acciones">
-                    <button class="btn ghost" id="btnTplShalom"><i data-feather="download"></i>Plantilla SHALOM</button>
-                    <button class="btn ghost" id="btnTplOlva"><i data-feather="download"></i>Plantilla OLVA</button>
-                    <button class="btn primary" id="btnEtiquetas"><i data-feather="tag"></i>Imprimir Etiquetas</button>
+            <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200 mb-6">
+                <h2 class="text-2xl font-bold text-accent mb-4 flex items-center gap-2">
+                    <i data-feather="truck" class="w-6 h-6"></i>Mis Envíos
+                </h2>
+                
+                <!-- Acciones Principales -->
+                <div class="flex gap-2 flex-wrap justify-end mb-4">
+                    <button class="btn ghost bg-transparent border border-gray-200 text-gray-900 hover:bg-gray-50 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2" id="btnTplShalom"><i data-feather="download" class="w-4 h-4"></i>Plantilla SHALOM</button>
+                    <button class="btn ghost bg-transparent border border-gray-200 text-gray-900 hover:bg-gray-50 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2" id="btnTplOlva"><i data-feather="download" class="w-4 h-4"></i>Plantilla OLVA</button>
+                    <button class="btn primary bg-gradient-to-r from-accent to-accent-alt text-white shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2" id="btnEtiquetas"><i data-feather="tag" class="w-4 h-4"></i>Imprimir Etiquetas</button>
                 </div>
-                <div class="filtros">
-                    <label>Cliente (Celular)<input type="text" id="filtroCliente" placeholder="Ej: 987654321" class="input" /></label>
-                    <label>Fecha de Envío<input type="date" id="filtroFecha" class="input" /></label>
-                    <label>Courier
-                        <select id="filtroTipo" class="select">
+                
+                <!-- Filtros -->
+                <div class="flex flex-wrap items-center gap-3 my-4">
+                    <label class="text-xs text-gray-500 font-semibold">Cliente (Celular)<input type="text" id="filtroCliente" placeholder="Ej: 987654321" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-40 text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100 mt-1" /></label>
+                    <label class="text-xs text-gray-500 font-semibold">Fecha de Envío<input type="date" id="filtroFecha" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-40 text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100 mt-1" /></label>
+                    <label class="text-xs text-gray-500 font-semibold">Courier
+                        <select id="filtroTipo" class="select p-2.5 border border-gray-200 rounded-xl bg-white w-40 text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100 mt-1">
                             <option value="">Todos</option>
                             <option value="DELIVERY">Delivery Propio</option>
                             <option value="SHALOM">Shalom</option>
                             <option value="OLVA">Olva</option>
                         </select>
                     </label>
-                    <button class="btn primary" id="btnAplicarFiltros">Filtrar</button>
+                    <button class="btn primary bg-gradient-to-r from-accent to-accent-alt text-white py-2.5 px-4 rounded-xl font-bold text-sm h-fit self-end shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200" id="btnAplicarFiltros">Filtrar</button>
                 </div>
-                <div class="lote">
-                    <div class="lote-left">
-                        <label class="nowrap"><input type="checkbox" id="checkTodos" /> Seleccionar todo</label>
-                        <span style="color:var(--muted);font-size:13px" id="selCount">0 seleccionados</span>
+                
+                <!-- Lote y Selección -->
+                <div class="flex flex-wrap items-center justify-between gap-3 my-3">
+                    <div class="lote-left flex gap-3 items-center flex-wrap">
+                        <label class="nowrap text-sm text-gray-900"><input type="checkbox" id="checkTodos" class="rounded border-gray-300 text-accent focus:ring-accent" /> Seleccionar todo</label>
+                        <span class="text-gray-500 text-sm" id="selCount">0 seleccionados</span>
                     </div>
-                    <div class="lote-right">
-                        <select id="accionLote" class="select">
+                    <div class="lote-right flex gap-2 items-center flex-wrap justify-end">
+                        <select id="accionLote" class="select p-2.5 border border-gray-200 rounded-xl bg-white w-40 text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
                             <option value="" selected>Acción en lote…</option>
                             <option value="ENVIADO">Marcar como Enviado</option>
                             <option value="ENTREGADO">Marcar como Entregado</option>
                             <option value="REPROGRAMADO">Reprogramar</option>
                         </select>
-                        <input type="date" id="fechaReprog" class="input oculto" />
-                        <button class="btn primary" id="btnAplicarLote">Aplicar</button>
+                        <input type="date" id="fechaReprog" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-40 text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100 oculto" />
+                        <button class="btn primary bg-accent text-white py-2.5 px-4 rounded-xl font-bold text-sm shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200" id="btnAplicarLote">Aplicar</button>
                     </div>
                 </div>
-                <div class="table-wrapper">
-                    <table id="tablaEnvios">
+                
+                <!-- Tabla de Envíos -->
+                <div class="overflow-x-auto shadow-lg shadow-gray-100 rounded-xl border border-gray-200">
+                    <table id="tablaEnvios" class="w-full border-collapse bg-white">
                         <thead>
                             <tr>
-                                <th style="width:36px"><input type="checkbox" id="thCheckTodos" /></th>
-                                <th>Fecha Reg.</th>
-                                <th>Cliente</th>
-                                <th>Courier</th>
-                                <th>Destinatario</th>
-                                <th class="col-distrito">Distrito</th>
-                                <th class="col-direccion">Dirección</th>
-                                <th class="col-dni">DNI/CE</th>
-                                <th class="col-agencia">Agencia</th>
-                                <th>Fecha Envío</th>
-                                <th>Estado</th>
+                                <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50 rounded-tl-xl w-12"><input type="checkbox" id="thCheckTodos" class="rounded border-gray-300 text-accent focus:ring-accent" /></th>
+                                <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Fecha Reg.</th>
+                                <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Cliente</th>
+                                <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Courier</th>
+                                <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Destinatario</th>
+                                <th class="col-distrito border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Distrito</th>
+                                <th class="col-direccion border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Dirección</th>
+                                <th class="col-dni border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">DNI/CE</th>
+                                <th class="col-agencia border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Agencia</th>
+                                <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Fecha Envío</th>
+                                <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50 rounded-tr-xl">Estado</th>
                             </tr>
                         </thead>
                         <tbody id="tbodyEnvios">
                             <!-- JS llenará esta tabla -->
-                            <tr><td colspan="11" style="text-align:center;padding:40px;color:var(--muted);">No hay envíos para mostrar.</td></tr>
+                            <tr><td colspan="11" class="text-center p-10 text-gray-500">No hay envíos para mostrar.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -308,14 +164,16 @@
 
         <!-- ======================= SECCIÓN LINK MÁGICO ======================= -->
         <section id="link">
-            <div class="card">
-                <h2><i data-feather="link"></i>Tu Enlace Mágico</h2>
-                <p class="text-muted" style="margin-bottom: 20px;">Comparte este link único con tus clientes. Ellos completarán sus datos de envío directamente y la información aparecerá en tu panel, ¡sin errores y sin que tengas que transcribir nada!</p>
+            <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200 mb-6">
+                <h2 class="text-2xl font-bold text-accent mb-4 flex items-center gap-2">
+                    <i data-feather="link" class="w-6 h-6"></i>Tu Enlace Mágico
+                </h2>
+                <p class="text-gray-500 text-sm mb-5">Comparte este link único con tus clientes. Ellos completarán sus datos de envío directamente y la información aparecerá en tu panel, ¡sin errores y sin que tengas que transcribir nada!</p>
                 <div class="form-group">
-                    <label for="linkUnicoInput">Tu enlace personal</label>
-                    <div id="linkUnicoContainer">
-                        <input type="text" id="linkUnicoInput" class="input" value="https://latam5s.com/form/tu-tienda" readonly>
-                        <button class="btn primary" id="btnCopiarLink"><i data-feather="copy"></i>Copiar</button>
+                    <label for="linkUnicoInput" class="block text-sm text-gray-500 font-semibold mb-1.5">Tu enlace personal</label>
+                    <div id="linkUnicoContainer" class="flex gap-2">
+                        <input type="text" id="linkUnicoInput" class="input p-2.5 border border-gray-200 rounded-xl bg-gray-50 flex-grow text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" value="https://latam5s.com/form/tu-tienda" readonly>
+                        <button class="btn primary bg-gradient-to-r from-accent to-accent-alt text-white shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2" id="btnCopiarLink"><i data-feather="copy" class="w-4 h-4"></i>Copiar</button>
                     </div>
                 </div>
             </div>
@@ -323,24 +181,26 @@
         
         <!-- ======================= SECCIÓN REPORTES ======================= -->
         <section id="reportes">
-             <div class="card">
-                <h2><i data-feather="bar-chart-2"></i>Reportes (Este Mes)</h2>
-                <div class="grid-container">
-                    <div class="stat-card">
-                        <div class="value" id="statTotal">128</div>
-                        <div class="label">Envíos Totales</div>
+            <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200 mb-6">
+                <h2 class="text-2xl font-bold text-accent mb-4 flex items-center gap-2">
+                    <i data-feather="bar-chart-2" class="w-6 h-6"></i>Reportes (Este Mes)
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div class="stat-card text-center bg-bg-soft p-5 rounded-xl border border-orange-100">
+                        <div class="value text-4xl font-bold text-accent" id="statTotal">128</div>
+                        <div class="label text-sm text-gray-500 mt-1">Envíos Totales</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="value" id="statPendientes">15</div>
-                        <div class="label">Pendientes</div>
+                    <div class="stat-card text-center bg-bg-soft p-5 rounded-xl border border-orange-100">
+                        <div class="value text-4xl font-bold text-accent" id="statPendientes">15</div>
+                        <div class="label text-sm text-gray-500 mt-1">Pendientes</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="value" id="statCompletados">113</div>
-                        <div class="label">Completados</div>
+                    <div class="stat-card text-center bg-bg-soft p-5 rounded-xl border border-orange-100">
+                        <div class="value text-4xl font-bold text-accent" id="statCompletados">113</div>
+                        <div class="label text-sm text-gray-500 mt-1">Completados</div>
                     </div>
-                     <div class="stat-card">
-                        <div class="value" id="statCourier">Shalom</div>
-                        <div class="label">Courier Más Usado</div>
+                    <div class="stat-card text-center bg-bg-soft p-5 rounded-xl border border-orange-100">
+                        <div class="value text-2xl font-bold text-accent" id="statCourier">Shalom</div>
+                        <div class="label text-sm text-gray-500 mt-1">Courier Más Usado</div>
                     </div>
                 </div>
             </div>
@@ -348,88 +208,101 @@
 
         <!-- ======================= SECCIÓN MI CUENTA ======================= -->
         <section id="cuenta">
-            <h2><i data-feather="settings"></i>Configuración de tu Cuenta</h2>
-            <div class="grid-container">
-                <div class="card setting-card">
-                    <h3><i data-feather="briefcase"></i> Perfil del Negocio</h3>
+            <h2 class="text-2xl font-bold text-accent mb-4 flex items-center gap-2">
+                <i data-feather="settings" class="w-6 h-6"></i>Configuración de tu Cuenta
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                <div class="card setting-card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200 flex flex-col gap-4">
+                    <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2"><i data-feather="briefcase" class="w-5 h-5 text-accent"></i> Perfil del Negocio</h3>
                     <div class="form-group">
-                        <label for="businessName">Nombre del Emprendimiento</label>
-                        <input type="text" id="businessName" class="input" placeholder="Ej: La Tiendita de Ana">
+                        <label for="businessName" class="block text-sm text-gray-500 font-semibold mb-1.5">Nombre del Emprendimiento</label>
+                        <input type="text" id="businessName" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" placeholder="Ej: La Tiendita de Ana">
                     </div>
                     <div class="form-group">
-                        <label for="logoInput">Logo del Negocio</label>
-                        <input type="file" id="logoInput" class="input" accept="image/*">
-                        <img id="logoPreview" src="" alt="Vista previa del logo">
+                        <label for="logoInput" class="block text-sm text-gray-500 font-semibold mb-1.5">Logo del Negocio</label>
+                        <input type="file" id="logoInput" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm file:mr-4 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-accent hover:file:bg-orange-100" accept="image/*">
+                        <img id="logoPreview" src="" alt="Vista previa del logo" class="max-h-20 rounded-lg object-contain border border-dashed border-gray-300 p-1 mt-3 hidden">
                     </div>
                 </div>
 
-                <div class="card setting-card">
-                    <h3><i data-feather="package"></i> Opciones de Envío</h3>
-                    <p style="font-size:14px; color:var(--muted);">Selecciona los couriers que ofreces. Tus clientes solo verán estas opciones en el formulario.</p>
-                    <div class="form-group">
-                        <label><input type="checkbox" checked> Delivery Propio</label>
-                        <label><input type="checkbox" checked> Shalom</label>
-                        <label><input type="checkbox"> Olva</label>
-                        <label><input type="checkbox"> Otro (próximamente)</label>
+                <div class="card setting-card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200 flex flex-col gap-4">
+                    <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2"><i data-feather="package" class="w-5 h-5 text-accent"></i> Opciones de Envío</h3>
+                    <p class="text-sm text-gray-500">Selecciona los couriers que ofreces. Tus clientes solo verán estas opciones en el formulario.</p>
+                    <div class="form-group space-y-2">
+                        <label class="block text-sm text-gray-900"><input type="checkbox" checked class="rounded border-gray-300 text-accent focus:ring-accent mr-2"> Delivery Propio</label>
+                        <label class="block text-sm text-gray-900"><input type="checkbox" checked class="rounded border-gray-300 text-accent focus:ring-accent mr-2"> Shalom</label>
+                        <label class="block text-sm text-gray-900"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-2"> Olva</label>
+                        <label class="block text-sm text-gray-900"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-2" disabled> Otro (próximamente)</label>
                     </div>
                 </div>
 
-                <div class="card setting-card">
-                    <h3><i data-feather="calendar"></i> Fechas y Horarios</h3>
-                     <div class="form-group">
-                        <label for="cutoffTime">Hora de Cierre de Pedidos</label>
-                        <input type="time" id="cutoffTime" class="input">
+                <div class="card setting-card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200 flex flex-col gap-4">
+                    <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2"><i data-feather="calendar" class="w-5 h-5 text-accent"></i> Fechas y Horarios</h3>
+                    <div class="form-group">
+                        <label for="cutoffTime" class="block text-sm text-gray-500 font-semibold mb-1.5">Hora de Cierre de Pedidos</label>
+                        <input type="time" id="cutoffTime" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
                     </div>
                     <div class="form-group">
-                         <label>Días de Despacho Habilitados</label>
-                         <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                            <label><input type="checkbox"> Lun</label>
-                            <label><input type="checkbox" checked> Mar</label>
-                            <label><input type="checkbox"> Mié</label>
-                            <label><input type="checkbox" checked> Jue</label>
-                            <label><input type="checkbox"> Vie</label>
-                            <label><input type="checkbox" checked> Sáb</label>
-                            <label><input type="checkbox"> Dom</label>
-                         </div>
+                        <label class="block text-sm text-gray-500 font-semibold mb-1.5">Días de Despacho Habilitados</label>
+                        <div class="flex flex-wrap gap-2 text-sm">
+                            <label class="inline-flex items-center"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Lun</label>
+                            <label class="inline-flex items-center"><input type="checkbox" checked class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Mar</label>
+                            <label class="inline-flex items-center"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Mié</label>
+                            <label class="inline-flex items-center"><input type="checkbox" checked class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Jue</label>
+                            <label class="inline-flex items-center"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Vie</label>
+                            <label class="inline-flex items-center"><input type="checkbox" checked class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Sáb</label>
+                            <label class="inline-flex items-center"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Dom</label>
+                        </div>
                     </div>
                 </div>
 
-                <div class="card setting-card">
-                    <h3><i data-feather="users"></i> Gestión de Equipo</h3>
-                    <p style="font-size:14px; color:var(--muted);">Invita a miembros de tu equipo para gestionar los envíos (Función del Plan Consolidado).</p>
-                    <button class="btn ghost" disabled><i data-feather="plus"></i>Invitar Usuario</button>
+                <div class="card setting-card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200 flex flex-col gap-4">
+                    <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2"><i data-feather="users" class="w-5 h-5 text-accent"></i> Gestión de Equipo</h3>
+                    <p class="text-sm text-gray-500">Invita a miembros de tu equipo para gestionar los envíos (Función del Plan Consolidado).</p>
+                    <button class="btn ghost bg-transparent border border-gray-200 text-gray-500 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200" disabled><i data-feather="plus" class="w-4 h-4"></i>Invitar Usuario</button>
                 </div>
             </div>
-            <div style="display:flex; justify-content: flex-end; margin-top: 20px;">
-                <button class="btn primary" id="btnGuardarConfig"><i data-feather="save"></i>Guardar Cambios</button>
+            <div class="flex justify-end mt-5">
+                <button class="btn primary bg-gradient-to-r from-accent to-accent-alt text-white shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2" id="btnGuardarConfig"><i data-feather="save" class="w-4 h-4"></i>Guardar Cambios</button>
             </div>
         </section>
         
-        <footer>
+        <!-- Footer -->
+        <footer class="mt-20 pb-5 flex justify-center items-center gap-2 text-gray-500 text-sm">
             <span>Powered by</span>
             <svg height="20" viewBox="0 0 90 22" xmlns="http://www.w3.org/2000/svg">
-                <text x="0" y="18" style="font-family: Quicksand, sans-serif; font-size: 20px; font-weight: 700; fill: rgb(217, 107, 79);">Latam5S</text>
+                <text x="0" y="18" style="font-family: Quicksand, sans-serif; font-size: 20px; font-weight: 700; fill: #D96B4F;">Latam5S</text>
             </svg>
         </footer>
     </main>
 
-    <div class="toast" id="toast">Acción aplicada</div>
+    <!-- Toast de Notificación -->
+    <div class="toast fixed right-5 bottom-5 bg-gradient-to-r from-accent to-accent-alt text-white p-3 rounded-xl shadow-xl shadow-accent/25 opacity-0 translate-y-2 transition-all duration-300 z-50" id="toast">Acción aplicada</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // Inicializa Feather Icons
     feather.replace();
 
     // --- NAVEGACIÓN PRINCIPAL ---
     const navLinks = document.querySelectorAll('.nav-link');
     const sections = document.querySelectorAll('main > section');
 
+    // Función para manejar la navegación entre secciones
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const targetId = link.getAttribute('href').substring(1);
             
-            navLinks.forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
+            navLinks.forEach(l => {
+                l.classList.remove('active', 'bg-orange-100', 'text-accent');
+                l.classList.add('text-gray-500');
+            });
+            
+            // Aplica clases de Tailwind para el estado activo
+            link.classList.add('active', 'bg-orange-100', 'text-accent');
+            link.classList.remove('text-gray-500');
+
 
             sections.forEach(sec => {
                 sec.classList.toggle('active', sec.id === targetId);
@@ -437,7 +310,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- SECCIÓN ENVÍOS ---
+    // Inicializa la primera sección como activa visualmente
+    document.querySelector('.nav-link.active').classList.add('bg-orange-100', 'text-accent');
+    document.querySelector('.nav-link.active').classList.remove('text-gray-500');
+
+    // --- SECCIÓN ENVÍOS (Variables de DOM) ---
     const filtroTipo = document.getElementById('filtroTipo');
     const filtroCliente = document.getElementById('filtroCliente');
     const filtroFecha = document.getElementById('filtroFecha');
@@ -459,43 +336,49 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 5, tipo: "SHALOM", cliente: "988667755", fechaEnvio: "2025-08-29", fechaReg: "2025-08-26", nombre: "Valeria Campos", dni: "78451236", agencia: "Piura / Piura / Castilla", estado: "REPROGRAMADO" },
     ];
     
+    // Función para renderizar la tabla
     function renderTable(data) {
         tbody.innerHTML = '';
         if (data.length === 0) {
-             tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--muted);">No hay envíos que coincidan con los filtros.</td></tr>';
-             return;
+            tbody.innerHTML = '<tr><td colspan="11" class="text-center p-10 text-gray-500">No hay envíos que coincidan con los filtros.</td></tr>';
+            return;
         }
+
         data.forEach(item => {
             const row = document.createElement('tr');
-            row.dataset.id = item.id; // Asignar ID único a la fila
+            row.classList.add('hover:bg-orange-50', 'transition-colors');
+            row.dataset.id = item.id;
             row.dataset.tipo = item.tipo;
             row.dataset.cliente = item.cliente;
             row.dataset.fechaenvio = item.fechaEnvio;
             
-            const badgeMap = {
-                "PENDIENTE": '<span class="badge b-pendiente">Pendiente</span>',
-                "ENVIADO": '<span class="badge b-enviado">Enviado</span>',
-                "ENTREGADO": '<span class="badge b-entregado">Entregado</span>',
-                "REPROGRAMADO": '<span class="badge b-reprogramado">Reprogramado</span>',
+            // Mapeo de estados a clases Tailwind para los badges
+            const badgeClassMap = {
+                "PENDIENTE": 'bg-amber-100 text-badge-pending border-amber-300',
+                "ENVIADO": 'bg-orange-100 text-badge-sent border-orange-300',
+                "ENTREGADO": 'bg-emerald-100 text-badge-delivered border-emerald-300',
+                "REPROGRAMADO": 'bg-purple-100 text-badge-rescheduled border-purple-300',
             };
+            const estadoBadge = `<span class="badge ${badgeClassMap[item.estado]} px-2 py-1 rounded-full text-xs font-bold border">${item.estado}</span>`;
 
             row.innerHTML = `
-                <td><input type="checkbox" class="rowCheck" /></td>
-                <td class="nowrap">${item.fechaReg}</td>
-                <td>${item.cliente}</td>
-                <td>${item.tipo}</td>
-                <td>${item.nombre}</td>
-                <td class="col-distrito">${item.distrito || '-'}</td>
-                <td class="col-direccion">${item.direccion || '-'}</td>
-                <td class="col-dni">${item.dni || '-'}</td>
-                <td class="col-agencia">${item.agencia || '-'}</td>
-                <td class="nowrap">${item.fechaEnvio}</td>
-                <td class="estado">${badgeMap[item.estado] || item.estado}</td>
+                <td class="border-t border-gray-200 p-3"><input type="checkbox" class="rowCheck rounded border-gray-300 text-accent focus:ring-accent" /></td>
+                <td class="border-t border-gray-200 p-3 text-xs text-gray-700 nowrap">${item.fechaReg}</td>
+                <td class="border-t border-gray-200 p-3 text-xs text-gray-700">${item.cliente}</td>
+                <td class="border-t border-gray-200 p-3 text-xs text-gray-700">${item.tipo}</td>
+                <td class="border-t border-gray-200 p-3 text-xs text-gray-700">${item.nombre}</td>
+                <td class="col-distrito border-t border-gray-200 p-3 text-xs text-gray-700">${item.distrito || '-'}</td>
+                <td class="col-direccion border-t border-gray-200 p-3 text-xs text-gray-700">${item.direccion || '-'}</td>
+                <td class="col-dni border-t border-gray-200 p-3 text-xs text-gray-700">${item.dni || '-'}</td>
+                <td class="col-agencia border-t border-gray-200 p-3 text-xs text-gray-700">${item.agencia || '-'}</td>
+                <td class="border-t border-gray-200 p-3 text-xs text-gray-700 nowrap">${item.fechaEnvio}</td>
+                <td class="estado border-t border-gray-200 p-3">${estadoBadge}</td>
             `;
             tbody.appendChild(row);
         });
     }
 
+    // Función principal de filtros y visibilidad de columnas
     function aplicarFiltros() {
         const tipo = filtroTipo.value;
         const cel = filtroCliente.value.trim().toLowerCase();
@@ -513,18 +396,26 @@ document.addEventListener('DOMContentLoaded', () => {
         renderTable(filteredData);
         
         // 3. Ahora, aplicar la visibilidad de columnas a la tabla recién renderizada
-        document.querySelectorAll('.col-distrito,.col-direccion,.col-dni,.col-agencia').forEach(el => el.style.display = ''); // Resetear visibilidad
+        const colDistrito = document.querySelectorAll('.col-distrito');
+        const colDireccion = document.querySelectorAll('.col-direccion');
+        const colDni = document.querySelectorAll('.col-dni');
+        const colAgencia = document.querySelectorAll('.col-agencia');
+
+        // Resetear visibilidad
+        [...colDistrito, ...colDireccion, ...colDni, ...colAgencia].forEach(el => el.style.display = 'table-cell');
         
+        // Aplicar reglas de visibilidad según Courier
         if (tipo === 'DELIVERY') { 
-            document.querySelectorAll('.col-dni,.col-agencia').forEach(el => el.style.display = 'none'); 
+            [...colDni, ...colAgencia].forEach(el => el.style.display = 'none'); 
         } else if (tipo === 'SHALOM' || tipo === 'OLVA') { 
-            document.querySelectorAll('.col-distrito,.col-direccion').forEach(el => el.style.display = 'none'); 
+            [...colDistrito, ...colDireccion].forEach(el => el.style.display = 'none'); 
         }
 
         // 4. Deseleccionar todas las filas
         deseleccionarTodo();
     }
 
+    // Funciones de selección en lote
     function contarSeleccionados(){
         const count = tbody.querySelectorAll('.rowCheck:checked').length;
         selCount.textContent = `${count} seleccionados`;
@@ -537,15 +428,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function deseleccionarTodo(){ seleccionarTodo(false); }
 
+    // Eventos de selección
     checkTodos.addEventListener('change', e => seleccionarTodo(e.target.checked));
     thCheckTodos.addEventListener('change', e => seleccionarTodo(e.target.checked));
     tbody.addEventListener('change', e => { if(e.target.classList.contains('rowCheck')) contarSeleccionados(); });
     
+    // Evento de acción en lote
     accionLote.addEventListener('change', () => {
         fechaReprog.classList.toggle('oculto', accionLote.value !== 'REPROGRAMADO');
         if (accionLote.value !== 'REPROGRAMADO') fechaReprog.value = '';
     });
 
+    // Evento de aplicar acción en lote
     btnAplicarLote.addEventListener('click', () => {
         const action = accionLote.value;
         if (!action){ showToast('Elige una acción en lote'); return; }
@@ -579,12 +473,35 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- SECCIÓN LINK MÁGICO ---
     const btnCopiarLink = document.getElementById('btnCopiarLink');
     const linkUnicoInput = document.getElementById('linkUnicoInput');
+    
+    // Uso de navigator.clipboard.writeText para copiar
     btnCopiarLink.addEventListener('click', () => {
-        navigator.clipboard.writeText(linkUnicoInput.value).then(() => {
-            showToast('¡Enlace copiado al portapapeles!');
-        }).catch(err => {
-            showToast('Error al copiar el enlace.');
-        });
+        // Fallback for secure context (Canvas environment)
+        if (!navigator.clipboard || !navigator.clipboard.writeText) {
+            // Fallback for non-secure or restricted contexts
+            const textarea = document.createElement('textarea');
+            textarea.value = linkUnicoInput.value;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                document.execCommand('copy');
+                showToast('¡Enlace copiado al portapapeles!');
+            } catch (err) {
+                showToast('Error al copiar: Tu navegador no lo permite.');
+            }
+            document.body.removeChild(textarea);
+
+        } else {
+            // Modern Clipboard API
+            navigator.clipboard.writeText(linkUnicoInput.value).then(() => {
+                showToast('¡Enlace copiado al portapapeles!');
+            }).catch(err => {
+                showToast('Error al copiar el enlace.');
+            });
+        }
     });
 
     // --- SECCIÓN MI CUENTA ---
@@ -595,45 +512,56 @@ document.addEventListener('DOMContentLoaded', () => {
     const headerLogo = document.getElementById('headerLogo');
     const btnGuardarConfig = document.getElementById('btnGuardarConfig');
 
+    // Actualiza el nombre del negocio en el encabezado
     businessNameInput.addEventListener('input', () => {
         headerBusinessName.textContent = businessNameInput.value || '[Nombre del emprendimiento]';
     });
 
+    // Vista previa y actualización del logo
     logoInput.addEventListener('change', function() {
         const file = this.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = function(e) {
                 const imageUrl = e.target.result;
+                // Mostrar en la vista previa
                 logoPreview.src = imageUrl;
-                logoPreview.style.display = "block";
+                logoPreview.classList.remove('hidden');
+                // Mostrar en el encabezado
                 headerLogo.src = imageUrl;
-                headerLogo.style.display = "block";
+                headerLogo.classList.remove('hidden');
             };
             reader.readAsDataURL(file);
+        } else {
+            logoPreview.classList.add('hidden');
+            headerLogo.classList.add('hidden');
         }
     });
 
+    // Evento de guardar configuración (simulado)
     btnGuardarConfig.addEventListener('click', () => {
         showToast('Configuración guardada exitosamente.');
-        // Aquí iría la lógica para guardar los datos en el backend.
+        // Aquí iría la lógica para guardar los datos en el backend (Firestore).
     });
 
     // --- UTILIDADES ---
     const toast = document.getElementById('toast');
+    let toastTimeout;
     function showToast(msg){
+        clearTimeout(toastTimeout);
         toast.textContent = msg;
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 2500);
+        toast.classList.remove('opacity-0', 'translate-y-2');
+        toast.classList.add('opacity-100', 'translate-y-0');
+        
+        toastTimeout = setTimeout(() => {
+            toast.classList.remove('opacity-100', 'translate-y-0');
+            toast.classList.add('opacity-0', 'translate-y-2');
+        }, 2500);
     }
 
     // --- INICIALIZACIÓN ---
-    renderTable(sampleData);
     aplicarFiltros();
 });
 </script>
 </body>
 </html>
-
-
-
