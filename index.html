@@ -241,7 +241,8 @@
                     <label for="linkUnicoInput" class="block text-sm text-gray-500 font-semibold mb-1.5">Tu enlace personal</label>
                     <div id="linkUnicoContainer" class="flex gap-2">
                         <input type="text" id="linkUnicoInput" class="input p-2.5 border border-gray-200 rounded-xl bg-gray-50 flex-grow text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" value="https://latam5s.com/form/tu-tienda" readonly>
-                        <button class="btn primary bg-gradient-to-r from-accent to-accent-alt text-white shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2" id="btnCopiarLink"><i data-feather="copy" class="w-4 h-4"></i>Copiar</button>
+                        <button class="btn ghost bg-transparent border border-gray-200 text-gray-900 hover:bg-gray-50 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2" id="btnCopiarLink"><i data-feather="copy" class="w-4 h-4"></i>Copiar</button>
+                        <button class="btn primary bg-gradient-to-r from-accent to-accent-alt text-white shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2" id="btnCompartirLink"><i data-feather="share-2" class="w-4 h-4"></i>Compartir</button>
                     </div>
                 </div>
             </div>
@@ -1183,35 +1184,56 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- SECCIÓN LINK MÁGICO ---
     const btnCopiarLink = document.getElementById('btnCopiarLink');
     const linkUnicoInput = document.getElementById('linkUnicoInput');
+    const btnCompartirLink = document.getElementById('btnCompartirLink');
     
-    // Uso de navigator.clipboard.writeText para copiar
-    btnCopiarLink.addEventListener('click', () => {
-        // Fallback for secure context (Canvas environment)
-        if (!navigator.clipboard || !navigator.clipboard.writeText) {
-            // Fallback for non-secure or restricted contexts
-            const textarea = document.createElement('textarea');
-            textarea.value = linkUnicoInput.value;
-            textarea.style.position = 'fixed';
-            textarea.style.opacity = '0';
-            document.body.appendChild(textarea);
-            textarea.select();
-            
-            try {
-                document.execCommand('copy');
-                showToast('¡Enlace copiado al portapapeles!');
-            } catch (err) {
-                showToast('Error al copiar: Tu navegador no lo permite.');
-            }
-            document.body.removeChild(textarea);
+    // Lógica para el botón de Compartir
+    btnCompartirLink.addEventListener('click', async () => {
+        const shareData = {
+            title: `Formulario de Envío para ${businessName}`,
+            text: `¡Hola! Por favor, completa tus datos de envío en el siguiente enlace para coordinar tu pedido. ¡Gracias!`,
+            url: linkUnicoInput.value
+        };
 
+        if (navigator.share) {
+            try {
+                await navigator.share(shareData);
+                // No mostramos toast en caso de éxito, ya que la acción es evidente.
+            } catch (err) {
+                // Esto ocurre si el usuario cierra el diálogo de compartir, no es un error real.
+                console.log('El usuario canceló la acción de compartir.');
+            }
         } else {
-            // Modern Clipboard API
-            navigator.clipboard.writeText(linkUnicoInput.value).then(() => {
-                showToast('¡Enlace copiado al portapapeles!');
-            }).catch(err => {
-                showToast('Error al copiar el enlace.');
-            });
+            // Fallback para navegadores que no soportan la Web Share API
+            showToast('Tu navegador no soporta esta función. Intenta copiar el enlace.');
         }
+    });
+
+    // Lógica para el botón de Copiar (Método compatible)
+    btnCopiarLink.addEventListener('click', () => {
+        const linkToCopy = linkUnicoInput.value;
+        const textarea = document.createElement('textarea');
+        textarea.value = linkToCopy;
+        
+        // Oculta el textarea para que no sea visible
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+                showToast('¡Enlace copiado al portapapeles!');
+            } else {
+                showToast('No se pudo copiar el enlace. Inténtalo manualmente.');
+            }
+        } catch (err) {
+            showToast('Error al copiar: Tu navegador no soporta esta acción.');
+        }
+        
+        document.body.removeChild(textarea);
     });
 
     // --- SECCIÓN MI CUENTA ---
@@ -1289,3 +1311,9 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
+
+
+
+
+
