@@ -199,8 +199,10 @@
                                 <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Cliente</th>
                                 <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Courier</th>
                                 <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Destinatario</th>
+                                <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Teléfono</th>
                                 <th class="col-distrito border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Distrito</th>
                                 <th class="col-direccion border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Dirección</th>
+                                <th class="col-referencia border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Referencia</th>
                                 <th class="col-dni border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">DNI/CE</th>
                                 <th class="col-agencia border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Agencia</th>
                                 <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Fecha Envío</th>
@@ -210,7 +212,7 @@
                         </thead>
                         <tbody id="tbodyEnvios">
                             <!-- JS llenará esta tabla -->
-                            <tr><td colspan="12" class="text-center p-10 text-gray-500">No hay envíos para mostrar.</td></tr>
+                            <tr><td colspan="14" class="text-center p-10 text-gray-500">No hay envíos para mostrar.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -458,16 +460,16 @@
             <input type="hidden" id="editShipmentId">
             <!-- Campos del formulario de edición -->
             <div class="form-group">
+                <label for="editCliente" class="block text-sm text-gray-500 font-semibold mb-1.5">Celular del Cliente (No editable)</label>
+                <input type="text" id="editCliente" class="input p-2.5 border border-gray-200 rounded-xl bg-gray-100 w-full text-sm text-gray-600 focus:outline-none focus:ring-0 focus:border-gray-200 cursor-not-allowed" readonly>
+            </div>
+            <div class="form-group">
                 <label for="editNombre" class="block text-sm text-gray-500 font-semibold mb-1.5">Nombre del Destinatario</label>
                 <input type="text" id="editNombre" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
             </div>
-            <div class="form-group">
-                <label for="editCliente" class="block text-sm text-gray-500 font-semibold mb-1.5">Celular del Cliente</label>
-                <input type="text" id="editCliente" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
-            </div>
              <div class="form-group">
-                <label for="editProducto" class="block text-sm text-gray-500 font-semibold mb-1.5">Producto</label>
-                <input type="text" id="editProducto" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                <label for="editTelefono" class="block text-sm text-gray-500 font-semibold mb-1.5">Teléfono del Destinatario</label>
+                <input type="text" id="editTelefono" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
             </div>
             <div class="form-group">
                 <label for="editFechaEnvio" class="block text-sm text-gray-500 font-semibold mb-1.5">Fecha de Envío</label>
@@ -483,6 +485,10 @@
                 <div class="form-group">
                     <label for="editDireccion" class="block text-sm text-gray-500 font-semibold mb-1.5">Dirección</label>
                     <input type="text" id="editDireccion" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                </div>
+                <div class="form-group">
+                    <label for="editReferencia" class="block text-sm text-gray-500 font-semibold mb-1.5">Referencia</label>
+                    <input type="text" id="editReferencia" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
                 </div>
             </div>
 
@@ -564,16 +570,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Datos de ejemplo (Simulación de datos cargados desde Firestore)
     let sampleData = [
-        // Datos de Shalom (Courier con agencia, DNI/CE)
-        { id: 1, tipo: "SHALOM", cliente: "912345678", fechaEnvio: "2025-08-20", fechaReg: "2025-08-18", nombre: "María López", dni: "87654321", agencia: "Lima / Lima / Chorrillos", estado: "ENVIADO", producto: "Paquete Pequeño" },
-        // Datos de Delivery (Courier con dirección y distrito)
-        { id: 2, tipo: "DELIVERY", cliente: "987654321", fechaEnvio: "2025-08-22", fechaReg: "2025-08-20", nombre: "Juan Pérez", distrito: "Miraflores", direccion: "Av. Principal 123", estado: "PENDIENTE", producto: "Caja de Regalo" },
-        // Datos de Olva (Courier con agencia, DNI/CE)
-        { id: 3, tipo: "OLVA", cliente: "911223344", fechaEnvio: "2025-08-25", fechaReg: "2025-08-22", nombre: "Lucía Gutiérrez", dni: "75342190", agencia: "Lima / Lima / Los Olivos", estado: "PENDIENTE", producto: "Sobre con Documentos" },
-        // Datos de Delivery (Courier con dirección y distrito)
-        { id: 4, tipo: "DELIVERY", cliente: "987111222", fechaEnvio: "2025-08-26", fechaReg: "2025-08-23", nombre: "Rosa Valdivia", distrito: "San Miguel", direccion: "Av. Universitaria 240", estado: "ENTREGADO", producto: "Kit de Maquillaje" },
-        // Datos de Shalom (Courier con agencia, DNI/CE)
-        { id: 5, tipo: "SHALOM", cliente: "988667755", fechaEnvio: "2025-08-29", fechaReg: "2025-08-26", nombre: "Valeria Campos", dni: "78451236", agencia: "Piura / Piura / Castilla", estado: "REPROGRAMADO", producto: "Mochila" },
+        { id: 1, tipo: "SHALOM", cliente: "912345678", fechaEnvio: "2025-08-20", fechaReg: "2025-08-18", nombre: "María López", telefono: "912345678", dni: "87654321", agencia: "Lima / Lima / Chorrillos", estado: "ENVIADO" },
+        { id: 2, tipo: "DELIVERY", cliente: "987654321", fechaEnvio: "2025-08-22", fechaReg: "2025-08-20", nombre: "Juan Pérez", telefono: "999888777", distrito: "Miraflores", direccion: "Av. Principal 123", referencia: "Frente al parque", estado: "PENDIENTE" },
+        { id: 3, tipo: "OLVA", cliente: "911223344", fechaEnvio: "2025-08-25", fechaReg: "2025-08-22", nombre: "Lucía Gutiérrez", telefono: "911223344", dni: "75342190", agencia: "Lima / Lima / Los Olivos", estado: "PENDIENTE" },
+        { id: 4, tipo: "DELIVERY", cliente: "987111222", fechaEnvio: "2025-08-26", fechaReg: "2025-08-23", nombre: "Rosa Valdivia", telefono: "987111222", distrito: "San Miguel", direccion: "Av. Universitaria 240", referencia: "Al lado de la farmacia", estado: "ENTREGADO" },
+        { id: 5, tipo: "SHALOM", cliente: "988667755", fechaEnvio: "2025-08-29", fechaReg: "2025-08-26", nombre: "Valeria Campos", telefono: "988667755", dni: "78451236", agencia: "Piura / Piura / Castilla", estado: "REPROGRAMADO" },
     ];
     let currentData = [...sampleData]; // Los datos actualmente mostrados/filtrados
 
@@ -623,7 +624,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('editShipmentId').value = shipment.id;
         document.getElementById('editNombre').value = shipment.nombre || '';
         document.getElementById('editCliente').value = shipment.cliente || '';
-        document.getElementById('editProducto').value = shipment.producto || '';
+        document.getElementById('editTelefono').value = shipment.telefono || '';
         document.getElementById('editFechaEnvio').value = shipment.fechaEnvio || '';
         
         // Mostrar/ocultar campos según el tipo de courier
@@ -635,6 +636,7 @@ document.addEventListener('DOMContentLoaded', () => {
             courierFields.classList.add('hidden');
             document.getElementById('editDistrito').value = shipment.distrito || '';
             document.getElementById('editDireccion').value = shipment.direccion || '';
+            document.getElementById('editReferencia').value = shipment.referencia || '';
         } else {
             deliveryFields.classList.add('hidden');
             courierFields.classList.remove('hidden');
@@ -666,14 +668,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Actualizar datos comunes
         updatedShipment.nombre = document.getElementById('editNombre').value;
-        updatedShipment.cliente = document.getElementById('editCliente').value;
-        updatedShipment.producto = document.getElementById('editProducto').value;
+        updatedShipment.telefono = document.getElementById('editTelefono').value;
         updatedShipment.fechaEnvio = document.getElementById('editFechaEnvio').value;
         
         // Actualizar datos condicionales
         if (updatedShipment.tipo === 'DELIVERY') {
             updatedShipment.distrito = document.getElementById('editDistrito').value;
             updatedShipment.direccion = document.getElementById('editDireccion').value;
+            updatedShipment.referencia = document.getElementById('editReferencia').value;
         } else {
             updatedShipment.dni = document.getElementById('editDni').value;
             updatedShipment.agencia = document.getElementById('editAgencia').value;
@@ -710,7 +712,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentData = data; // Actualiza los datos actuales
         tbody.innerHTML = '';
         if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="12" class="text-center p-10 text-gray-500">No hay envíos para mostrar.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="14" class="text-center p-10 text-gray-500">No hay envíos para mostrar.</td></tr>';
             return;
         }
 
@@ -738,8 +740,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td class="border-t border-gray-200 p-3 text-xs text-gray-700">${item.cliente}</td>
                 <td class="border-t border-gray-200 p-3 text-xs text-gray-700">${item.tipo}</td>
                 <td class="border-t border-gray-200 p-3 text-xs text-gray-700">${item.nombre}</td>
+                <td class="border-t border-gray-200 p-3 text-xs text-gray-700">${item.telefono}</td>
                 <td class="col-distrito border-t border-gray-200 p-3 text-xs text-gray-700">${item.distrito || '-'}</td>
                 <td class="col-direccion border-t border-gray-200 p-3 text-xs text-gray-700">${item.direccion || '-'}</td>
+                <td class="col-referencia border-t border-gray-200 p-3 text-xs text-gray-700">${item.referencia || '-'}</td>
                 <td class="col-dni border-t border-gray-200 p-3 text-xs text-gray-700">${item.dni || '-'}</td>
                 <td class="col-agencia border-t border-gray-200 p-3 text-xs text-gray-700">${item.agencia || '-'}</td>
                 <td class="border-t border-gray-200 p-3 text-xs text-gray-700 nowrap">${item.fechaEnvio}</td>
@@ -776,17 +780,18 @@ document.addEventListener('DOMContentLoaded', () => {
         // 3. Ahora, aplicar la visibilidad de columnas a la tabla recién renderizada
         const colDistrito = document.querySelectorAll('.col-distrito');
         const colDireccion = document.querySelectorAll('.col-direccion');
+        const colReferencia = document.querySelectorAll('.col-referencia');
         const colDni = document.querySelectorAll('.col-dni');
         const colAgencia = document.querySelectorAll('.col-agencia');
 
         // Resetear visibilidad
-        [...colDistrito, ...colDireccion, ...colDni, ...colAgencia].forEach(el => el.style.display = 'table-cell');
+        [...colDistrito, ...colDireccion, ...colReferencia, ...colDni, ...colAgencia].forEach(el => el.style.display = 'table-cell');
         
         // Aplicar reglas de visibilidad según Courier
         if (tipo === 'DELIVERY') { 
             [...colDni, ...colAgencia].forEach(el => el.style.display = 'none'); 
         } else if (tipo === 'SHALOM' || tipo === 'OLVA') { 
-            [...colDistrito, ...colDireccion].forEach(el => el.style.display = 'none'); 
+            [...colDistrito, ...colDireccion, ...colReferencia].forEach(el => el.style.display = 'none'); 
         }
 
         // 4. Deseleccionar todas las filas
@@ -952,15 +957,15 @@ document.addEventListener('DOMContentLoaded', () => {
             fileName = `${courier.toLowerCase()}_plantilla_${new Date().toISOString().slice(0, 10)}.csv`; 
             
             // Usamos el DELIMITER para el encabezado
-            csvContent = `FechaEnvio${DELIMITER}NombreDestinatario${DELIMITER}DNI_CE${DELIMITER}Agencia_Recojo${DELIMITER}Producto\n`; 
+            csvContent = `FechaEnvio${DELIMITER}NombreDestinatario${DELIMITER}Telefono${DELIMITER}DNI_CE${DELIMITER}Agencia_Recojo\n`; 
             
             filteredShipments.forEach(item => {
                 const row = [
                     sanitizeValue(item.fechaEnvio),
                     sanitizeValue(item.nombre),
+                    sanitizeValue(item.telefono),
                     sanitizeValue(item.dni),
-                    sanitizeValue(item.agencia),
-                    sanitizeValue(item.producto)
+                    sanitizeValue(item.agencia)
                 ];
                 // Usamos el DELIMITER para unir los campos
                 csvContent += row.join(DELIMITER) + '\n';
@@ -971,7 +976,7 @@ document.addEventListener('DOMContentLoaded', () => {
             fileName = `delivery_propio_plantilla_${new Date().toISOString().slice(0, 10)}.csv`;
             
             // Encabezado para Delivery Propio (usando Distrito y Dirección)
-            csvContent = `FechaEnvio${DELIMITER}NombreDestinatario${DELIMITER}Celular${DELIMITER}Distrito${DELIMITER}Direccion\n`;
+            csvContent = `FechaEnvio${DELIMITER}NombreDestinatario${DELIMITER}Celular${DELIMITER}Distrito${DELIMITER}Direccion${DELIMITER}Referencia\n`;
             
             filteredShipments.forEach(item => {
                 const row = [
@@ -979,7 +984,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     sanitizeValue(item.nombre),
                     sanitizeValue(item.cliente), // Usamos 'cliente' que contiene el número de celular
                     sanitizeValue(item.distrito),
-                    sanitizeValue(item.direccion)
+                    sanitizeValue(item.direccion),
+                    sanitizeValue(item.referencia)
                 ];
                 // Usamos el DELIMITER para unir los campos
                 csvContent += row.join(DELIMITER) + '\n';
@@ -1024,7 +1030,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let labelsHtml = shipments.map((item, index) => {
             const isDelivery = item.tipo === 'DELIVERY';
             const location = isDelivery ? 
-                `<strong>Distrito:</strong> ${item.distrito}<br><strong>Dirección:</strong> ${item.direccion}` :
+                `<strong>Distrito:</strong> ${item.distrito}<br><strong>Dirección:</strong> ${item.direccion}<br><strong>Ref:</strong> ${item.referencia || ''}` :
                 `<strong>Agencia:</strong> ${item.agencia}<br><strong>DNI/CE:</strong> ${item.dni}`;
 
             return `
@@ -1034,9 +1040,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="label-info">
                         <p><strong>Remitente:</strong> ${businessName}</p>
-                        <p><strong>Destinatario:</strong> ${item.nombre} (${item.cliente})</p>
+                        <p><strong>Destinatario:</strong> ${item.nombre} (${item.telefono})</p>
+                        <p><strong>Cliente:</strong> ${item.cliente}</p>
                         <p><strong>Fecha Envío:</strong> ${item.fechaEnvio}</p>
-                        <p><strong>Producto:</strong> ${item.producto || 'N/A'}</p>
                         <p>${location}</p>
                     </div>
                     <div class="qr-placeholder">
@@ -1215,4 +1221,6 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
+
 
