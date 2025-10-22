@@ -18,1040 +18,1601 @@
             theme: {
                 extend: {
                     colors: {
-                        'accent': '#D96B4F', // El color principal (Terracota)
-                        'accent-alt': '#FF8B6A', // El color secundario (Naranja claro)
-                        'bg-soft': '#fffaf6', // El color de fondo original
+                        'accent': '#D96B4F',
+                        'accent-alt': '#FF8B6A',
+                        'bg-soft': '#fffaf6',
                         'badge-pending': '#9a6200',
                         'badge-sent': '#D96B4F',
                         'badge-delivered': '#1b7f3a',
                         'badge-rescheduled': '#8e44ad',
-                        // Se añade 'brand-accent' para que coincida con la clase del héroe
-                        'brand-accent': '#D96B4F', 
+                        'brand-accent': '#D96B4F',
+                        // Colores para el nuevo menú lateral
+                        'sidebar-bg': '#1f2937', // Gris oscuro para el fondo
+                        'sidebar-hover': '#374151', // Gris más claro para el hover
+                        'sidebar-active-bg': '#D96B4F', // Color accent para el fondo del enlace activo
                     },
                     fontFamily: {
                         sans: ['Quicksand', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Arial', 'sans-serif'],
                     },
-                    borderRadius: {
-                        'xl': '14px', // Mantenemos el radio de borde original
-                    }
+                    borderRadius: { 'xl': '14px' }
                 },
             }
         }
     </script>
     <style>
-        /* Estilos base (Mínimo CSS necesario) */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
-        body { background-color: #fffaf6; color: #2b2b2b; line-height: 1.6; }
-
-        /* Clases de utilidad */
-        .oculto { display: none !important; }
-
-        /* Manejo de secciones (ya no lo hace el CSS, sino el JS que añade 'active') */
-        main > section { display: none; }
-        main > section.active { display: block; }
-
-        /* Estilos específicos para la tabla (para manejar el nowrap y el ancho) */
-        .nowrap { white-space: nowrap; }
-
-        /* Animación para el panel de edición */
-        #editPanel {
-            transition: transform 0.3s ease-in-out;
+        /* El bloqueo del scroll principal se aplica solo en desktop */
+        @media (min-width: 768px) {
+            html, body, #root-container {
+                height: 100%;
+            }
+        }
+      
+        #sidebar {
+          z-index: 60; /* Asegura que quede por encima del header */
         }
 
-        /* Estilos para la impresión de etiquetas */
+        #sidebarOverlay {
+          z-index: 50; /* Queda justo debajo del sidebar, pero encima del contenido */
+        }
+
+        header {
+          position: sticky;
+          top: 0;
+          z-index: 40; /* Menor que el sidebar */
+        }      
+      
+        body { 
+            background-color: #fffaf6; 
+            color: #2b2b2b; 
+            line-height: 1.6;
+        }
+        .oculto { display: none !important; }
+
+        /* SOLUCIÓN DEFINITIVA: Se centraliza el control de visibilidad y layout. */
+        /* Todas las secciones están ocultas por defecto. */
+        main > section { display: none; }
+        /* La clase 'active' es la ÚNICA responsable de mostrar una sección y darle el layout de columna vertical. */
+        main > section.active { 
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nowrap { white-space: nowrap; }
+        #editPanel { transition: transform 0.3s ease-in-out; }
+
+        /* Estilos para cabecera de tabla fija */
+        #tablaEnvios > thead > tr > th {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            background-color: #fef3c7; /* Se usa un color sólido para evitar transparencias */
+        }
+        
+        /* Contenedor de etiquetas oculto por defecto */
+        .print-container { display: none; }
+
         @media print {
-            body > * { display: none; } /* Oculta todo por defecto */
-            .print-container { 
-                display: block; 
-                width: 100%;
-                /* Ajustes para un formato de etiqueta común, por ejemplo 4x6 pulgadas o similar a un A4, usando CSS columns */
-                column-count: 2; 
-                column-gap: 1.5cm;
-                padding: 1cm;
+            /* Oculta explícitamente los elementos de la interfaz principal. */
+            #root-container, .toast, #deleteModal, #editPanelOverlay, #editPanel {
+                display: none !important;
             }
+            
+            /* Muestra el contenedor de impresión y lo prepara. */
+            .print-container { 
+                display: block !important; 
+                width: 100%; 
+                column-count: 2; 
+                column-gap: 1cm; 
+                padding: 0.5cm; 
+            }
+            
+            /* --- NUEVO Y MEJORADO DISEÑO DE ETIQUETA --- */
             .label-card {
-                /* Esto asegura que la tarjeta de etiqueta no se corte a través de la columna */
-                break-inside: avoid-column; 
+                font-family: 'Quicksand', sans-serif;
+                break-inside: avoid;
                 page-break-inside: avoid;
-                margin-bottom: 1.5cm; /* Espacio entre etiquetas */
-                border: 1px solid #000;
-                padding: 10px;
-                width: 100%; /* Ocupa el ancho de la columna */
-                min-height: 100px;
+                margin-bottom: 1cm;
+                border: 1px solid #e0e0e0;
+                border-radius: 12px;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                background-color: #ffffff;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             }
             .label-header {
-                font-size: 14px;
-                font-weight: bold;
-                border-bottom: 1px dashed #000;
-                padding-bottom: 5px;
-                margin-bottom: 5px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 12px 16px;
+                background-color: #fffaf6; /* bg-soft */
+                border-bottom: 1px solid #e0e0e0;
             }
-            .label-info {
-                font-size: 12px;
-                margin-top: 5px;
+            .label-logo {
+                max-height: 40px;
+                max-width: 100px;
+                object-fit: contain;
             }
-            .qr-placeholder {
-                text-align: center;
-                margin-top: 10px;
+            .label-business-name {
+                font-size: 16px;
+                font-weight: 700;
+                color: #333;
+                text-align: right;
+            }
+            .label-body {
+                padding: 16px;
+                flex-grow: 1;
+            }
+            .label-section {
+                margin-bottom: 12px;
+            }
+            .label-section-title {
                 font-size: 10px;
+                font-weight: 700;
+                color: #D96B4F; /* accent */
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-bottom: 4px;
+            }
+            .label-recipient-name {
+                font-size: 20px;
+                font-weight: 700;
+                color: #000;
+                line-height: 1.2;
+            }
+            .label-recipient-phone {
+                font-size: 14px;
+                color: #555;
+            }
+            .label-destination-text {
+                font-size: 14px;
+                line-height: 1.5;
+                color: #333;
+            }
+            /* Estilo específico para el monto a cobrar */
+            .label-amount-to-collect {
+                background-color: #1f2937; /* sidebar-bg */
+                color: #ffffff;
+                padding: 8px 12px;
+                border-radius: 8px;
+                text-align: center;
+                margin-top: 8px;
+            }
+            .label-amount-to-collect span {
+                font-size: 12px;
+            }
+            .label-amount-to-collect strong {
+                font-size: 20px;
+                letter-spacing: 1px;
+            }
+            .label-footer {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 12px 16px;
+                background-color: #f9fafb; /* gray-50 */
+                border-top: 1px solid #e0e0e0;
+            }
+            .label-courier-info {
+                font-size: 12px;
+                font-weight: 600;
+                color: #555;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .label-courier-info svg {
+                width: 16px;
+                height: 16px;
+                stroke-width: 2.5;
+            }
+            .label-qr-code {
+                width: 60px;
+                height: 60px;
                 border: 1px solid #ccc;
-                padding: 5px;
-                height: 50px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                font-size: 10px;
+                color: #888;
+                text-align: center;
             }
         }
+
+        @media (min-width: 768px) {
+            body:not(.scroll-enabled) #root-container {
+                overflow: hidden;
+            }
+
+            body.scroll-enabled #mainContent {
+                overflow-y: auto;
+            }
+        }
+
+        .col-hidden {
+            display: none;
+        }
+
     </style>
 </head>
 <body class="font-sans bg-bg-soft text-gray-900 antialiased">
-    <!-- ---------- HEADER ---------- -->
-    <header class="bg-gradient-to-br from-brand-accent to-orange-400 text-white p-6 shadow-xl shadow-accent/25 flex items-center justify-center md:justify-start gap-4">
-        <img id="headerLogo" src="" alt="Logo Emprendimiento" class="h-12 w-12 rounded-lg object-cover bg-white p-1 hidden">
-        <div>
-            <h1 id="headerTitle" class="text-2xl font-bold">📋 Panel de Control</h1>
-            <p class="mt-1 text-sm opacity-90">Bienvenido, <strong id="headerBusinessName">[Nombre del emprendimiento]</strong></p>
-        </div>
-    </header>
+    
+    <div id="root-container" class="flex bg-bg-soft min-h-screen">
+        <!-- ======================= INICIO: MENÚ VERTICAL (Ahora colapsable) ======================= -->
+        <aside id="sidebar" class="w-64 bg-sidebar-bg text-white flex flex-col fixed h-full shadow-lg z-40 transform -translate-x-full transition-transform duration-300 ease-in-out">
+            <div class="p-6 border-b border-gray-700 flex items-center gap-3">
+                <img id="sidebarLogo" src="" alt="Logo" class="h-10 w-10 rounded-md object-cover bg-white p-1 hidden">
+                <h1 id="sidebarTitle" class="text-2xl font-bold text-white">Panel</h1>
+            </div>
 
-    <!-- ---------- NAV ---------- -->
-    <nav class="bg-white/80 backdrop-blur-sm border-b border-gray-200 flex flex-wrap gap-1 p-3 sticky top-0 z-10 justify-center">
-        <a href="#envios" class="nav-link active text-gray-500 font-semibold text-sm transition-colors p-2.5 rounded-lg flex items-center gap-1.5 
-            hover:text-gray-900 w-full justify-center sm:w-auto 
-            active:bg-orange-100 active:text-accent sm:active:text-accent">
-            <i data-feather="truck" class="w-4 h-4"></i>Envíos
-        </a>
-        <a href="#link" class="nav-link text-gray-500 font-semibold text-sm transition-colors p-2.5 rounded-lg flex items-center gap-1.5 
-            hover:text-gray-900 w-full justify-center sm:w-auto">
-            <i data-feather="link" class="w-4 h-4"></i>Link Mágico
-        </a>
-        <a href="#reportes" class="nav-link text-gray-500 font-semibold text-sm transition-colors p-2.5 rounded-lg flex items-center gap-1.5 
-            hover:text-gray-900 w-full justify-center sm:w-auto">
-            <i data-feather="bar-chart-2" class="w-4 h-4"></i>Reportes
-        </a>
-        <a href="#cuenta" class="nav-link text-gray-500 font-semibold text-sm transition-colors p-2.5 rounded-lg flex items-center gap-1.5 
-            hover:text-gray-900 w-full justify-center sm:w-auto">
-            <i data-feather="settings" class="w-4 h-4"></i>Mi Cuenta
-        </a>
-    </nav>
+            <nav class="flex-1 p-4 space-y-2">
+                <a href="#envios" class="nav-link active flex items-center gap-3 p-3 rounded-lg font-semibold transition-colors duration-200">
+                    <i data-feather="truck" class="w-5 h-5"></i><span>Envíos</span>
+                </a>
+                <a href="#link" class="nav-link flex items-center gap-3 p-3 rounded-lg font-semibold transition-colors duration-200">
+                    <i data-feather="link" class="w-5 h-5"></i><span>Link Mágico</span>
+                </a>
+                <a href="#reportes" class="nav-link flex items-center gap-3 p-3 rounded-lg font-semibold transition-colors duration-200">
+                    <i data-feather="bar-chart-2" class="w-5 h-5"></i><span>Reportes</span>
+                </a>
+                <a href="#mensajes" class="nav-link flex items-center gap-3 p-3 rounded-lg font-semibold transition-colors duration-200">
+                    <i data-feather="message-square" class="w-5 h-5"></i><span>Mensajes</span>
+                </a>
+                <a href="#cuenta" class="nav-link flex items-center gap-3 p-3 rounded-lg font-semibold transition-colors duration-200">
+                    <i data-feather="settings" class="w-5 h-5"></i><span>Mi Cuenta</span>
+                </a>
+            </nav>
 
-    <main class="p-6">
-        
-        <!-- ======================= SECCIÓN ENVÍOS ======================= -->
-        <section class="active" id="envios">
-            <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200 mb-6">
-                <h2 class="text-2xl font-bold text-accent mb-4 flex items-center gap-2">
-                    <i data-feather="truck" class="w-6 h-6"></i>Mis Envíos
-                </h2>
-                
-                <!-- Acciones Principales -->
-                <div class="flex gap-2 flex-wrap justify-end mb-4">
-                    <!-- Nuevo Botón para Plantilla DELIVERY -->
-                    <button class="btn ghost bg-transparent border border-gray-200 text-gray-900 hover:bg-gray-50 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2" id="btnTplDelivery"><i data-feather="download" class="w-4 h-4"></i>Plantilla DELIVERY (.csv)</button>
-                    <!-- Los otros botones se mantienen -->
-                    <button class="btn ghost bg-transparent border border-gray-200 text-gray-900 hover:bg-gray-50 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2" id="btnTplShalom"><i data-feather="download" class="w-4 h-4"></i>Plantilla SHALOM (.csv)</button>
-                    <button class="btn ghost bg-transparent border border-gray-200 text-gray-900 hover:bg-gray-50 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2" id="btnTplOlva"><i data-feather="download" class="w-4 h-4"></i>Plantilla OLVA (.csv)</button>
-                    <button class="btn primary bg-gradient-to-r from-accent to-accent-alt text-white shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2" id="btnEtiquetas"><i data-feather="tag" class="w-4 h-4"></i>Imprimir Etiquetas</button>
-                </div>
-                
-                <!-- Filtros -->
-                <div class="flex flex-wrap items-center gap-3 my-4">
-                    <label class="text-xs text-gray-500 font-semibold">Cliente (Celular)<input type="text" id="filtroCliente" placeholder="Ej: 987654321" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-40 text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100 mt-1" /></label>
-                    <label class="text-xs text-gray-500 font-semibold">Fecha de Envío<input type="date" id="filtroFecha" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-40 text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100 mt-1" /></label>
-                    <label class="text-xs text-gray-500 font-semibold">Courier
-                        <select id="filtroTipo" class="select p-2.5 border border-gray-200 rounded-xl bg-white w-40 text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100 mt-1">
-                            <option value="">Todos</option>
-                            <option value="DELIVERY">Delivery Propio</option>
-                            <option value="SHALOM">Shalom</option>
-                            <option value="OLVA">Olva</option>
-                        </select>
-                    </label>
-                    <button class="btn primary bg-gradient-to-r from-accent to-accent-alt text-white py-2.5 px-4 rounded-xl font-bold text-sm h-fit self-end shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200" id="btnAplicarFiltros">Filtrar</button>
-                </div>
-                
-                <!-- Lote y Selección -->
-                <div class="flex flex-wrap items-center justify-between gap-3 my-3">
-                    <div class="lote-left flex gap-3 items-center flex-wrap">
-                        <label class="nowrap text-sm text-gray-900"><input type="checkbox" id="checkTodos" class="rounded border-gray-300 text-accent focus:ring-accent" /> Seleccionar todo</label>
-                        <span class="text-gray-500 text-sm" id="selCount">0 seleccionados</span>
-                    </div>
-                    <div class="lote-right flex gap-2 items-center flex-wrap justify-end">
-                        <select id="accionLote" class="select p-2.5 border border-gray-200 rounded-xl bg-white w-auto text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
-                            <option value="" selected>Acción en lote…</option>
-                            <option value="ENVIADO">Marcar como Enviado</option>
-                            <option value="ENTREGADO">Marcar como Entregado</option>
-                            <option value="REPROGRAMADO">Reprogramar</option>
-                            <option value="ELIMINAR" class="text-red-600 font-semibold">Eliminar Seleccionados</option>
-                        </select>
-                        <input type="date" id="fechaReprog" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-40 text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100 oculto" />
-                        <button class="btn primary bg-accent text-white py-2.5 px-4 rounded-xl font-bold text-sm shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200" id="btnAplicarLote">Aplicar</button>
-                    </div>
-                </div>
-                
-                <!-- Contenedor de la Tabla -->
-                <div id="tableContainer">
-                    <div class="overflow-x-auto shadow-lg shadow-gray-100 rounded-xl border border-gray-200">
-                        <table id="tablaEnvios" class="w-full border-collapse bg-white">
-                            <thead>
-                                <tr>
-                                    <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50 rounded-tl-xl w-12"><input type="checkbox" id="thCheckTodos" class="rounded border-gray-300 text-accent focus:ring-accent" /></th>
-                                    <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Fecha Reg.</th>
-                                    <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Cliente</th>
-                                    <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Courier</th>
-                                    <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Destinatario</th>
-                                    <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Teléfono</th>
-                                    <th class="col-distrito border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Distrito</th>
-                                    <th class="col-direccion border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Dirección</th>
-                                    <th class="col-referencia border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Referencia</th>
-                                    <th class="col-dni border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">DNI/CE</th>
-                                    <th class="col-agencia border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Agencia</th>
-                                    <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Fecha Envío</th>
-                                    <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50">Estado</th>
-                                    <th class="border-t border-gray-200 p-3 text-left text-xs font-bold text-accent uppercase tracking-wider bg-orange-50 rounded-tr-xl">Notificar</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbodyEnvios">
-                                <!-- JS llenará esta tabla -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+            <div class="p-4 border-t border-gray-700 text-sm">
+                <a href="#" class="text-accent-alt hover:underline">Cerrar Sesión</a>
+            </div>
+        </aside>
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden transition-opacity duration-300 ease-in-out"></div>
+        <!-- ======================= FIN: MENÚ VERTICAL ======================= -->
 
-                <!-- Contenedor de Estado Vacío (Onboarding) -->
-                <div id="emptyStateContainer" class="hidden text-center p-10 border-2 border-dashed rounded-xl mt-4">
-                    <i data-feather="gift" class="w-16 h-16 mx-auto text-gray-300"></i>
-                    <h3 class="mt-4 text-xl font-bold text-gray-800">¡Bienvenido a tu panel de control!</h3>
-                    <p class="mt-2 text-sm text-gray-500 max-w-sm mx-auto">Aún no tienes envíos registrados. El primer paso es configurar tu 'Link Mágico' y compartirlo con tus clientes.</p>
-                    <button id="goToAccountBtn" class="mt-6 btn primary bg-gradient-to-r from-accent to-accent-alt text-white shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2">
-                        <i data-feather="settings" class="w-4 h-4"></i> Ir a Configuración
+        <div id="mainContent" class="flex-1 flex flex-col transition-all duration-300 ease-in-out">
+             <!-- ---------- HEADER (Fijo, no se expande) ---------- -->
+            <header class="bg-gradient-to-br from-brand-accent to-orange-400 text-white p-6 shadow-xl shadow-accent/25 flex items-center justify-between flex-shrink-0">
+                <!-- Izquierda: Toggle y Título -->
+                <div class="flex items-center gap-4">
+                    <button id="sidebarToggle" class="text-white p-2 rounded-md hover:bg-black/20 focus:outline-none focus:ring-2 focus:ring-white">
+                        <i data-feather="menu" class="w-6 h-6"></i>
                     </button>
+                    <div>
+                        <h1 id="headerTitle" class="text-2xl font-bold">Envíos</h1>
+                    </div>
                 </div>
-            </div>
-        </section>
 
-        <!-- ======================= SECCIÓN LINK MÁGICO ======================= -->
-        <section id="link">
-            <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200 mb-6">
-                <h2 class="text-2xl font-bold text-accent mb-4 flex items-center gap-2">
-                    <i data-feather="link" class="w-6 h-6"></i>Tu Enlace Mágico
-                </h2>
-                <p class="text-gray-500 text-sm mb-5">Comparte este link único con tus clientes. Ellos completarán sus datos de envío directamente y la información aparecerá en tu panel, ¡sin errores y sin que tengas que transcribir nada!</p>
-                <div class="form-group">
-                    <label for="linkUnicoInput" class="block text-sm text-gray-500 font-semibold mb-1.5">Tu enlace personal</label>
-                    <div id="linkUnicoContainer" class="flex gap-2">
-                        <input type="text" id="linkUnicoInput" class="input p-2.5 border border-gray-200 rounded-xl bg-gray-50 flex-grow text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" value="https://latam5s.com/form/tu-tienda" readonly>
-                        <button class="btn ghost bg-transparent border border-gray-200 text-gray-900 hover:bg-gray-50 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2" id="btnCopiarLink"><i data-feather="copy" class="w-4 h-4"></i>Copiar</button>
-                        <button class="btn primary bg-gradient-to-r from-accent to-accent-alt text-white shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2" id="btnCompartirLink"><i data-feather="share-2" class="w-4 h-4"></i>Compartir</button>
+                <!-- Derecha: Logo y Nombre del Negocio (Visible en pantallas medianas y grandes) -->
+                <div class="hidden md:flex items-center gap-3">
+                    <div class="text-right">
+                         <p class="text-sm opacity-90">Bienvenido,</p>
+                         <strong id="headerBusinessName" class="font-bold">[Nombre del emprendimiento]</strong>
                     </div>
+                    <img id="headerLogo" src="" alt="Logo" class="h-12 w-12 rounded-md object-cover bg-white p-1 hidden">
                 </div>
-            </div>
-        </section>
-        
-        <!-- ======================= SECCIÓN REPORTES ======================= -->
-        <section id="reportes">
-            <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200 mb-6">
-                <h2 class="text-2xl font-bold text-accent mb-4 flex items-center gap-2">
-                    <i data-feather="bar-chart-2" class="w-6 h-6"></i>Reportes (Este Mes)
-                </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-                    <div class="stat-card text-center bg-bg-soft p-5 rounded-xl border border-orange-100">
-                        <div class="value text-4xl font-bold text-accent" id="statTotal">128</div>
-                        <div class="label text-sm text-gray-500 mt-1">Envíos Totales</div>
-                    </div>
-                    <div class="stat-card text-center bg-bg-soft p-5 rounded-xl border border-orange-100">
-                        <div class="value text-4xl font-bold text-accent" id="statPendientes">15</div>
-                        <div class="label text-sm text-gray-500 mt-1">Pendientes</div>
-                    </div>
-                    <div class="stat-card text-center bg-bg-soft p-5 rounded-xl border border-orange-100">
-                        <div class="value text-4xl font-bold text-accent" id="statCompletados">113</div>
-                        <div class="label text-sm text-gray-500 mt-1">Completados</div>
-                    </div>
-                    <div class="stat-card text-center bg-bg-soft p-5 rounded-xl border border-orange-100">
-                        <div class="value text-2xl font-bold text-accent" id="statCourier">Shalom</div>
-                        <div class="label text-sm text-gray-500 mt-1">Courier Más Usado</div>
-                    </div>
-                </div>
-            </div>
-        </section>
+            </header>
 
-        <!-- ======================= SECCIÓN MI CUENTA ======================= -->
-        <section id="cuenta">
-            <h2 class="text-2xl font-bold text-accent mb-4 flex items-center gap-2">
-                <i data-feather="settings" class="w-6 h-6"></i>Configuración de tu Cuenta
-            </h2>
-            <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <main class="flex-grow p-4 md:p-6">
                 
-                <!-- Columna Izquierda: Configuraciones Principales y Frecuentes -->
-                <div class="lg:col-span-3 space-y-6">
-                    <!-- Card: Perfil del Negocio -->
-                    <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200">
-                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2 border-b border-gray-200 pb-3 mb-4"><i data-feather="briefcase" class="w-5 h-5 text-accent"></i> Perfil del Negocio</h3>
-                        <div class="space-y-4">
-                            <div class="form-group">
-                                <label for="businessName" class="block text-sm text-gray-500 font-semibold mb-1.5">Nombre del Emprendimiento</label>
-                                <input type="text" id="businessName" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" placeholder="Ej: La Tiendita de Ana" value="Mi Tienda de Prueba">
-                            </div>
-                            <div class="form-group">
-                                <label for="logoInput" class="block text-sm text-gray-500 font-semibold mb-1.5">Logo del Negocio</label>
-                                <input type="file" id="logoInput" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm file:mr-4 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-accent hover:file:bg-orange-100" accept="image/*">
-                                <img id="logoPreview" src="" alt="Vista previa del logo" class="max-h-20 rounded-lg object-contain border border-dashed border-gray-300 p-1 mt-3 hidden">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Card: Opciones de Despacho -->
-                    <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200">
-                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2 border-b border-gray-200 pb-3 mb-4"><i data-feather="calendar" class="w-5 h-5 text-accent"></i> Opciones de Despacho</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="space-y-3">
-                                <label class="block text-sm text-gray-500 font-semibold">Couriers Habilitados</label>
-                                <div class="space-y-2">
-                                    <label class="block text-sm text-gray-900"><input type="checkbox" checked class="rounded border-gray-300 text-accent focus:ring-accent mr-2"> Delivery Propio</label>
-                                    <label class="block text-sm text-gray-900"><input type="checkbox" checked class="rounded border-gray-300 text-accent focus:ring-accent mr-2"> Shalom</label>
-                                    <label class="block text-sm text-gray-900"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-2"> Olva</label>
-                                    <label class="block text-sm text-gray-900"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-2"> Dinsides</label>
+                <!-- ======================= SECCIÓN ENVÍOS ======================= -->
+                <!-- CORRECCIÓN: Se eliminó la clase 'md:h-full' de la sección. El control de altura ahora es centralizado. -->
+                <section class="active md:h-full" id="envios">
+                    <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-4 md:p-6 border border-gray-200 flex flex-col md:h-full">
+                        <!-- Contenido fijo de la tarjeta (título, botones, filtros) -->
+                        <div class="flex-shrink-0">
+                                <div class="flex flex-col md:flex-row justify-between md:items-end gap-4 border-b border-gray-200 pb-4 mb-4 flex-wrap">
+                                    <!-- Grupo de Filtros (Izquierda) -->
+                                    <div class="flex flex-col md:flex-row md:items-end gap-2 flex-wrap">
+                                        <label class="text-xs text-gray-500 font-semibold md:w-36">Cliente (Celular)<input type="text" id="filtroCliente" placeholder="Ej: 987654321" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100 mt-1" /></label>
+                                        <label class="text-xs text-gray-500 font-semibold md:w-36">Fecha de Envío<input type="date" id="filtroFecha" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100 mt-1" /></label>
+                                        <label class="text-xs text-gray-500 font-semibold md:w-36"">Courier
+                                            <select id="filtroTipo" class="select p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100 mt-1">
+                                                <option value="">Todos</option>
+                                                <option value="SHALOM">Shalom</option>
+                                                <option value="OLVA">Olva</option>
+                                                <option value="DINSIDES">Dinsides</option>
+                                                <option value="DELIVERY">Delivery Propio</option>
+                                            </select>
+                                        </label>
+                                        <button class="btn primary bg-gradient-to-r from-accent to-accent-alt text-white py-2.5 px-4 rounded-xl font-bold text-sm shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200" id="btnAplicarFiltros">Filtrar</button>
+                                        <button id="btnLimpiarFiltros" class="btn ghost bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 py-2.5 px-4 rounded-xl font-bold text-sm transition-all duration-200">Limpiar</button>
+                                        <label class="flex items-center text-sm text-gray-700 ml-4 cursor-pointer">
+                                            <input type="checkbox" id="filtroDuplicados" class="rounded border-gray-300 text-accent focus:ring-accent mr-2">
+                                            <span>Mostrar solo duplicados</span>
+                                        </label>
+                                    </div>
+                                    <!-- Grupo de Acciones (Derecha) -->
+                                    <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                                        <div class="relative inline-block text-left">
+                                            <button type="button" class="btn ghost bg-transparent border border-gray-200 text-gray-900 hover:bg-gray-50 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center justify-center gap-2 w-full" id="plantillasDropdownBtn">
+                                                <i data-feather="download" class="w-4 h-4"></i>
+                                                <span>Descargar Plantilla</span>
+                                                <i data-feather="chevron-down" class="w-4 h-4 -mr-1 ml-2"></i>
+                                            </button>
+                                            <div id="plantillasDropdownMenu" class="origin-top-right absolute right-0 mt-2 w-56 rounded-xl shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none hidden z-10">
+                                                <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="plantillasDropdownBtn">
+                                                    <a href="#" id="btnTplDelivery" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem">Plantilla DELIVERY (.csv)</a>
+                                                    <a href="#" id="btnTplShalom" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem">Plantilla SHALOM (.csv)</a>
+                                                    <a href="#" id="btnTplOlva" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem">Plantilla OLVA (.csv)</a>
+                                                    <a href="#" id="btnTplDinsides" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem">Plantilla DINSIDES (.csv)</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button class="btn primary bg-gradient-to-r from-accent to-accent-alt text-white shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center justify-center gap-2" id="btnEtiquetas"><i data-feather="tag" class="w-4 h-4"></i>Imprimir Etiquetas</button>
+                                    </div>
                                 </div>
-                            </div>
-                             <div class="space-y-3">
-                                <label class="block text-sm text-gray-500 font-semibold">Días de Despacho</label>
-                                <div class="flex flex-wrap gap-x-4 gap-y-2 text-sm">
-                                    <label class="inline-flex items-center"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Lun</label>
-                                    <label class="inline-flex items-center"><input type="checkbox" checked class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Mar</label>
-                                    <label class="inline-flex items-center"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Mié</label>
-                                    <label class="inline-flex items-center"><input type="checkbox" checked class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Jue</label>
-                                    <label class="inline-flex items-center"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Vie</label>
-                                    <label class="inline-flex items-center"><input type="checkbox" checked class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Sáb</label>
-                                    <label class="inline-flex items-center"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Dom</label>
-                                </div>
-                            </div>
-                            <div class="form-group md:col-span-2">
-                                <label for="cutoffTime" class="block text-sm text-gray-500 font-semibold mb-1.5">Hora de Cierre de Pedidos</label>
-                                <input type="time" id="cutoffTime" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full md:w-auto text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- Card: Redes Sociales -->
-                    <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200">
-                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2 border-b border-gray-200 pb-3 mb-4"><i data-feather="share-2" class="w-5 h-5 text-accent"></i> Redes Sociales</h3>
-                        <div class="space-y-4">
-                            <p class="text-sm text-gray-500 -mt-2">Estos enlaces aparecerán en tu formulario para que tus clientes puedan contactarte.</p>
-                            <div class="form-group">
-                                <label for="instagramUser" class="block text-sm text-gray-500 font-semibold mb-1.5">Usuario de Instagram</label>
-                                <div class="relative">
-                                    <i data-feather="instagram" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"></i>
-                                    <input type="text" id="instagramUser" class="input p-2.5 pl-9 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" placeholder="mitiendaonline">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 my-3 hidden" id="batchActionsContainer">
+                                <div class="lote-left flex gap-3 items-center flex-wrap">
+                                    <label class="nowrap text-sm text-gray-900"><input type="checkbox" id="checkTodos" class="rounded border-gray-300 text-accent focus:ring-accent" /> Seleccionar todo</label>
+                                    <span class="text-gray-500 text-sm hidden" id="selCount">0 seleccionados</span>
+                                    <span id="visibleCount" class="text-gray-500 text-sm border-l border-gray-300 pl-3 ml-3"></span>
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="whatsappNumber" class="block text-sm text-gray-500 font-semibold mb-1.5">Número de WhatsApp</label>
-                                <div class="relative">
-                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">+51</span>
-                                    <input type="number" id="whatsappNumber" class="input p-2.5 pl-10 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" placeholder="987654321">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="facebookUser" class="block text-sm text-gray-500 font-semibold mb-1.5">Usuario de Facebook</label>
-                                <div class="relative">
-                                    <i data-feather="facebook" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"></i>
-                                    <input type="text" id="facebookUser" class="input p-2.5 pl-9 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" placeholder="mitiendaonlinefb">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="tiktokUser" class="block text-sm text-gray-500 font-semibold mb-1.5">Usuario de TikTok</label>
-                                <div class="relative">
-                                    <i data-feather="music" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"></i>
-                                    <input type="text" id="tiktokUser" class="input p-2.5 pl-9 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" placeholder="mitienda.tiktok">
+                                <div class="lote-right flex flex-col sm:flex-row gap-2 items-center w-full md:w-auto hidden">
+                                    <select id="accionLote" class="select p-2.5 border border-gray-200 rounded-xl bg-white w-full sm:w-auto text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                                        <option value="" selected>Acción en lote…</option>
+                                        <option value="PENDIENTE">Marcar como Pendiente</option>
+                                        <option value="ENVIADO">Marcar como Enviado</option>
+                                        <option value="ENTREGADO">Marcar como Entregado</option>
+                                        <option value="REPROGRAMADO">Reprogramar</option>
+                                        <option value="ELIMINAR" class="text-red-600 font-semibold">Eliminar Seleccionados</option>
+                                    </select>
+                                    <input type="date" id="fechaReprog" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full sm:w-auto text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100 oculto" />
+                                    <button class="btn primary bg-accent text-white py-2.5 px-4 rounded-xl font-bold text-sm shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 w-full sm:w-auto" id="btnAplicarLote">Aplicar</button>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
+                        
+                        <div id="tableContainer" class="md:flex-grow md:relative md:min-h-0">
+                            <!-- Tabla para Desktop -->
+                            <div class="overflow-auto absolute inset-0 hidden md:block shadow-lg shadow-gray-100 rounded-xl border border-gray-200">
+                                <table id="tablaEnvios" class="w-full border-collapse bg-white">
+                                    <thead>
+                                        <tr>
+                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider rounded-tl-xl w-12"><input type="checkbox" id="thCheckTodos" class="rounded border-gray-300 text-accent focus:ring-accent" /></th>
+                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider">Fecha Reg.</th>
+                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider">Cliente</th>
+                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider">Courier</th>
+                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider col-responsive-hide">Destinatario</th>
+                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider col-responsive-hide">Teléfono</th>
+                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider col-responsive-hide col-delivery">Distrito</th>
+                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider col-responsive-hide col-delivery">Dirección</th>
+                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider col-responsive-hide col-delivery">Referencia</th>
+                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider col-responsive-hide col-agencia">DNI/CE</th>
+                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider col-responsive-hide col-agencia">Agencia</th>
+                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider col-responsive-hide col-dinsides col-hidden">Detalle</th>
+                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider col-responsive-hide col-dinsides col-hidden">Cobrar</th>
+                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider">Fecha Envío</th>
+                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider">Estado</th>
+                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider rounded-tr-xl">Notificar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyEnvios"></tbody>
+                                </table>
+                            </div>
+                             <!-- Contenedor de Tarjetas para Móvil (Ahora con flujo normal en móvil) -->
+                             <div id="mobileCardContainer" class="md:hidden space-y-4 md:overflow-y-auto md:absolute md:inset-0">
+                                <!-- Las tarjetas para móvil se insertarán aquí vía JS -->
+                            </div>
+                        </div>
 
-                <!-- Columna Derecha: Información de Cuenta y Funciones Avanzadas -->
-                <div class="lg:col-span-2 space-y-6">
-                    <!-- Card: Suscripción -->
-                    <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200">
-                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2 border-b border-gray-200 pb-3 mb-4"><i data-feather="award" class="w-5 h-5 text-accent"></i> Tu Suscripción</h3>
-                        <div class="space-y-3 text-sm">
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-500">Plan Actual:</span>
-                                <span class="font-bold text-gray-900">Crecimiento</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-500">Estado:</span>
-                                <span class="font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full text-xs">Activo</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-500">Próximo Pago:</span>
-                                <span class="font-bold text-gray-900">15 Nov, 2025</span>
-                            </div>
-                            <div class="pt-2">
-                                <button class="btn ghost bg-transparent border border-gray-200 text-gray-900 hover:bg-gray-50 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2 w-full justify-center">Administrar Suscripción</button>
-                            </div>
+                        <div id="emptyStateContainer" class="hidden text-center p-10 border-2 border-dashed rounded-xl mt-4 flex-grow items-center justify-center flex-col">
+                            <i data-feather="gift" class="w-16 h-16 mx-auto text-gray-300"></i>
+                            <h3 class="mt-4 text-xl font-bold text-gray-800">¡Bienvenido a tu panel de control!</h3>
+                            <p class="mt-2 text-sm text-gray-500 max-w-sm mx-auto">Aún no tienes envíos registrados. El primer paso es configurar tu 'Link Mágico' y compartirlo con tus clientes.</p>
+                            <button id="goToAccountBtn" class="mt-6 btn primary bg-gradient-to-r from-accent to-accent-alt text-white shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2">
+                                <i data-feather="settings" class="w-4 h-4"></i> Ir a Configuración
+                            </button>
                         </div>
                     </div>
-                    
-                    <!-- Card: Seguridad de la Cuenta -->
-                    <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200">
-                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2 border-b border-gray-200 pb-3 mb-4"><i data-feather="lock" class="w-5 h-5 text-accent"></i> Seguridad de la Cuenta</h3>
-                        <div class="space-y-4">
-                            <div class="form-group">
-                                <label for="userEmail" class="block text-sm text-gray-500 font-semibold mb-1.5">Email de la Cuenta</label>
-                                <input type="email" id="userEmail" class="input p-2.5 border border-gray-200 rounded-xl bg-gray-100 w-full text-sm text-gray-600 cursor-not-allowed" value="ana.ventas@email.com" readonly>
-                            </div>
-                            <div class="form-group">
-                                <label for="newPassword" class="block text-sm text-gray-500 font-semibold mb-1.5">Nueva Contraseña</label>
-                                <input type="password" id="newPassword" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" placeholder="Deja en blanco para no cambiar">
-                            </div>
-                        </div>
-                    </div>
+                </section>
 
-                    <!-- Card: Gestión de Equipo -->
+                <!-- ======================= SECCIÓN LINK MÁGICO ======================= -->
+                <!-- CORRECCIÓN: Se eliminó la clase 'h-full' de la sección. -->
+                <section id="link" class="h-full">
                     <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200">
-                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2 border-b border-gray-200 pb-3 mb-4"><i data-feather="users" class="w-5 h-5 text-accent"></i> Gestión de Equipo</h3>
-                        <div class="space-y-4">
-                            <p class="text-sm text-gray-500 -mt-2">Invita a miembros de tu equipo para que colaboren en la gestión de envíos (Función del Plan Consolidado).</p>
-                            <div class="flex gap-2">
-                                <input type="email" placeholder="email@ejemplo.com" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100 flex-grow">
-                                <button class="btn primary bg-accent text-white py-2.5 px-4 rounded-xl font-bold text-sm shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap">Invitar</button>
+                        <p class="text-gray-500 text-sm mb-5">Comparte este link único con tus clientes. Ellos completarán sus datos de envío directamente y la información aparecerá en tu panel, ¡sin errores y sin que tengas que transcribir nada!</p>
+                        <div class="form-group">
+                            <label for="linkUnicoInput" class="block text-sm text-gray-500 font-semibold mb-1.5">Tu enlace personal</label>
+                            <div id="linkUnicoContainer" class="flex flex-col sm:flex-row gap-2">
+                                <input type="text" id="linkUnicoInput" class="input p-2.5 border border-gray-200 rounded-xl bg-gray-50 flex-grow text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" value="https://latam5s.com/form/tu-tienda" readonly>
+                                <button class="btn ghost bg-transparent border border-gray-200 text-gray-900 hover:bg-gray-50 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center justify-center gap-2 w-full sm:w-auto" id="btnCopiarLink"><i data-feather="copy" class="w-4 h-4"></i>Copiar</button>
+                                <button class="btn primary bg-gradient-to-r from-accent to-accent-alt text-white shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center justify-center gap-2 w-full sm:w-auto" id="btnCompartirLink"><i data-feather="share-2" class="w-4 h-4"></i>Compartir</button>
                             </div>
-                            <div class="space-y-2 pt-2">
-                                <label class="block text-sm text-gray-500 font-semibold mb-1">Miembros Actuales:</label>
-                                <div class="flex justify-between items-center text-sm p-2 bg-gray-50 rounded-lg">
-                                    <span>ana.ventas@email.com (Tú)</span>
-                                    <span class="font-bold text-accent">Admin</span>
+                        </div>
+                    </div>
+                    <footer class="p-4 bg-bg-soft flex-shrink-0 flex justify-center items-center gap-2 text-gray-500 text-sm mt-auto">
+                        <span>Powered by</span>
+                        <svg height="20" viewBox="0 0 90 22" xmlns="http://www.w3.org/2000/svg">
+                            <text x="0" y="18" style="font-family: Quicksand, sans-serif; font-size: 20px; font-weight: 700; fill: #D96B4F;">Latam5S</text>
+                        </svg>
+                    </footer>
+                </section>
+                
+                <!-- ======================= SECCIÓN REPORTES ======================= -->
+                <!-- CORRECCIÓN: Se eliminó la clase 'md:h-full' de la sección. -->
+                <section id="reportes" class="h-full">
+                    <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                            <div class="stat-card text-center bg-bg-soft p-5 rounded-xl border border-orange-100">
+                                <div class="value text-4xl font-bold text-accent" id="statTotal">128</div>
+                                <div class="label text-sm text-gray-500 mt-1">Envíos Totales</div>
+                            </div>
+                            <div class="stat-card text-center bg-bg-soft p-5 rounded-xl border border-orange-100">
+                                <div class="value text-4xl font-bold text-accent" id="statPendientes">15</div>
+                                <div class="label text-sm text-gray-500 mt-1">Pendientes</div>
+                            </div>
+                            <div class="stat-card text-center bg-bg-soft p-5 rounded-xl border border-orange-100">
+                                <div class="value text-4xl font-bold text-accent" id="statCompletados">113</div>
+                                <div class="label text-sm text-gray-500 mt-1">Completados</div>
+                            </div>
+                            <div class="stat-card text-center bg-bg-soft p-5 rounded-xl border border-orange-100">
+                                <div class="value text-2xl font-bold text-accent" id="statCourier">Shalom</div>
+                                <div class="label text-sm text-gray-500 mt-1">Courier Más Usado</div>
+                            </div>
+                        </div>
+                    </div>
+                     <footer class="p-4 bg-bg-soft flex justify-center items-center gap-2 text-gray-500 text-sm md:mt-auto">
+                        <span>Powered by</span>
+                        <svg height="20" viewBox="0 0 90 22" xmlns="http://www.w3.org/2000/svg">
+                            <text x="0" y="18" style="font-family: Quicksand, sans-serif; font-size: 20px; font-weight: 700; fill: #D96B4F;">Latam5S</text>
+                        </svg>
+                    </footer>
+                </section>
+
+                <!-- ======================= SECCIÓN MENSAJES ======================= -->
+                <section id="mensajes">
+                    <div class="flex-grow p-6">
+                        <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200 mb-6">
+                            <p class="text-sm text-gray-500 mb-4">Define las plantillas que se enviarán a tus clientes. Haz clic en las variables para insertarlas en tus mensajes. Los cambios se guardan automáticamente.</p>
+                            <div class="flex flex-wrap gap-2 mb-6" id="messageVariables">
+                                <button class="variable-btn bg-orange-100 text-accent text-xs font-bold py-1 px-2 rounded-md hover:bg-orange-200 transition-colors">[CLIENTE]</button>
+                                <button class="variable-btn bg-orange-100 text-accent text-xs font-bold py-1 px-2 rounded-md hover:bg-orange-200 transition-colors">[DESTINATARIO]</button>
+                                <button class="variable-btn bg-orange-100 text-accent text-xs font-bold py-1 px-2 rounded-md hover:bg-orange-200 transition-colors">[COURIER]</button>
+                                <button class="variable-btn bg-orange-100 text-accent text-xs font-bold py-1 px-2 rounded-md hover:bg-orange-200 transition-colors">[FECHA_ENVIO]</button>
+                                <button class="variable-btn bg-orange-100 text-accent text-xs font-bold py-1 px-2 rounded-md hover:bg-orange-200 transition-colors">[MI_TIENDA]</button>
+                            </div>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div class="form-group">
+                                    <label for="msgConfirmacion" class="block text-sm text-gray-900 font-semibold mb-1.5">✅ Mensaje de Confirmación</label>
+                                    <textarea id="msgConfirmacion" rows="4" class="message-template input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100"></textarea>
                                 </div>
-                                <div class="flex justify-between items-center text-sm p-2 bg-gray-50 rounded-lg">
-                                    <span>carlos.logistica@email.com</span>
-                                    <span class="text-gray-500">Miembro</span>
+                                <div class="form-group">
+                                    <label for="msgEnviado" class="block text-sm text-gray-900 font-semibold mb-1.5">🚚 Mensaje de Envío en Camino</label>
+                                    <textarea id="msgEnviado" rows="4" class="message-template input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="msgEntregado" class="block text-sm text-gray-900 font-semibold mb-1.5">📦 Mensaje de Paquete Entregado</label>
+                                    <textarea id="msgEntregado" rows="4" class="message-template input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="msgReprogramado" class="block text-sm text-gray-900 font-semibold mb-1.5">🗓️ Mensaje de Envío Reprogramado</label>
+                                    <textarea id="msgReprogramado" rows="4" class="message-template input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100"></textarea>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="flex justify-end mt-6">
-                <button class="btn primary bg-gradient-to-r from-accent to-accent-alt text-white shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2" id="btnGuardarConfig"><i data-feather="save" class="w-4 h-4"></i>Guardar Cambios</button>
-            </div>
-        </section>
-        
-        <!-- Footer -->
-        <footer class="mt-20 pb-5 flex justify-center items-center gap-2 text-gray-500 text-sm">
-            <span>Powered by</span>
-            <svg height="20" viewBox="0 0 90 22" xmlns="http://www.w3.org/2000/svg">
-                <text x="0" y="18" style="font-family: Quicksand, sans-serif; font-size: 20px; font-weight: 700; fill: #D96B4F;">Latam5S</text>
-            </svg>
-        </footer>
-    </main>
+                    <footer class="p-4 bg-bg-soft flex-shrink-0 flex justify-center items-center gap-2 text-gray-500 text-sm mt-6">
+                        <span>Powered by</span>
+                        <svg height="20" viewBox="0 0 90 22" xmlns="http://www.w3.org/2000/svg">
+                            <text x="0" y="18" style="font-family: Quicksand, sans-serif; font-size: 20px; font-weight: 700; fill: #D96B4F;">Latam5S</text>
+                        </svg>
+                    </footer>
+                </section>
 
-    <!-- Toast de Notificación -->
+                <!-- ======================= SECCIÓN MI CUENTA ======================= -->
+                <!-- CORRECCIÓN: Se eliminó 'flex-col'. El layout ahora lo controla 'main > section.active' -->
+                <section id="cuenta">
+                    <div class="flex-grow p-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                            <div class="lg:col-span-3 space-y-6">
+                                <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200">
+                                    <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2 border-b border-gray-200 pb-3 mb-4"><i data-feather="briefcase" class="w-5 h-5 text-accent"></i> Perfil del Negocio</h3>
+                                    <div class="space-y-4">
+                                        <div class="form-group">
+                                            <label for="businessName" class="block text-sm text-gray-500 font-semibold mb-1.5">Nombre del Emprendimiento</label>
+                                            <input type="text" id="businessName" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" placeholder="Ej: La Tiendita de Ana" value="Mi Tienda de Prueba">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="logoInput" class="block text-sm text-gray-500 font-semibold mb-1.5">Logo del Negocio</label>
+                                            <input type="file" id="logoInput" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm file:mr-4 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-accent hover:file:bg-orange-100" accept="image/*">
+                                            <img id="logoPreview" src="" alt="Vista previa del logo" class="max-h-20 rounded-lg object-contain border border-dashed border-gray-300 p-1 mt-3 hidden">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200">
+                                    <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2 border-b border-gray-200 pb-3 mb-4"><i data-feather="calendar" class="w-5 h-5 text-accent"></i> Opciones de Despacho</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div class="space-y-3">
+                                            <label class="block text-sm text-gray-500 font-semibold">Couriers Habilitados</label>
+                                            <div class="space-y-2">
+                                                <label class="block text-sm text-gray-900"><input type="checkbox" checked class="rounded border-gray-300 text-accent focus:ring-accent mr-2"> Delivery Propio</label>
+                                                <label class="block text-sm text-gray-900"><input type="checkbox" checked class="rounded border-gray-300 text-accent focus:ring-accent mr-2"> Shalom</label>
+                                                <label class="block text-sm text-gray-900"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-2"> Olva</label>
+                                                <label class="block text-sm text-gray-900"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-2"> Dinsides</label>
+                                            </div>
+                                        </div>
+                                         <div class="space-y-3">
+                                            <label class="block text-sm text-gray-500 font-semibold">Días de Despacho</label>
+                                            <div class="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                                                <label class="inline-flex items-center"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Lun</label>
+                                                <label class="inline-flex items-center"><input type="checkbox" checked class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Mar</label>
+                                                <label class="inline-flex items-center"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Mié</label>
+                                                <label class="inline-flex items-center"><input type="checkbox" checked class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Jue</label>
+                                                <label class="inline-flex items-center"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Vie</label>
+                                                <label class="inline-flex items-center"><input type="checkbox" checked class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Sáb</label>
+                                                <label class="inline-flex items-center"><input type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent mr-1"> Dom</label>
+                                            </div>
+                                        </div>
+                                        <div class="form-group md:col-span-2">
+                                            <label for="cutoffTime" class="block text-sm text-gray-500 font-semibold mb-1.5">Hora de Cierre de Pedidos</label>
+                                            <input type="time" id="cutoffTime" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full md:w-auto text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200">
+                                    <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2 border-b border-gray-200 pb-3 mb-4"><i data-feather="share-2" class="w-5 h-5 text-accent"></i> Redes Sociales</h3>
+                                    <div class="space-y-4">
+                                        <p class="text-sm text-gray-500 -mt-2">Estos enlaces aparecerán en tu formulario para que tus clientes puedan contactarte.</p>
+                                        <div class="form-group">
+                                            <label for="instagramUser" class="block text-sm text-gray-500 font-semibold mb-1.5">Usuario de Instagram</label>
+                                            <div class="relative">
+                                                <i data-feather="instagram" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"></i>
+                                                <input type="text" id="instagramUser" class="input p-2.5 pl-9 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" placeholder="mitiendaonline">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="whatsappNumber" class="block text-sm text-gray-500 font-semibold mb-1.5">Número de WhatsApp</label>
+                                            <div class="relative">
+                                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">+51</span>
+                                                <input type="number" id="whatsappNumber" class="input p-2.5 pl-10 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" placeholder="987654321">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="facebookUser" class="block text-sm text-gray-500 font-semibold mb-1.5">Usuario de Facebook</label>
+                                            <div class="relative">
+                                                <i data-feather="facebook" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"></i>
+                                                <input type="text" id="facebookUser" class="input p-2.5 pl-9 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" placeholder="mitiendaonlinefb">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="tiktokUser" class="block text-sm text-gray-500 font-semibold mb-1.5">Usuario de TikTok</label>
+                                            <div class="relative">
+                                                <i data-feather="music" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"></i>
+                                                <input type="text" id="tiktokUser" class="input p-2.5 pl-9 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" placeholder="mitienda.tiktok">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="lg:col-span-2 space-y-6">
+                                <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200">
+                                    <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2 border-b border-gray-200 pb-3 mb-4"><i data-feather="award" class="w-5 h-5 text-accent"></i> Tu Suscripción</h3>
+                                    <div class="space-y-3 text-sm">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-500">Plan Actual:</span>
+                                            <span class="font-bold text-gray-900">Crecimiento</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-500">Estado:</span>
+                                            <span class="font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full text-xs">Activo</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-500">Próximo Pago:</span>
+                                            <span class="font-bold text-gray-900">15 Nov, 2025</span>
+                                        </div>
+                                        <div class="pt-2">
+                                            <button class="btn ghost bg-transparent border border-gray-200 text-gray-900 hover:bg-gray-50 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2 w-full justify-center">Administrar Suscripción</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200">
+                                    <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2 border-b border-gray-200 pb-3 mb-4"><i data-feather="lock" class="w-5 h-5 text-accent"></i> Seguridad de la Cuenta</h3>
+                                    <div class="space-y-4">
+                                        <div class="form-group">
+                                            <label for="userEmail" class="block text-sm text-gray-500 font-semibold mb-1.5">Email de la Cuenta</label>
+                                            <input type="email" id="userEmail" class="input p-2.5 border border-gray-200 rounded-xl bg-gray-100 w-full text-sm text-gray-600 cursor-not-allowed" value="ana.ventas@email.com" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="newPassword" class="block text-sm text-gray-500 font-semibold mb-1.5">Nueva Contraseña</label>
+                                            <input type="password" id="newPassword" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" placeholder="Deja en blanco para no cambiar">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200">
+                                    <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2 border-b border-gray-200 pb-3 mb-4"><i data-feather="users" class="w-5 h-5 text-accent"></i> Gestión de Equipo</h3>
+                                    <div class="space-y-4">
+                                        <p class="text-sm text-gray-500 -mt-2">Invita a miembros de tu equipo para que colaboren en la gestión de envíos (Función del Plan Consolidado).</p>
+                                        <div class="flex gap-2">
+                                            <input type="email" placeholder="email@ejemplo.com" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100 flex-grow">
+                                            <button class="btn primary bg-accent text-white py-2.5 px-4 rounded-xl font-bold text-sm shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap">Invitar</button>
+                                        </div>
+                                        <div class="space-y-2 pt-2">
+                                            <label class="block text-sm text-gray-500 font-semibold mb-1">Miembros Actuales:</label>
+                                            <div class="flex justify-between items-center text-sm p-2 bg-gray-50 rounded-lg">
+                                                <span>ana.ventas@email.com (Tú)</span>
+                                                <span class="font-bold text-accent">Admin</span>
+                                            </div>
+                                            <div class="flex justify-between items-center text-sm p-2 bg-gray-50 rounded-lg">
+                                                <span>carlos.logistica@email.com</span>
+                                                <span class="text-gray-500">Miembro</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-end mt-6">
+                            <button class="btn primary bg-gradient-to-r from-accent to-accent-alt text-white shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2" id="btnGuardarConfig"><i data-feather="save" class="w-4 h-4"></i>Guardar Cambios</button>
+                        </div>
+                    </div>
+                    <footer class="p-4 bg-bg-soft flex-shrink-0 flex justify-center items-center gap-2 text-gray-500 text-sm mt-6">
+                        <span>Powered by</span>
+                        <svg height="20" viewBox="0 0 90 22" xmlns="http://www.w3.org/2000/svg">
+                            <text x="0" y="18" style="font-family: Quicksand, sans-serif; font-size: 20px; font-weight: 700; fill: #D96B4F;">Latam5S</text>
+                        </svg>
+                    </footer>
+                </section>
+                
+            </main>
+
+        </div>
+    </div>
+
+    <!-- Elementos Flotantes (Toast, Modals, Panel de Edición) -->
     <div class="toast fixed right-5 bottom-5 bg-gradient-to-r from-accent to-accent-alt text-white p-3 rounded-xl shadow-xl shadow-accent/25 opacity-0 translate-y-2 transition-all duration-300 z-50" id="toast">Acción aplicada</div>
-
-    <!-- Modal de Confirmación para Eliminar -->
     <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md text-center">
             <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0">
                 <i data-feather="alert-triangle" class="h-6 w-6 text-red-600"></i>
             </div>
-            <h3 class="text-lg leading-6 font-bold text-gray-900 mt-4" id="modal-title">
-                Confirmar Eliminación
-            </h3>
-            <div class="mt-2">
-                <p class="text-sm text-gray-500" id="modalMessage">
-                    ¿Estás seguro de que quieres eliminar los envíos seleccionados? Esta acción no se puede deshacer.
-                </p>
-            </div>
+            <h3 class="text-lg leading-6 font-bold text-gray-900 mt-4" id="modal-title">Confirmar Eliminación</h3>
+            <div class="mt-2"><p class="text-sm text-gray-500" id="modalMessage">...</p></div>
             <div class="mt-6 flex justify-center gap-4">
-                <button type="button" id="confirmDeleteBtn" class="inline-flex justify-center rounded-xl border border-transparent shadow-sm px-6 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                    Eliminar
-                </button>
-                <button type="button" id="cancelDeleteBtn" class="inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-6 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    Cancelar
-                </button>
+                <button type="button" id="confirmDeleteBtn" class="inline-flex justify-center rounded-xl border border-transparent bg-red-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200">Eliminar</button>
+                <button type="button" id="cancelDeleteBtn" class="inline-flex justify-center rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-bold text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 transition-all duration-200">Cancelar</button>
             </div>
         </div>
     </div>
-
-    <!-- Panel Lateral de Edición -->
     <div id="editPanelOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden"></div>
+    <!-- PANEL DE EDICIÓN (HTML AÑADIDO) -->
     <aside id="editPanel" class="fixed top-0 right-0 h-full w-full max-w-md bg-bg-soft shadow-2xl transform translate-x-full z-30 flex flex-col">
-        <div class="flex justify-between items-center p-4 border-b border-gray-200">
-            <h2 class="text-lg font-bold text-accent flex items-center gap-2"><i data-feather="edit" class="w-5 h-5"></i>Editar Envío</h2>
-            <button id="closeEditPanel" class="p-2 rounded-full hover:bg-gray-200">
-                <i data-feather="x" class="w-6 h-6 text-gray-600"></i>
+        <!-- Header del Panel -->
+        <div class="flex-shrink-0 flex justify-between items-center p-4 bg-white border-b border-gray-200">
+            <h2 class="text-xl font-bold text-gray-900">Editar Envío</h2>
+            <button id="closeEditPanelBtn" class="text-gray-500 hover:text-accent transition-colors">
+                <i data-feather="x" class="w-6 h-6"></i>
             </button>
         </div>
-        <form id="editForm" class="flex-grow p-6 space-y-4 overflow-y-auto">
-            <input type="hidden" id="editShipmentId">
-            <!-- Campos del formulario de edición -->
-            <div class="form-group">
-                <label for="editCliente" class="block text-sm text-gray-500 font-semibold mb-1.5">Celular del Cliente (No editable)</label>
-                <input type="text" id="editCliente" class="input p-2.5 border border-gray-200 rounded-xl bg-gray-100 w-full text-sm text-gray-600 focus:outline-none focus:ring-0 focus:border-gray-200 cursor-not-allowed" readonly>
-            </div>
-            <div class="form-group">
-                <label for="editEstado" class="block text-sm text-gray-500 font-semibold mb-1.5">Estado del Envío</label>
-                <select id="editEstado" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
-                    <option value="PENDIENTE">Pendiente</option>
-                    <option value="ENVIADO">Enviado</option>
-                    <option value="ENTREGADO">Entregado</option>
-                    <option value="REPROGRAMADO">Reprogramado</option>
-                </select>
-            </div>
-            <div id="editReprogDateContainer" class="form-group hidden">
-                <label for="editReprogDate" class="block text-sm text-gray-500 font-semibold mb-1.5">Nueva Fecha de Envío</label>
-                <input type="date" id="editReprogDate" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
-            </div>
-            <div class="form-group">
-                <label for="editNombre" class="block text-sm text-gray-500 font-semibold mb-1.5">Nombre del Destinatario</label>
-                <input type="text" id="editNombre" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
-            </div>
-             <div class="form-group">
-                <label for="editTelefono" class="block text-sm text-gray-500 font-semibold mb-1.5">Teléfono del Destinatario</label>
-                <input type="text" id="editTelefono" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
-            </div>
-            <div class="form-group">
-                <label for="editFechaEnvio" class="block text-sm text-gray-500 font-semibold mb-1.5">Fecha de Envío</label>
-                <input type="date" id="editFechaEnvio" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
-            </div>
-
-            <!-- Campos Condicionales -->
-            <div id="editFieldsDelivery" class="space-y-4">
-                <div class="form-group">
-                    <label for="editDistrito" class="block text-sm text-gray-500 font-semibold mb-1.5">Distrito</label>
-                    <input type="text" id="editDistrito" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+    
+        <!-- Contenido del Formulario (con scroll) -->
+        <div class="flex-grow p-6 overflow-y-auto">
+            <form id="editForm" class="space-y-4">
+                <input type="hidden" id="editId">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="editCliente" class="block text-sm text-gray-500 font-semibold mb-1.5">Cliente (Celular)</label>
+                        <input type="text" id="editCliente" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                    </div>
+                    <div>
+                        <label for="editNombre" class="block text-sm text-gray-500 font-semibold mb-1.5">Destinatario</label>
+                        <input type="text" id="editNombre" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="editDireccion" class="block text-sm text-gray-500 font-semibold mb-1.5">Dirección</label>
-                    <input type="text" id="editDireccion" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+    
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="editTelefono" class="block text-sm text-gray-500 font-semibold mb-1.5">Teléfono</label>
+                        <input type="text" id="editTelefono" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                    </div>
+                    <div>
+                        <label for="editFechaEnvio" class="block text-sm text-gray-500 font-semibold mb-1.5">Fecha Envío</label>
+                        <input type="date" id="editFechaEnvio" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="editReferencia" class="block text-sm text-gray-500 font-semibold mb-1.5">Referencia</label>
-                    <input type="text" id="editReferencia" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+    
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div>
+                        <label for="editTipo" class="block text-sm text-gray-500 font-semibold mb-1.5">Courier</label>
+                        <select id="editTipo" class="select p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                            <option value="DELIVERY">Delivery Propio</option>
+                            <option value="SHALOM">Shalom</option>
+                            <option value="OLVA">Olva</option>
+                            <option value="DINSIDES">Dinsides</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="editEstado" class="block text-sm text-gray-500 font-semibold mb-1.5">Estado</label>
+                        <select id="editEstado" class="select p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                            <option value="PENDIENTE">Pendiente</option>
+                            <option value="ENVIADO">Enviado</option>
+                            <option value="ENTREGADO">Entregado</option>
+                            <option value="REPROGRAMADO">Reprogramado</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
-
-            <div id="editFieldsCourier" class="space-y-4">
-                <div class="form-group">
-                    <label for="editDni" class="block text-sm text-gray-500 font-semibold mb-1.5">DNI/CE</label>
-                    <input type="text" id="editDni" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+    
+                <!-- Campos Condicionales -->
+                <div id="editCamposDelivery" class="space-y-4" style="display: none;">
+                    <div>
+                        <label for="editDistrito" class="block text-sm text-gray-500 font-semibold mb-1.5">Distrito</label>
+                        <input type="text" id="editDistrito" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                    </div>
+                    <div>
+                        <label for="editDireccion" class="block text-sm text-gray-500 font-semibold mb-1.5">Dirección</label>
+                        <input type="text" id="editDireccion" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                    </div>
+                    <div>
+                        <label for="editReferencia" class="block text-sm text-gray-500 font-semibold mb-1.5">Referencia</label>
+                        <textarea id="editReferencia" rows="2" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100"></textarea>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="editAgencia" class="block text-sm text-gray-500 font-semibold mb-1.5">Agencia</label>
-                    <input type="text" id="editAgencia" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+    
+                <div id="editCamposAgencia" class="space-y-4" style="display: none;">
+                    <div>
+                        <label for="editDni" class="block text-sm text-gray-500 font-semibold mb-1.5">DNI/CE</label>
+                        <input type="text" id="editDni" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                    </div>
+                    <div>
+                        <label for="editAgencia" class="block text-sm text-gray-500 font-semibold mb-1.5">Agencia</label>
+                        <input type="text" id="editAgencia" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                    </div>
                 </div>
-            </div>
-        </form>
-        <div class="p-4 bg-white border-t border-gray-200 flex justify-between items-center gap-3">
-            <button type="button" id="deleteShipmentBtn" class="btn text-red-600 hover:bg-red-50 font-bold text-sm py-2.5 px-4 rounded-xl transition-colors">Eliminar Envío</button>
-            <div class="flex gap-3">
-                <button type="button" id="cancelEditBtn" class="btn ghost bg-transparent border border-gray-200 text-gray-900 hover:bg-gray-50 transition-all duration-200 py-2.5 px-4 rounded-xl font-bold text-sm">Cancelar</button>
-                <button type="button" id="saveEditBtn" class="btn primary bg-accent text-white py-2.5 px-4 rounded-xl font-bold text-sm shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-md disabled:hover:-translate-y-0" disabled>Guardar Cambios</button>
-            </div>
+                
+                <div id="editCamposDinsides" class="space-y-4" style="display: none;">
+                    <div>
+                        <label for="editDetalle" class="block text-sm text-gray-500 font-semibold mb-1.5">Detalle Envío</label>
+                        <input type="text" id="editDetalle" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                    </div>
+                    <div>
+                        <label for="editCobrar" class="block text-sm text-gray-500 font-semibold mb-1.5">Monto a Cobrar</label>
+                        <input type="text" id="editCobrar" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                    </div>
+                </div>
+    
+            </form>
+        </div>
+    
+        <!-- Footer del Panel -->
+        <div class="flex-shrink-0 p-4 bg-white border-t border-gray-200 flex justify-end gap-3">
+            <button id="cancelEditBtn" class="btn ghost bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 py-2 px-4 rounded-xl font-bold text-sm transition-all duration-200">Cancelar</button>
+            <button id="saveEditBtn" class="btn primary bg-gradient-to-r from-accent to-accent-alt text-white shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 py-2 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2">
+                <i data-feather="save" class="w-4 h-4"></i> Guardar Cambios
+            </button>
         </div>
     </aside>
 
+    <!-- Contenedor oculto para las etiquetas de impresión -->
+    <div id="print-container" class="print-container"></div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // Inicializa Feather Icons
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyhlKeKpyhBTtQTzYEdITXUErRjH9kmLACnaEAlmmXMDp1fVHJeVJx4N7Lw3dZgYShjfA/exec"; // <--- AÑADE ESTA LÍNEA
     feather.replace();
 
-    // --- VARIABLES GLOBALES DEL EMPRENDIMIENTO (SIMULADAS) ---
-    // En una implementación real con Firebase, estos vendrían de un documento de configuración.
-    const businessName = document.getElementById('businessName').value || 'Mi Tienda de Prueba';
+    // --- LÓGICA PARA EL MENÚ COLAPSABLE ---
+    const rootContainer = document.getElementById('root-container'); // <--- AÑADE ESTA LÍNEA
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
 
-    // --- NAVEGACIÓN PRINCIPAL ---
+    function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        sidebarOverlay.classList.add('hidden');
+    }
+
+    function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        sidebarOverlay.classList.remove('hidden');
+    }
+    
+    sidebarToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (sidebar.classList.contains('-translate-x-full')) {
+            openSidebar();
+        } else {
+            closeSidebar();
+        }
+    });
+
+    sidebarOverlay.addEventListener('click', closeSidebar);
+
+
+    // --- LÓGICA PARA DROPDOWN DE PLANTILLAS ---
+    const plantillasBtn = document.getElementById('plantillasDropdownBtn');
+    const plantillasMenu = document.getElementById('plantillasDropdownMenu');
+
+    plantillasBtn.addEventListener('click', () => {
+        plantillasMenu.classList.toggle('hidden');
+    });
+
+    window.addEventListener('click', (e) => {
+        if (!plantillasBtn.contains(e.target) && !plantillasMenu.contains(e.target)) {
+            plantillasMenu.classList.add('hidden');
+        }
+    });
+
+    // --- LÓGICA PARA EL NUEVO MENÚ VERTICAL ---   
     const navLinks = document.querySelectorAll('.nav-link');
     const sections = document.querySelectorAll('main > section');
+    const headerTitle = document.getElementById('headerTitle'); // <--- AÑADE ESTA LÍNEA
+    const activeClasses = ['bg-sidebar-active-bg', 'text-white'];
+    const inactiveClasses = ['text-gray-300', 'hover:bg-sidebar-hover', 'hover:text-white'];
 
-    // Función para manejar la navegación entre secciones
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const targetId = link.getAttribute('href').substring(1);
-            
+
+            // Actualizar el título del header  <--- AÑADE ESTE BLOQUE
+            const newTitle = link.querySelector('span').textContent;
+            headerTitle.textContent = newTitle;
+
+            // --- INICIO DEL BLOQUE A AÑADIR ---
+            // Añade o quita una clase para controlar el scroll con CSS
+            if (targetId === 'cuenta' || targetId === 'mensajes') {
+                document.body.classList.add('scroll-enabled');
+            } else {
+                document.body.classList.remove('scroll-enabled');
+            }
+            // --- FIN DEL BLOQUE A AÑADIR ---
+
             navLinks.forEach(l => {
-                l.classList.remove('active', 'bg-orange-100', 'text-accent');
-                l.classList.add('text-gray-500');
+                l.classList.remove(...activeClasses);
+                l.classList.add(...inactiveClasses);
             });
+            link.classList.add(...activeClasses);
+            link.classList.remove(...inactiveClasses);
+
+            sections.forEach(sec => sec.classList.remove('active'));
+            const targetSection = document.getElementById(targetId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
             
-            // Aplica clases de Tailwind para el estado activo
-            link.classList.add('active', 'bg-orange-100', 'text-accent');
-            link.classList.remove('text-gray-500');
-
-
-            sections.forEach(sec => {
-                sec.classList.toggle('active', sec.id === targetId);
-            });
+            // Cierra el menú al hacer clic (ahora en todos los dispositivos)
+            closeSidebar();        
         });
     });
+    document.querySelector('.nav-link.active')?.classList.remove(...inactiveClasses);
+    document.querySelector('.nav-link.active')?.classList.add(...activeClasses);
 
-    // Inicializa la primera sección como activa visualmente
-    document.querySelector('.nav-link.active').classList.add('bg-orange-100', 'text-accent');
-    document.querySelector('.nav-link.active').classList.remove('text-gray-500');
-
-    // --- SECCIÓN ENVÍOS (Variables de DOM) ---
-    const filtroTipo = document.getElementById('filtroTipo');
+    // ===================================================================================
+    // --- INICIO DE LA LÓGICA DEL PANEL (CON DATOS SIMULADOS) ---
+    // ===================================================================================
+    
+    // --- ELEMENTOS DEL DOM ---
+    const btnLimpiarFiltros = document.getElementById('btnLimpiarFiltros');
+    const templateLinks = document.querySelectorAll('#plantillasDropdownMenu a');
+    const btnEtiquetas = document.getElementById('btnEtiquetas');
+    const tbodyEnvios = document.getElementById('tbodyEnvios');
+    const mobileCardContainer = document.getElementById('mobileCardContainer');
     const filtroCliente = document.getElementById('filtroCliente');
     const filtroFecha = document.getElementById('filtroFecha');
+    const filtroTipo = document.getElementById('filtroTipo');
+    const filtroDuplicados = document.getElementById('filtroDuplicados');
     const btnAplicarFiltros = document.getElementById('btnAplicarFiltros');
-    const tbody = document.getElementById('tbodyEnvios');
+    const tableContainer = document.getElementById('tableContainer').querySelector('.overflow-auto'); // Apunta al contenedor con scroll
+    const mobileContainerParent = document.getElementById('mobileCardContainer').parentElement;
+    const emptyStateContainer = document.getElementById('emptyStateContainer');
+    const batchActionsContainer = document.getElementById('batchActionsContainer');
     const checkTodos = document.getElementById('checkTodos');
     const thCheckTodos = document.getElementById('thCheckTodos');
     const selCount = document.getElementById('selCount');
     const accionLote = document.getElementById('accionLote');
     const fechaReprog = document.getElementById('fechaReprog');
     const btnAplicarLote = document.getElementById('btnAplicarLote');
-    
-    // Contenedores para la tabla y el estado vacío
-    const tableContainer = document.getElementById('tableContainer');
-    const emptyStateContainer = document.getElementById('emptyStateContainer');
     const goToAccountBtn = document.getElementById('goToAccountBtn');
     
-    // Botones de funciones nuevas
-    const btnTplDelivery = document.getElementById('btnTplDelivery'); // Nuevo botón para Delivery
-    const btnTplShalom = document.getElementById('btnTplShalom');
-    const btnTplOlva = document.getElementById('btnTplOlva');
-    const btnEtiquetas = document.getElementById('btnEtiquetas');
+    // --- NUEVOS ELEMENTOS DEL DOM PARA EL PANEL DE EDICIÓN ---
+    const editPanel = document.getElementById('editPanel');
+    const editPanelOverlay = document.getElementById('editPanelOverlay');
+    const closeEditPanelBtn = document.getElementById('closeEditPanelBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    const saveEditBtn = document.getElementById('saveEditBtn');
+    const editForm = document.getElementById('editForm');
+    
+    let todosLosEnvios = []; // Variable global para almacenar todos los envíos.
 
-    // --- CONEXIÓN CON GOOGLE SHEETS ---
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbyhlKeKpyhBTtQTzYEdITXUErRjH9kmLACnaEAlmmXMDp1fVHJeVJx4N7Lw3dZgYShjfA/exec';
-    let sampleData = []; // Ahora se llenará con datos reales
-
-    async function loadDataFromSheet() {
-        // Mostrar un estado de carga
-        tbody.innerHTML = '<tr><td colspan="14" class="text-center p-10 text-gray-500"><i data-feather="loader" class="animate-spin mx-auto"></i>Cargando datos...</td></tr>';
-        feather.replace();
-
+    async function fetchDataFromSheet() {
+        showToast('Cargando envíos...');
         try {
-            const response = await fetch(scriptURL);
+            const response = await fetch(SCRIPT_URL);
             if (!response.ok) {
-                throw new Error('Error en la respuesta de la red.');
+                throw new Error('Error al cargar los datos.');
             }
             const data = await response.json();
-            // Invertir el array para que los registros más nuevos aparezcan primero
-            sampleData = data.reverse(); 
-            aplicarFiltros(); // Llama a aplicarFiltros una vez que los datos están listos
+            // Procesa los datos: si el estado está vacío, lo establece como 'PENDIENTE'.
+            // Luego, filtra los envíos para excluir los que están marcados como "ELIMINADO".
+            todosLosEnvios = data.map(envio => ({
+                ...envio,
+                estado: envio.estado || 'PENDIENTE',
+                detalle: envio.detalle || '', // Asegura que existan
+                cobrar: envio.cobrar || ''    // Asegura que existan
+            })).filter(envio => envio.estado !== 'ELIMINADO');
+            
+            aplicarFiltros();
+            showToast('Envíos cargados.');
         } catch (error) {
-            console.error('Error al cargar los datos:', error);
-            tbody.innerHTML = '<tr><td colspan="14" class="text-center p-10 text-red-500"><strong>Error al cargar los datos.</strong><br>Verifica la URL del script y los permisos.</td></tr>';
+            console.error('Error fetching data:', error);
+            showToast('Error: No se pudieron cargar los envíos.');
+            // En caso de error, muestra la tabla vacía.
+            todosLosEnvios = [];
+            aplicarFiltros();
         }
     }
     
-    let currentData = []; // Los datos actualmente mostrados/filtrados
+    // --- LÓGICA DE LA TABLA Y FILTROS ---
+
+    function manejarVisibilidadColumnas(filtro, enviosMostrados) {
+        const columnasDelivery = document.querySelectorAll('.col-delivery');
+        const columnasAgencia = document.querySelectorAll('.col-agencia');
+        const columnasDinsides = document.querySelectorAll('.col-dinsides');
+
+        // Oculta todas las columnas especiales primero
+        columnasDelivery.forEach(col => col.classList.add('col-hidden'));
+        columnasAgencia.forEach(col => col.classList.add('col-hidden'));
+        columnasDinsides.forEach(col => col.classList.add('col-hidden'));
+
+        if (filtro) {
+            // Lógica existente si hay un filtro específico
+            if (filtro === 'SHALOM' || filtro === 'OLVA') {
+                columnasAgencia.forEach(col => col.classList.remove('col-hidden'));
+            } else if (filtro === 'DINSIDES') {
+                columnasAgencia.forEach(col => col.classList.remove('col-hidden')); // Muestra DNI/Agencia
+                columnasDinsides.forEach(col => col.classList.remove('col-hidden')); // Y Muestra Detalle/Cobrar
+            } else if (filtro === 'DELIVERY') {
+                columnasDelivery.forEach(col => col.classList.remove('col-hidden'));
+            }
+            // Si el filtro es "" (Todos), esta parte se salta
+        } else {
+            // NUEVA LÓGICA: Si el filtro es "Todos", inspecciona los datos mostrados
+            const hasDelivery = enviosMostrados.some(e => e.tipo === 'DELIVERY');
+            const hasAgencia = enviosMostrados.some(e => e.tipo === 'SHALOM' || e.tipo === 'OLVA');
+            const hasDinsides = enviosMostrados.some(e => e.tipo === 'DINSIDES');
+
+            if (hasDelivery) {
+                columnasDelivery.forEach(col => col.classList.remove('col-hidden'));
+            }
+            if (hasAgencia || hasDinsides) {
+                // Muestra DNI/Agencia si hay Shalom, Olva O Dinsides
+                columnasAgencia.forEach(col => col.classList.remove('col-hidden'));
+            }
+            if (hasDinsides) {
+                // Muestra Detalle/Cobrar solo si hay Dinsides
+                columnasDinsides.forEach(col => col.classList.remove('col-hidden'));
+            }
+        }
+    }
 
 
-    // --- MODAL DE CONFIRMACIÓN ---
+    function aplicarFiltros() {
+        const hoy = new Date().toISOString().split('T')[0];
+        const clienteFilter = filtroCliente.value.toLowerCase();
+        const tipoFilter = filtroTipo.value;
+        const mostrarSoloDuplicados = filtroDuplicados.checked;
+
+        // --- Lógica para detectar duplicados en TODA la base de datos ---
+        const seen = {};
+        const duplicates = new Set();
+        todosLosEnvios.forEach(envio => {
+            const key = `${envio.cliente}-${envio.fechaEnvio ? envio.fechaEnvio.substring(0, 10) : 'sin-fecha'}`;
+            if (seen[key]) {
+                duplicates.add(key);
+            } else {
+                seen[key] = true;
+            }
+        });
+
+        const enviosFiltrados = todosLosEnvios.filter(envio => {
+            const clienteMatch = !clienteFilter || String(envio.cliente).toLowerCase().includes(clienteFilter);
+            const fechaMatch = filtroFecha.value
+                ? (envio.fechaEnvio && envio.fechaEnvio.substring(0, 10) === filtroFecha.value) 
+                : (envio.fechaEnvio && envio.fechaEnvio.substring(0, 10) >= hoy);
+            const tipoMatch = !tipoFilter || envio.tipo === tipoFilter;
+            
+            if (mostrarSoloDuplicados) {
+                const key = `${envio.cliente}-${envio.fechaEnvio ? envio.fechaEnvio.substring(0, 10) : 'sin-fecha'}`;
+                const esDuplicado = duplicates.has(key);
+                return esDuplicado && clienteMatch && fechaMatch && tipoMatch;
+            }
+
+            return clienteMatch && fechaMatch && tipoMatch;
+        });
+          
+        // Ordena los envíos filtrados antes de mostrarlos
+        enviosFiltrados.sort((a, b) => {
+            const fechaA = a.fechaEnvio || '';
+            const fechaB = b.fechaEnvio || '';
+            const clienteA = String(a.cliente || '');
+            const clienteB = String(b.cliente || '');
+
+            const comparacionFecha = fechaB.localeCompare(fechaA);
+            if (comparacionFecha !== 0) {
+                return comparacionFecha;
+            }
+            return clienteB.localeCompare(clienteA);
+        });        
+        
+        renderizarTabla(enviosFiltrados, duplicates);
+        manejarVisibilidadColumnas(filtroTipo.value, enviosFiltrados);
+    }
+
+    function renderizarTabla(envios, duplicates) {
+        tbodyEnvios.innerHTML = '';
+        mobileCardContainer.innerHTML = '';
+
+        const visibleCountEl = document.getElementById('visibleCount');
+        if(visibleCountEl) {
+            visibleCountEl.textContent = `Mostrando ${envios.length} de ${todosLosEnvios.length} envíos`;
+        }
+
+        const hasEnvios = envios.length > 0;
+        
+        tableContainer.parentElement.classList.toggle('hidden', !hasEnvios);
+        emptyStateContainer.classList.toggle('hidden', hasEnvios);
+        batchActionsContainer.classList.toggle('hidden', !hasEnvios);
+
+        if (hasEnvios) {
+            envios.forEach(envio => {
+                const getEstadoClass = (estado) => {
+                    switch (estado) {
+                        case 'PENDIENTE': return 'bg-yellow-100 text-badge-pending';
+                        case 'ENVIADO': return 'bg-orange-100 text-badge-sent';
+                        case 'ENTREGADO': return 'bg-green-100 text-badge-delivered';
+                        case 'REPROGRAMADO': return 'bg-purple-100 text-badge-rescheduled';
+                        default: return 'bg-gray-100 text-gray-800';
+                    }
+                };
+
+                const key = `${envio.cliente}-${envio.fechaEnvio ? envio.fechaEnvio.substring(0, 10) : 'sin-fecha'}`;
+                const isDuplicate = duplicates.has(key);
+                const duplicateClass = isDuplicate ? 'bg-yellow-200/50' : '';
+
+                // --- Renderizar para tabla (Desktop) ---
+                const tr = document.createElement('tr');
+                tr.className = `border-b border-gray-100 hover:bg-orange-50/50 transition-colors duration-200 ${duplicateClass} cursor-pointer`; // Añadido cursor-pointer
+                tr.dataset.id = envio.id;
+                tr.innerHTML = `
+                    <td class="p-3 text-center"><input type="checkbox" class="rowCheck rounded border-gray-300 text-accent focus:ring-accent" data-id="${envio.id}"></td>
+                    <td class="p-3 text-sm text-gray-700">${envio.fechaReg ? envio.fechaReg.substring(0, 10) : ''}</td>
+                    <td class="p-3 text-sm text-gray-700">${envio.cliente}</td>
+                    <td class="p-3 text-sm text-gray-700">${envio.tipo}</td>
+                    <td class="p-3 text-sm text-gray-700 col-responsive-hide">${envio.nombre}</td>
+                    <td class="p-3 text-sm text-gray-700 col-responsive-hide">${envio.telefono}</td>
+                    <td class="p-3 text-sm text-gray-700 col-responsive-hide col-delivery col-hidden">${envio.distrito}</td>
+                    <td class="p-3 text-sm text-gray-700 col-responsive-hide col-delivery col-hidden">${envio.direccion}</td>
+                    <td class="p-3 text-sm text-gray-700 col-responsive-hide col-delivery col-hidden">${envio.referencia}</td>
+                    <td class="p-3 text-sm text-gray-700 col-responsive-hide col-agencia col-hidden">${envio.dni}</td>
+                    <td class="p-3 text-sm text-gray-700 col-responsive-hide col-agencia col-hidden">${envio.agencia}</td>
+                    <td class="p-3 text-sm text-gray-700 col-responsive-hide col-dinsides col-hidden">${envio.detalle}</td>
+                    <td class="p-3 text-sm text-gray-700 col-responsive-hide col-dinsides col-hidden">${envio.cobrar}</td>
+                    <td class="p-3 text-sm text-gray-700">${envio.fechaEnvio ? envio.fechaEnvio.substring(0, 10) : ''}</td>
+                    <td class="p-3 text-sm"><span class="px-2 py-1 text-xs font-bold rounded-full ${getEstadoClass(envio.estado)}">${envio.estado}</span></td>
+                    <td class="p-3 text-center"><button class="text-accent hover:text-accent-alt" title="Notificar al cliente"><i data-feather="send" class="w-4 h-4"></i></button></td>
+                `;
+                tbodyEnvios.appendChild(tr);
+
+                // --- Renderizar para tarjetas (Móvil) ---
+                const card = document.createElement('div');
+                const cardBgClass = isDuplicate ? 'bg-yellow-200/50' : 'bg-white';
+                card.className = `${cardBgClass} rounded-xl shadow p-4 border border-gray-200 space-y-3 cursor-pointer`; // Añadido cursor-pointer
+                card.dataset.id = envio.id;
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" class="rowCheck rounded border-gray-300 text-accent focus:ring-accent" data-id="${envio.id}">
+                            <div>
+                                <p class="font-bold text-gray-800">${envio.nombre}</p>
+                                <p class="text-sm text-gray-500">${envio.distrito}</p>
+                            </div>
+                        </div>
+                        <span class="px-2 py-1 text-xs font-bold rounded-full ${getEstadoClass(envio.estado)}">${envio.estado}</span>
+                    </div>
+                    <div class="text-sm text-gray-600 space-y-2 pl-8">
+                        <p><strong class="text-gray-500">Cliente:</strong> ${envio.cliente}</p>
+                        <p><strong class="text-gray-500">Courier:</strong> ${envio.tipo}</p>
+                        <p><strong class="text-gray-500">Fecha Envío:</strong> ${envio.fechaEnvio ? envio.fechaEnvio.substring(0, 10) : ''}</p>
+                        <!-- Info Dinsides para móvil -->
+                        ${envio.tipo === 'DINSIDES' ? `
+                            <p><strong class="text-gray-500">Detalle:</strong> ${envio.detalle || 'N/A'}</p>
+                            <p><strong class="text-gray-500">Cobrar:</strong> ${envio.cobrar || 'N/A'}</p>
+                        ` : ''}
+                    </div>
+                    <div class="flex justify-end pt-2">
+                        <button class="text-accent hover:text-accent-alt text-sm font-bold inline-flex items-center gap-1" title="Notificar al cliente">
+                            <i data-feather="send" class="w-4 h-4"></i> Notificar
+                        </button>
+                    </div>
+                `;
+                mobileCardContainer.appendChild(card);
+            });
+            feather.replace();
+        }
+        contarSeleccionados();
+    }
+
+    function obtenerIdsSeleccionados() {
+        if (window.innerWidth < 768) {
+            return [...mobileCardContainer.querySelectorAll('.rowCheck:checked')].map(chk => parseInt(chk.dataset.id));
+        } else {
+            return [...tbodyEnvios.querySelectorAll('.rowCheck:checked')].map(chk => parseInt(chk.dataset.id));
+        }
+    }
+
+    // --- LÓGICA DE ACCIONES EN LOTE ---
+    function contarSeleccionados() {
+        const seleccionadosDesktop = tbodyEnvios.querySelectorAll('.rowCheck:checked').length;
+        const seleccionadosMobile = mobileCardContainer.querySelectorAll('.rowCheck:checked').length;
+        const seleccionados = Math.max(seleccionadosDesktop, seleccionadosMobile);
+
+        const totalVisibleRows = (window.innerWidth < 768) 
+            ? mobileCardContainer.children.length 
+            : tbodyEnvios.rows.length;
+        
+        selCount.textContent = `${seleccionados} seleccionados`;
+        
+        const allChecked = totalVisibleRows > 0 && seleccionados === totalVisibleRows;
+        checkTodos.checked = allChecked;
+        thCheckTodos.checked = allChecked;
+
+        // En lugar de ocultar todo el contenedor, ahora controlamos las partes específicas
+        // que dependen de la selección.
+        const loteRightControls = batchActionsContainer.querySelector('.lote-right');
+        const hasSelections = seleccionados > 0;
+
+        // Muestra u oculta el contador de seleccionados y los controles de acción (dropdown, botón aplicar)
+        selCount.classList.toggle('hidden', !hasSelections);
+        if (loteRightControls) {
+            loteRightControls.classList.toggle('hidden', !hasSelections);
+        }
+    }
+    
+    function seleccionarTodos(checked) {
+        document.querySelectorAll('.rowCheck').forEach(chk => chk.checked = checked);
+        contarSeleccionados();
+    }
+
+    accionLote.addEventListener('change', () => {
+        const esReprog = accionLote.value === 'REPROGRAMADO';
+        fechaReprog.classList.toggle('oculto', !esReprog);
+    });    
+
+    btnAplicarLote.addEventListener('click', async () => {
+        const seleccionadosIds = obtenerIdsSeleccionados();
+        const accion = accionLote.value;
+
+        if (seleccionadosIds.length === 0 || !accion) {
+            showToast(!accion ? 'Por favor, selecciona una acción.' : 'No has seleccionado ningún envío.');
+            return;
+        }
+
+        // Si la acción es eliminar, abre el modal de confirmación y detiene la ejecución aquí.
+        if (accion === 'ELIMINAR') {
+            abrirModalConfirmacion(seleccionadosIds);
+            return;
+        }
+
+        let payload;
+        let action;
+
+        if (accion === 'REPROGRAMADO') {
+            if (!fechaReprog.value) {
+                showToast('Debes seleccionar una fecha para reprogramar.');
+                return;
+            }
+            action = 'batchUpdateStatus';
+            payload = { ids: seleccionadosIds, status: 'REPROGRAMADO', newDate: fechaReprog.value };
+        } else { // Para 'ENVIADO', 'ENTREGADO', 'PENDIENTE'
+            action = 'batchUpdateStatus';
+            payload = { ids: seleccionadosIds, status: accion };
+        }
+
+        showToast('Aplicando cambios...');
+        try {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action, payload }),
+            });
+            await response.json();
+            await fetchDataFromSheet(); // Recarga los datos
+            showToast('Acción en lote aplicada con éxito.');
+        } catch (error) {
+            console.error('Error batch updating:', error);
+            showToast('Error al aplicar la acción.');
+        } finally {
+            accionLote.value = '';
+            fechaReprog.classList.add('oculto');
+        }
+    });
+
+    checkTodos.addEventListener('change', (e) => seleccionarTodos(e.target.checked));
+    thCheckTodos.addEventListener('change', (e) => seleccionarTodos(e.target.checked));
+    
+    document.getElementById('envios').addEventListener('change', (e) => {
+        if(e.target.classList.contains('rowCheck')) {
+            const id = e.target.dataset.id;
+            const isChecked = e.target.checked;
+            document.querySelectorAll(`.rowCheck[data-id="${id}"]`).forEach(chk => {
+                if (chk !== e.target) chk.checked = isChecked;
+            });
+            contarSeleccionados();
+        }
+    });
+
+    // --- EVENT LISTENERS ---
+    btnEtiquetas.addEventListener('click', () => {
+        const seleccionadosIds = obtenerIdsSeleccionados();
+        if (seleccionadosIds.length === 0) {
+            showToast('Debes seleccionar al menos un envío para imprimir etiquetas.');
+            return;
+        }
+
+        const enviosSeleccionados = todosLosEnvios.filter(envio => seleccionadosIds.includes(envio.id));
+        const printContainer = document.getElementById('print-container');
+        
+        // --- NUEVA LÓGICA PARA ETIQUETAS INCREÍBLES ---
+        const businessName = localStorage.getItem('businessName') || 'Tu Emprendimiento';
+        const logoSrc = localStorage.getItem('businessLogo');
+
+        let labelsHtml = '';
+        enviosSeleccionados.forEach(envio => {
+            let destinationHtml = '';
+            let detailsHtml = ''; // Variable para los detalles extra
+
+            if (envio.tipo === 'DELIVERY') {
+                const direccionCompleta = [envio.direccion, envio.distrito].filter(Boolean).join(', ');
+                destinationHtml = `
+                    <div class="label-section">
+                        <div class="label-section-title">Destino:</div>
+                        <p class="label-destination-text">
+                            ${direccionCompleta}<br>
+                            <strong>Ref:</strong> ${envio.referencia || 'N/A'}
+                        </p>
+                    </div>
+                `;
+            } else if (envio.tipo === 'DINSIDES') {
+                // HTML de Destino para Dinsides
+                destinationHtml = `
+                    <div class="label-section">
+                        <div class="label-section-title">Destino:</div>
+                        <p class="label-destination-text">
+                            <strong>Distrito:</strong> ${envio.distrito || 'N/A'}<br>
+                            <strong>Fecha Entrega:</strong> ${envio.fechaEnvio ? envio.fechaEnvio.substring(0, 10) : 'N/A'}
+                        </p>
+                    </div>
+                `;
+                // HTML de Detalles extra para Dinsides
+                detailsHtml = `
+                    <div class="label-section">
+                        <div class="label-section-title">Detalle del Envío:</div>
+                        <p class="label-destination-text">${envio.detalle || 'N/A'}</p>
+                    </div>
+                    ${envio.cobrar ? `
+                    <div class="label-section">
+                        <div class="label-amount-to-collect">
+                            <span>MONTO A COBRAR:</span><br>
+                            <strong>${envio.cobrar}</strong>
+                        </div>
+                    </div>
+                    ` : ''}
+                `;
+            } else { // Para otras agencias (Shalom, Olva)
+                destinationHtml = `
+                    <div class="label-section">
+                        <div class="label-section-title">Destino:</div>
+                        <p class="label-destination-text">
+                            <strong>DNI/CE:</strong> ${envio.dni || 'N/A'}<br>
+                            <strong>Agencia:</strong> ${envio.agencia || 'N/A'}
+                        </p>
+                    </div>
+                `;
+            }
+
+            labelsHtml += `
+                <div class="label-card">
+                    <div class="label-header">
+                        ${logoSrc ? `<img src="${logoSrc}" alt="Logo" class="label-logo">` : '<div></div>'}
+                        <div class="label-business-name">${businessName}</div>
+                    </div>
+                    <div class="label-body">
+                        <div class="label-section">
+                            <div class="label-section-title">Para:</div>
+                            <div class="label-recipient-name">${String(envio.nombre || '').toUpperCase()}</div>
+                            <div class="label-recipient-phone">${envio.telefono || 'Sin teléfono'}</div>
+                        </div>
+                        ${destinationHtml}
+                        ${detailsHtml} <!-- Se añaden los detalles extra aquí -->
+                    </div>
+                    <div class="label-footer">
+                        <div class="label-courier-info">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+                            <span>${envio.tipo || 'N/A'}</span>
+                        </div>
+                        <div class="label-qr-code">QR Code</div>
+                    </div>
+                </div>
+            `;
+        });
+
+        printContainer.innerHTML = labelsHtml;
+        window.print();
+    });
+
+    templateLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault(); // Previene que el enlace intente navegar a otra página
+
+            const seleccionadosIds = obtenerIdsSeleccionados();
+            if (seleccionadosIds.length === 0) {
+                showToast('Debes seleccionar al menos un envío para descargar la plantilla.');
+                plantillasMenu.classList.add('hidden'); // Cierra el menú
+                return;
+            }
+
+            // Aquí iría la lógica futura para descargar el archivo
+            const templateName = e.target.textContent;
+            console.log(`Descargando ${templateName} para los envíos:`, seleccionadosIds);
+            showToast(`Descargando ${templateName}...`);
+            plantillasMenu.classList.add('hidden'); // Cierra el menú
+        });
+    });      
+    btnAplicarFiltros.addEventListener('click', aplicarFiltros);
+    filtroCliente.addEventListener('keyup', (e) => { if(e.key === 'Enter') aplicarFiltros() });
+
+    btnLimpiarFiltros.addEventListener('click', () => {
+        // 1. Resetea los valores de los campos de filtro
+        filtroCliente.value = '';
+        filtroFecha.value = '';
+        filtroTipo.value = '';
+        filtroDuplicados.checked = false; // También resetea el nuevo checkbox
+
+        // 2. Vuelve a renderizar la tabla con todos los datos
+        aplicarFiltros();
+
+        // 3. Muestra una notificación de confirmación
+        showToast('Filtros limpiados.');
+    });
+
+    // --- SINCRONIZACIÓN CON "MI CUENTA" ---
+    const businessNameInput = document.getElementById('businessName');
+    const headerBusinessName = document.getElementById('headerBusinessName');
+    const logoInput = document.getElementById('logoInput');
+    const logoPreview = document.getElementById('logoPreview');
+    const btnGuardarConfig = document.getElementById('btnGuardarConfig');
+    const sidebarTitle = document.getElementById('sidebarTitle');
+    const sidebarLogo = document.getElementById('sidebarLogo');
+    const headerLogo = document.getElementById('headerLogo');
+
+    function syncBusinessInfo() {
+        const name = localStorage.getItem('businessName') || 'Mi Tienda de Prueba';
+        businessNameInput.value = name;
+        headerBusinessName.textContent = name;
+        sidebarTitle.textContent = name;     
+
+        const logoSrc = localStorage.getItem('businessLogo');
+        if (logoSrc) {
+            sidebarLogo.src = logoSrc;
+            headerLogo.src = logoSrc;
+            logoPreview.src = logoSrc;
+            sidebarLogo.classList.remove('hidden');
+            headerLogo.classList.remove('hidden');
+            logoPreview.classList.remove('hidden');
+        } else {
+            sidebarLogo.classList.add('hidden');
+            headerLogo.classList.add('hidden');
+            logoPreview.classList.add('hidden');
+        }
+    }
+    
+    logoInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                localStorage.setItem('businessLogo', e.target.result);
+                syncBusinessInfo();
+            };
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+
+    btnGuardarConfig.addEventListener('click', () => {
+        localStorage.setItem('businessName', businessNameInput.value);
+        showToast('Cambios guardados con éxito.');
+        syncBusinessInfo(); // <-- ¡Verifica esta llamada!
+    });
+
+    goToAccountBtn.addEventListener('click', () => {
+        document.querySelector('a.nav-link[href="#cuenta"]').click();
+    });
+
+    // --- LÓGICA DEL MODAL DE CONFIRMACIÓN ---
     const deleteModal = document.getElementById('deleteModal');
     const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
     const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
     const modalMessage = document.getElementById('modalMessage');
-    let idsToDelete = [];
+    let idsParaEliminar = [];
 
-    function openDeleteModal(ids) {
-        idsToDelete = ids;
+    function abrirModalConfirmacion(ids) {
+        idsParaEliminar = ids;
         modalMessage.textContent = `¿Estás seguro de que quieres eliminar ${ids.length} envío(s) seleccionados? Esta acción no se puede deshacer.`;
         deleteModal.classList.remove('hidden');
     }
 
-    function closeDeleteModal() {
-        idsToDelete = [];
+    function cerrarModalConfirmacion() {
         deleteModal.classList.add('hidden');
+        idsParaEliminar = [];
     }
 
     confirmDeleteBtn.addEventListener('click', async () => {
-        const payload = { action: "deleteShipments", payload: { ids: idsToDelete } };
+        const eliminadosCount = idsParaEliminar.length;
+        if (eliminadosCount === 0) return;
+
+        showToast('Eliminando envíos...');
         try {
-            const response = await fetch(scriptURL, {
+            const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors', // Solución para el problema de CORS
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: JSON.stringify(payload)
+                // Cambiamos la acción para que actualice el estado a 'ELIMINADO' en lugar de borrar la fila
+                body: JSON.stringify({ action: 'batchUpdateStatus', payload: { ids: idsParaEliminar, status: 'ELIMINADO' } }),
             });
-            // Con no-cors, no podemos leer la respuesta, así que asumimos éxito y recargamos.
-             showToast(`${idsToDelete.length} envío(s) eliminado(s). Recargando...`);
-             setTimeout(() => loadDataFromSheet(), 1500); // Dar tiempo para que el sheet se actualice
+            await response.json();
+            cerrarModalConfirmacion();
+            await fetchDataFromSheet(); // Recarga los datos
+            showToast(`${eliminadosCount} envío(s) eliminados correctamente.`);
         } catch (error) {
-            showToast('Error de conexión al eliminar.');
+            console.error('Error deleting shipments:', error);
+            showToast('Error al eliminar los envíos.');
         } finally {
-            closeDeleteModal();
+            accionLote.value = '';
         }
     });
-    
-    cancelDeleteBtn.addEventListener('click', closeDeleteModal);
 
+    cancelDeleteBtn.addEventListener('click', cerrarModalConfirmacion);
 
-    // --- PANEL DE EDICIÓN ---
-    const editPanel = document.getElementById('editPanel');
-    const editPanelOverlay = document.getElementById('editPanelOverlay');
-    const editForm = document.getElementById('editForm');
-    const editEstado = document.getElementById('editEstado');
-    const editReprogDateContainer = document.getElementById('editReprogDateContainer');
-    const editReprogDate = document.getElementById('editReprogDate');
-    const saveEditBtn = document.getElementById('saveEditBtn');
-    
-    function openEditPanel(shipmentId) {
-        const shipment = sampleData.find(item => item.id === shipmentId);
-        if (!shipment) return;
+    // --- LÓGICA DEL PANEL DE EDICIÓN (AÑADIDA) ---
+    const editPanelForm = {
+        id: document.getElementById('editId'),
+        cliente: document.getElementById('editCliente'),
+        nombre: document.getElementById('editNombre'),
+        telefono: document.getElementById('editTelefono'),
+        fechaEnvio: document.getElementById('editFechaEnvio'),
+        tipo: document.getElementById('editTipo'),
+        estado: document.getElementById('editEstado'),
+        distrito: document.getElementById('editDistrito'),
+        direccion: document.getElementById('editDireccion'),
+        referencia: document.getElementById('editReferencia'),
+        dni: document.getElementById('editDni'),
+        agencia: document.getElementById('editAgencia'),
+        detalle: document.getElementById('editDetalle'),
+        cobrar: document.getElementById('editCobrar')
+    };
 
-        // Poblar el formulario
-        document.getElementById('editShipmentId').value = shipment.id;
-        document.getElementById('editCliente').value = shipment.cliente || '';
-        editEstado.value = shipment.estado || 'PENDIENTE';
-        document.getElementById('editNombre').value = shipment.nombre || '';
-        document.getElementById('editTelefono').value = shipment.telefono || '';
-        document.getElementById('editFechaEnvio').value = shipment.fechaEnvio || '';
-        
-        // Manejar visibilidad del campo de fecha de reprogramación
-        const isReprogramado = shipment.estado === 'REPROGRAMADO';
-        editReprogDateContainer.classList.toggle('hidden', !isReprogramado);
-        editReprogDate.value = isReprogramado ? shipment.fechaEnvio : '';
-        
-        // Mostrar/ocultar campos según el tipo de courier
-        const deliveryFields = document.getElementById('editFieldsDelivery');
-        const courierFields = document.getElementById('editFieldsCourier');
-        
-        if (shipment.tipo === 'DELIVERY') {
-            deliveryFields.classList.remove('hidden');
-            courierFields.classList.add('hidden');
-            document.getElementById('editDistrito').value = shipment.distrito || '';
-            document.getElementById('editDireccion').value = shipment.direccion || '';
-            document.getElementById('editReferencia').value = shipment.referencia || '';
-        } else {
-            deliveryFields.classList.add('hidden');
-            courierFields.classList.remove('hidden');
-            document.getElementById('editDni').value = shipment.dni || '';
-            document.getElementById('editAgencia').value = shipment.agencia || '';
+    const editCampos = {
+        delivery: document.getElementById('editCamposDelivery'),
+        agencia: document.getElementById('editCamposAgencia'),
+        dinsides: document.getElementById('editCamposDinsides')
+    };
+
+    function toggleEditFields(courier) {
+        editCampos.delivery.style.display = 'none';
+        editCampos.agencia.style.display = 'none';
+        editCampos.dinsides.style.display = 'none';
+
+        if (courier === 'DELIVERY') {
+            editCampos.delivery.style.display = 'block';
+        } else if (courier === 'DINSIDES') {
+            editCampos.agencia.style.display = 'block';
+            editCampos.dinsides.style.display = 'block';
+        } else if (courier === 'SHALOM' || courier === 'OLVA') {
+            editCampos.agencia.style.display = 'block';
+        }
+    }
+
+    editPanelForm.tipo.addEventListener('change', (e) => toggleEditFields(e.target.value));
+
+    function openEditPanel(id) {
+        const envio = todosLosEnvios.find(e => e.id === id);
+        if (!envio) {
+            showToast('Error: No se encontró el envío.');
+            return;
         }
 
-        // Mostrar panel y overlay
+        // Poblar el formulario
+        editPanelForm.id.value = envio.id;
+        editPanelForm.cliente.value = envio.cliente || '';
+        editPanelForm.nombre.value = envio.nombre || '';
+        editPanelForm.telefono.value = envio.telefono || '';
+        editPanelForm.fechaEnvio.value = envio.fechaEnvio ? envio.fechaEnvio.substring(0, 10) : '';
+        editPanelForm.tipo.value = envio.tipo || 'DELIVERY';
+        editPanelForm.estado.value = envio.estado || 'PENDIENTE';
+        editPanelForm.distrito.value = envio.distrito || '';
+        editPanelForm.direccion.value = envio.direccion || '';
+        editPanelForm.referencia.value = envio.referencia || '';
+        editPanelForm.dni.value = envio.dni || '';
+        editPanelForm.agencia.value = envio.agencia || '';
+        editPanelForm.detalle.value = envio.detalle || '';
+        editPanelForm.cobrar.value = envio.cobrar || '';
+
+        // Mostrar campos correctos
+        toggleEditFields(envio.tipo);
+
+        // Abrir el panel
         editPanelOverlay.classList.remove('hidden');
         editPanel.classList.remove('translate-x-full');
-        
-        // Deshabilitar el botón de guardar al abrir
-        saveEditBtn.disabled = true;
+        feather.replace(); // Recargar íconos
     }
 
     function closeEditPanel() {
         editPanel.classList.add('translate-x-full');
         editPanelOverlay.classList.add('hidden');
-        editForm.reset(); // Limpia el formulario
+        editForm.reset();
     }
 
-    // Usar delegación de eventos para los botones del panel
-    editPanel.addEventListener('click', async (e) => {
-        const target = e.target;
-        if (target.id === 'saveEditBtn' || target.closest('#saveEditBtn')) {
-            const shipmentId = parseInt(document.getElementById('editShipmentId').value, 10);
-            
-            const newStatus = editEstado.value;
-            if (newStatus === 'REPROGRAMADO' && !editReprogDate.value) {
-                showToast('Por favor, selecciona la nueva fecha para reprogramar.');
-                return;
-            }
-            
-            const updatedShipment = { id: shipmentId };
-            updatedShipment.nombre = document.getElementById('editNombre').value;
-            updatedShipment.telefono = document.getElementById('editTelefono').value;
-            updatedShipment.estado = newStatus;
-            updatedShipment.fechaEnvio = (newStatus === 'REPROGRAMADO') ? editReprogDate.value : document.getElementById('editFechaEnvio').value;
-            
-            const originalShipment = sampleData.find(item => item.id === shipmentId);
-            if(originalShipment) {
-                 if (originalShipment.tipo === 'DELIVERY') {
-                    updatedShipment.distrito = document.getElementById('editDistrito').value;
-                    updatedShipment.direccion = document.getElementById('editDireccion').value;
-                    updatedShipment.referencia = document.getElementById('editReferencia').value;
-                } else {
-                    updatedShipment.dni = document.getElementById('editDni').value;
-                    updatedShipment.agencia = document.getElementById('editAgencia').value;
-                }
-            }
-            
-            const payload = { action: "updateShipment", payload: updatedShipment };
-            try {
-                saveEditBtn.disabled = true;
-                 const response = await fetch(scriptURL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', },
-                    body: JSON.stringify(payload)
-                });
-
-                showToast('Cambios enviados. Recargando datos...');
-                closeEditPanel();
-                setTimeout(() => loadDataFromSheet(), 1500);
-
-            } catch (error) {
-                showToast('Error de conexión al guardar.');
-                saveEditBtn.disabled = false;
-            }
-        }
-
-        if (target.id === 'cancelEditBtn' || target.closest('#cancelEditBtn') || target.id === 'closeEditPanel' || target.closest('#closeEditPanel')) {
-            closeEditPanel();
-        }
-
-        if (target.id === 'deleteShipmentBtn' || target.closest('#deleteShipmentBtn')) {
-            const shipmentId = parseInt(document.getElementById('editShipmentId').value, 10);
-            if (shipmentId) {
-                closeEditPanel();
-                setTimeout(() => openDeleteModal([shipmentId]), 300);
-            }
-        }
-    });
-
-    // Habilitar el botón de guardar cuando se detecta un cambio en el formulario
-    editForm.addEventListener('input', () => {
-        saveEditBtn.disabled = false;
-    });
-    
-    // Mostrar/ocultar campo de fecha al cambiar el estado
-    editEstado.addEventListener('change', () => {
-        editReprogDateContainer.classList.toggle('hidden', editEstado.value !== 'REPROGRAMADO');
-    });
-
-    editPanelOverlay.addEventListener('click', closeEditPanel);
-
-
-    // Función para obtener los IDs de los envíos seleccionados
-    function getSelectedIds() {
-        return [...tbody.querySelectorAll('.rowCheck:checked')]
-            .map(cb => parseInt(cb.closest('tr').dataset.id, 10));
-    }
-
-    // Función para obtener los envíos seleccionados como objetos
-    function getSelectedShipments() {
-        const selectedIds = getSelectedIds();
-        return sampleData.filter(item => selectedIds.includes(item.id));
-    }
-    
-    // Función para renderizar la tabla
-    function renderTable(data) {
-        currentData = data; 
-        
-        const hasAnyData = sampleData.length > 0;
-        document.querySelectorAll('#envios .flex, #envios .grid, #tableContainer').forEach(el => {
-            el.classList.toggle('hidden', !hasAnyData);
-        });
-        emptyStateContainer.classList.toggle('hidden', hasAnyData);
-        
-        if (!hasAnyData) {
-            feather.replace();
+    function handleRowClick(e) {
+        // No abrir si se hizo clic en un checkbox o un botón
+        if (e.target.closest('input[type="checkbox"]') || e.target.closest('button')) {
             return;
         }
-
-        tbody.innerHTML = '';
-        if (data.length === 0) {
-             tbody.innerHTML = '<tr><td colspan="14" class="text-center p-10 text-gray-500">No hay envíos que coincidan con los filtros.</td></tr>';
-             return;
+        
+        const row = e.target.closest('tr[data-id], div[data-id]');
+        if (row) {
+            const id = parseInt(row.dataset.id);
+            openEditPanel(id);
         }
-
-        data.forEach(item => {
-            const row = document.createElement('tr');
-            row.classList.add('hover:bg-orange-50', 'transition-colors', 'duration-1000', 'ease-out', 'cursor-pointer');
-            row.dataset.id = item.id;
-            row.dataset.tipo = item.tipo;
-            row.dataset.cliente = item.cliente;
-            row.dataset.fechaenvio = item.fechaEnvio;
-            
-            const badgeClassMap = {
-                "PENDIENTE": 'bg-amber-100 text-badge-pending border-amber-300',
-                "ENVIADO": 'bg-orange-100 text-badge-sent border-orange-300',
-                "ENTREGADO": 'bg-emerald-100 text-badge-delivered border-emerald-300',
-                "REPROGRAMADO": 'bg-purple-100 text-badge-rescheduled border-purple-300',
-            };
-            const estadoBadge = `<span class="badge ${badgeClassMap[item.estado]} px-2 py-1 rounded-full text-xs font-bold border">${item.estado || 'PENDIENTE'}</span>`;
-
-            row.innerHTML = `
-                <td class="border-t border-gray-200 p-3"><input type="checkbox" class="rowCheck rounded border-gray-300 text-accent focus:ring-accent" /></td>
-                <td class="border-t border-gray-200 p-3 text-xs text-gray-700 nowrap">${item.fechaReg}</td>
-                <td class="border-t border-gray-200 p-3 text-xs text-gray-700">${item.cliente}</td>
-                <td class="border-t border-gray-200 p-3 text-xs text-gray-700">${item.tipo}</td>
-                <td class="border-t border-gray-200 p-3 text-xs text-gray-700">${item.nombre}</td>
-                <td class="border-t border-gray-200 p-3 text-xs text-gray-700">${item.telefono}</td>
-                <td class="col-distrito border-t border-gray-200 p-3 text-xs text-gray-700">${item.distrito || '-'}</td>
-                <td class="col-direccion border-t border-gray-200 p-3 text-xs text-gray-700">${item.direccion || '-'}</td>
-                <td class="col-referencia border-t border-gray-200 p-3 text-xs text-gray-700">${item.referencia || '-'}</td>
-                <td class="col-dni border-t border-gray-200 p-3 text-xs text-gray-700">${item.dni || '-'}</td>
-                <td class="col-agencia border-t border-gray-200 p-3 text-xs text-gray-700">${item.agencia || '-'}</td>
-                <td class="border-t border-gray-200 p-3 text-xs text-gray-700 nowrap">${item.fechaEnvio}</td>
-                <td class="estado border-t border-gray-200 p-3">${estadoBadge}</td>
-                <td class="border-t border-gray-200 p-3 text-center">
-                    <a href="#" class="whatsapp-link text-green-500 hover:text-green-700 transition-colors" data-id="${item.id}" title="Enviar resumen por WhatsApp">
-                        <i data-feather="send" class="w-5 h-5"></i>
-                    </a>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
-        feather.replace();
     }
 
-    // Función principal de filtros y visibilidad de columnas
-    function aplicarFiltros() {
-        const tipo = filtroTipo.value;
-        const cel = filtroCliente.value.trim().toLowerCase();
-        const fecha = filtroFecha.value;
-        
-        const filteredData = sampleData.filter(item => {
-            const okTipo = !tipo || item.tipo === tipo;
-            const okCli = !cel || (item.cliente && item.cliente.includes(cel));
-            const okFec = !fecha || item.fechaEnvio === fecha;
-            return okTipo && okCli && okFec;
-        });
-        
-        renderTable(filteredData);
-        
-        if (sampleData.length > 0) {
-            const colDistrito = document.querySelectorAll('.col-distrito');
-            const colDireccion = document.querySelectorAll('.col-direccion');
-            const colReferencia = document.querySelectorAll('.col-referencia');
-            const colDni = document.querySelectorAll('.col-dni');
-            const colAgencia = document.querySelectorAll('.col-agencia');
+    async function saveShipmentChanges() {
+        saveEditBtn.disabled = true;
+        showToast('Guardando cambios...');
 
-            [...colDistrito, ...colDireccion, ...colReferencia, ...colDni, ...colAgencia].forEach(el => el.style.display = 'table-cell');
-            
-            if (tipo === 'DELIVERY') { 
-                [...colDni, ...colAgencia].forEach(el => el.style.display = 'none'); 
-            } else if (tipo === 'SHALOM' || tipo === 'OLVA') { 
-                [...colDistrito, ...colDireccion, ...colReferencia].forEach(el => el.style.display = 'none'); 
-            }
-        }
-        
-        deseleccionarTodo();
-    }
-
-    // Funciones de selección en lote
-    function contarSeleccionados(){
-        const count = tbody.querySelectorAll('.rowCheck:checked').length;
-        selCount.textContent = `${count} seleccionados`;
-    }
-    function seleccionarTodo(checked){
-        tbody.querySelectorAll('.rowCheck').forEach(cb => cb.checked = checked);
-        thCheckTodos.checked = checked;
-        checkTodos.checked = checked;
-        contarSeleccionados();
-    }
-    function deseleccionarTodo(){ seleccionarTodo(false); }
-
-    // Eventos de selección
-    checkTodos.addEventListener('change', e => seleccionarTodo(e.target.checked));
-    thCheckTodos.addEventListener('change', e => seleccionarTodo(e.target.checked));
-    
-    // Evento unificado en el cuerpo de la tabla para abrir panel de edición y manejar checkboxes
-    tbody.addEventListener('click', e => {
-        const target = e.target;
-        
-        if (target.classList.contains('rowCheck')) {
-            contarSeleccionados();
-            return;
-        }
-
-        const whatsAppLink = target.closest('.whatsapp-link');
-        const row = target.closest('tr');
-
-        if (whatsAppLink) {
-            e.preventDefault();
-            const shipmentId = parseInt(whatsAppLink.dataset.id, 10);
-            const shipment = sampleData.find(item => item.id === shipmentId);
-
-            if (shipment) {
-                const businessName = document.getElementById('businessName').value || 'tu tienda';
-                let details = (shipment.tipo === 'DELIVERY') ?
-                    `Courier: ${shipment.tipo}\nDistrito: ${shipment.distrito}\nDirección: ${shipment.direccion}` :
-                    `Courier: ${shipment.tipo}\nAgencia: ${shipment.agencia}\nDNI/CE: ${shipment.dni}`;
-                
-                const message = `¡Hola ${shipment.nombre}! 👋 Te enviamos los detalles de tu envío con ${businessName}:\n\n${details}\n\nFecha de Envío Programada: ${shipment.fechaEnvio}\n\n¡Gracias por tu compra! 😊`;
-                const whatsappUrl = `https://wa.me/51${shipment.cliente}?text=${encodeURIComponent(message)}`;
-                window.open(whatsappUrl, '_blank');
-            }
-            return;
-        }
-
-        if (row && row.dataset.id) {
-            const shipmentId = parseInt(row.dataset.id, 10);
-            openEditPanel(shipmentId);
-        }
-    });
-
-    // Evento de acción en lote
-    accionLote.addEventListener('change', () => {
-        fechaReprog.classList.toggle('oculto', accionLote.value !== 'REPROGRAMADO');
-        if (accionLote.value !== 'REPROGRAMADO') fechaReprog.value = '';
-    });
-
-    // Evento de aplicar acción en lote
-    btnAplicarLote.addEventListener('click', async () => {
-        const action = accionLote.value;
-        if (!action){ showToast('Elige una acción en lote'); return; }
-        
-        const seleccionados = getSelectedIds();
-        if (seleccionados.length === 0){ showToast('No hay envíos seleccionados'); return; }
-
-        if (action === 'ELIMINAR') {
-            openDeleteModal(seleccionados);
-            return;
-        }
-
-        if (action === 'REPROGRAMADO' && !fechaReprog.value){ showToast('Selecciona fecha para reprogramar'); return; }
-        
-        const payload = { 
-            action: "batchUpdateStatus", 
-            payload: { 
-                ids: seleccionados, 
-                status: action,
-                newDate: fechaReprog.value 
-            } 
+        // Recolectar datos del formulario
+        const payload = {
+            id: parseInt(editPanelForm.id.value),
+            cliente: editPanelForm.cliente.value,
+            nombre: editPanelForm.nombre.value,
+            telefono: editPanelForm.telefono.value,
+            fechaEnvio: editPanelForm.fechaEnvio.value,
+            tipo: editPanelForm.tipo.value,
+            estado: editPanelForm.estado.value,
+            distrito: editPanelForm.distrito.value,
+            direccion: editPanelForm.direccion.value,
+            referencia: editPanelForm.referencia.value,
+            dni: editPanelForm.dni.value,
+            agencia: editPanelForm.agencia.value,
+            detalle: editPanelForm.detalle.value,
+            cobrar: editPanelForm.cobrar.value
         };
 
         try {
-            const response = await fetch(scriptURL, {
+            const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({ action: 'updateShipment', payload }),
             });
-            showToast('Acción aplicada. Recargando datos...');
-            setTimeout(() => loadDataFromSheet(), 1500);
+            await response.json();
+            
+            closeEditPanel();
+            await fetchDataFromSheet(); // Recarga los datos
+            showToast('Envío actualizado con éxito.');
         } catch (error) {
-            showToast('Error de conexión al aplicar acción.');
+            console.error('Error updating shipment:', error);
+            showToast('Error al guardar los cambios.');
+        } finally {
+            saveEditBtn.disabled = false;
         }
-    });
+    }
 
-    btnAplicarFiltros.addEventListener('click', aplicarFiltros);
-
-    // --- FUNCIONALIDADES DE PLANTILLAS Y ETIQUETAS ---
-    function downloadCSV(fileName, data) { /* ... */ }
-    function sanitizeValue(value) { /* ... */ }
-    function generateCourierCSV(courier, shipments) { /* ... */ }
-    btnTplDelivery.addEventListener('click', () => { /* ... */ });
-    btnTplShalom.addEventListener('click', () => { /* ... */ });
-    btnTplOlva.addEventListener('click', () => { /* ... */ });
-    btnEtiquetas.addEventListener('click', () => { /* ... */ });
-
-
-    // --- SECCIÓN LINK MÁGICO ---
-    const btnCopiarLink = document.getElementById('btnCopiarLink');
-    const linkUnicoInput = document.getElementById('linkUnicoInput');
-    const btnCompartirLink = document.getElementById('btnCompartirLink');
-    btnCompartirLink.addEventListener('click', async () => { /* ... */ });
-    btnCopiarLink.addEventListener('click', () => { /* ... */ });
-
-    // --- SECCIÓN MI CUENTA ---
-    const businessNameInput = document.getElementById('businessName');
-    const headerBusinessName = document.getElementById('headerBusinessName');
-    const logoInput = document.getElementById('logoInput');
-    const logoPreview = document.getElementById('logoPreview');
-    const headerLogo = document.getElementById('headerLogo');
-    const btnGuardarConfig = document.getElementById('btnGuardarConfig');
-    headerBusinessName.textContent = businessNameInput.value || '[Nombre del emprendimiento]';
-    businessNameInput.addEventListener('input', () => { /* ... */ });
-    logoInput.addEventListener('change', function() { /* ... */ });
-    btnGuardarConfig.addEventListener('click', () => { /* ... */ });
-    goToAccountBtn.addEventListener('click', () => { /* ... */ });
+    // Event listeners para el panel
+    tbodyEnvios.addEventListener('click', handleRowClick);
+    mobileCardContainer.addEventListener('click', handleRowClick);
+    closeEditPanelBtn.addEventListener('click', closeEditPanel);
+    cancelEditBtn.addEventListener('click', closeEditPanel);
+    editPanelOverlay.addEventListener('click', closeEditPanel);
+    saveEditBtn.addEventListener('click', saveShipmentChanges);
 
 
     // --- UTILIDADES ---
@@ -1062,7 +1623,6 @@ document.addEventListener('DOMContentLoaded', () => {
         toast.textContent = msg;
         toast.classList.remove('opacity-0', 'translate-y-2');
         toast.classList.add('opacity-100', 'translate-y-0');
-        
         toastTimeout = setTimeout(() => {
             toast.classList.remove('opacity-100', 'translate-y-0');
             toast.classList.add('opacity-0', 'translate-y-2');
@@ -1070,8 +1630,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- INICIALIZACIÓN ---
-    loadDataFromSheet();
-    contarSeleccionados();
+    syncBusinessInfo();
+    fetchDataFromSheet();
 });
 </script>
 </body>
