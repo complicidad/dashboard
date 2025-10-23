@@ -236,6 +236,66 @@
             display: none;
         }
 
+        /* Estilos para edición inline */
+        .inline-edit-container {
+            display: flex;
+            align-items: center;
+            gap: 4px; /* Espacio entre select, input y botón */
+        }
+        .inline-edit-estado {
+            min-width: 120px; /* Ancho mínimo para el select */
+            flex-shrink: 0;
+            /* Estilos reducidos para inputs inline */
+            padding: 0.3rem 0.5rem !important; /* Más pequeño, !important para sobreescribir Tailwind */
+            font-size: 0.75rem !important; /* Más pequeño */
+            border-radius: 0.5rem !important; /* rounded-lg */
+        }
+         .inline-edit-fecha {
+             max-width: 150px; /* Ancho máximo para la fecha */
+             flex-shrink: 0;
+             /* Estilos reducidos para inputs inline */
+             padding: 0.3rem 0.5rem !important;
+             font-size: 0.75rem !important;
+             border-radius: 0.5rem !important;
+         }
+        .inline-save-btn {
+             padding: 4px 8px !important; /* Botón más pequeño */
+             flex-shrink: 0;
+             font-size: 0.75rem !important; /* Texto más pequeño */
+             border-radius: 0.5rem !important; /* rounded-lg */
+        }
+        .inline-save-btn svg {
+            width: 14px !important;
+            height: 14px !important;
+        }
+
+        /* Ajustes para tarjetas móviles */
+        #mobileCardContainer .inline-edit-container {
+            flex-direction: column;
+            align-items: flex-start; /* Alinear a la izquierda en móvil */
+            margin-top: 8px;
+            gap: 8px; /* Más espacio vertical en móvil */
+            padding-top: 8px;
+            border-top: 1px solid #eee; /* Separador visual */
+        }
+         #mobileCardContainer .inline-edit-fecha {
+             max-width: none; /* Ancho completo en móvil */
+             width: 100%;
+             padding: 0.5rem !important; /* Padding normal en móvil */
+             font-size: 0.875rem !important; /* Tamaño normal en móvil */
+         }
+          #mobileCardContainer .inline-edit-estado {
+             width: 100%;
+             padding: 0.5rem !important; /* Padding normal en móvil */
+             font-size: 0.875rem !important; /* Tamaño normal en móvil */
+         }
+         #mobileCardContainer .inline-save-btn {
+            width: 100%;
+            justify-content: center;
+            padding: 0.5rem 1rem !important; /* Padding normal en móvil */
+            font-size: 0.875rem !important; /* Tamaño normal en móvil */
+         }
+
     </style>
 </head>
 <body class="font-sans bg-bg-soft text-gray-900 antialiased">
@@ -678,115 +738,6 @@
             </div>
         </div>
     </div>
-    <div id="editPanelOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden"></div>
-    <!-- PANEL DE EDICIÓN (HTML AÑADIDO) -->
-    <aside id="editPanel" class="fixed top-0 right-0 h-full w-full max-w-md bg-bg-soft shadow-2xl transform translate-x-full z-30 flex flex-col">
-        <!-- Header del Panel -->
-        <div class="flex-shrink-0 flex justify-between items-center p-4 bg-white border-b border-gray-200">
-            <h2 class="text-xl font-bold text-gray-900">Editar Envío</h2>
-            <button id="closeEditPanelBtn" class="text-gray-500 hover:text-accent transition-colors">
-                <i data-feather="x" class="w-6 h-6"></i>
-            </button>
-        </div>
-    
-        <!-- Contenido del Formulario (con scroll) -->
-        <div class="flex-grow p-6 overflow-y-auto">
-            <form id="editForm" class="space-y-4">
-                <input type="hidden" id="editId">
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="editCliente" class="block text-sm text-gray-500 font-semibold mb-1.5">Cliente (Celular)</label>
-                        <input type="text" id="editCliente" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
-                    </div>
-                    <div>
-                        <label for="editNombre" class="block text-sm text-gray-500 font-semibold mb-1.5">Destinatario</label>
-                        <input type="text" id="editNombre" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
-                    </div>
-                </div>
-    
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="editTelefono" class="block text-sm text-gray-500 font-semibold mb-1.5">Teléfono</label>
-                        <input type="text" id="editTelefono" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
-                    </div>
-                    <div>
-                        <label for="editFechaEnvio" class="block text-sm text-gray-500 font-semibold mb-1.5">Fecha Envío</label>
-                        <input type="date" id="editFechaEnvio" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
-                    </div>
-                </div>
-    
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <div>
-                        <label for="editTipo" class="block text-sm text-gray-500 font-semibold mb-1.5">Courier</label>
-                        <select id="editTipo" class="select p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
-                            <option value="DELIVERY">Delivery Propio</option>
-                            <option value="SHALOM">Shalom</option>
-                            <option value="OLVA">Olva</option>
-                            <option value="DINSIDES">Dinsides</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="editEstado" class="block text-sm text-gray-500 font-semibold mb-1.5">Estado</label>
-                        <select id="editEstado" class="select p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
-                            <option value="PENDIENTE">Pendiente</option>
-                            <option value="ENVIADO">Enviado</option>
-                            <option value="ENTREGADO">Entregado</option>
-                            <option value="REPROGRAMADO">Reprogramado</option>
-                        </select>
-                    </div>
-                </div>
-    
-                <!-- Campos Condicionales -->
-                <div id="editCamposDelivery" class="space-y-4" style="display: none;">
-                    <div>
-                        <label for="editDistrito" class="block text-sm text-gray-500 font-semibold mb-1.5">Distrito</label>
-                        <input type="text" id="editDistrito" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
-                    </div>
-                    <div>
-                        <label for="editDireccion" class="block text-sm text-gray-500 font-semibold mb-1.5">Dirección</label>
-                        <input type="text" id="editDireccion" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
-                    </div>
-                    <div>
-                        <label for="editReferencia" class="block text-sm text-gray-500 font-semibold mb-1.5">Referencia</label>
-                        <textarea id="editReferencia" rows="2" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100"></textarea>
-                    </div>
-                </div>
-    
-                <div id="editCamposAgencia" class="space-y-4" style="display: none;">
-                    <div>
-                        <label for="editDni" class="block text-sm text-gray-500 font-semibold mb-1.5">DNI/CE</label>
-                        <input type="text" id="editDni" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
-                    </div>
-                    <div>
-                        <label for="editAgencia" class="block text-sm text-gray-500 font-semibold mb-1.5">Agencia</label>
-                        <input type="text" id="editAgencia" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
-                    </div>
-                </div>
-                
-                <div id="editCamposDinsides" class="space-y-4" style="display: none;">
-                    <div>
-                        <label for="editDetalle" class="block text-sm text-gray-500 font-semibold mb-1.5">Detalle Envío</label>
-                        <input type="text" id="editDetalle" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
-                    </div>
-                    <div>
-                        <label for="editCobrar" class="block text-sm text-gray-500 font-semibold mb-1.5">Monto a Cobrar</label>
-                        <input type="text" id="editCobrar" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
-                    </div>
-                </div>
-    
-            </form>
-        </div>
-    
-        <!-- Footer del Panel -->
-        <div class="flex-shrink-0 p-4 bg-white border-t border-gray-200 flex justify-end gap-3">
-            <button id="cancelEditBtn" class="btn ghost bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 py-2 px-4 rounded-xl font-bold text-sm transition-all duration-200">Cancelar</button>
-            <button id="saveEditBtn" class="btn primary bg-gradient-to-r from-accent to-accent-alt text-white shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 py-2 px-4 rounded-xl font-bold text-sm inline-flex items-center gap-2">
-                <i data-feather="save" class="w-4 h-4"></i> Guardar Cambios
-            </button>
-        </div>
-    </aside>
-
     <!-- Contenedor oculto para las etiquetas de impresión -->
     <div id="print-container" class="print-container"></div>
 
@@ -908,14 +859,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const fechaReprog = document.getElementById('fechaReprog');
     const btnAplicarLote = document.getElementById('btnAplicarLote');
     const goToAccountBtn = document.getElementById('goToAccountBtn');
-    
-    // --- NUEVOS ELEMENTOS DEL DOM PARA EL PANEL DE EDICIÓN ---
-    const editPanel = document.getElementById('editPanel');
-    const editPanelOverlay = document.getElementById('editPanelOverlay');
-    const closeEditPanelBtn = document.getElementById('closeEditPanelBtn');
-    const cancelEditBtn = document.getElementById('cancelEditBtn');
-    const saveEditBtn = document.getElementById('saveEditBtn');
-    const editForm = document.getElementById('editForm');
     
     let todosLosEnvios = []; // Variable global para almacenar todos los envíos.
 
@@ -1076,7 +1019,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // --- Renderizar para tabla (Desktop) ---
                 const tr = document.createElement('tr');
-                tr.className = `border-b border-gray-100 hover:bg-orange-50/50 transition-colors duration-200 ${duplicateClass} cursor-pointer`; // Añadido cursor-pointer
+                tr.className = `border-b border-gray-100 hover:bg-orange-50/50 transition-colors duration-200 ${duplicateClass}`; // Añadido cursor-pointer
                 tr.dataset.id = envio.id;
                 tr.innerHTML = `
                     <td class="p-3 text-center"><input type="checkbox" class="rowCheck rounded border-gray-300 text-accent focus:ring-accent" data-id="${envio.id}"></td>
@@ -1093,7 +1036,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td class="p-3 text-sm text-gray-700 col-responsive-hide col-dinsides col-hidden">${envio.detalle}</td>
                     <td class="p-3 text-sm text-gray-700 col-responsive-hide col-dinsides col-hidden">${envio.cobrar}</td>
                     <td class="p-3 text-sm text-gray-700">${envio.fechaEnvio ? envio.fechaEnvio.substring(0, 10) : ''}</td>
-                    <td class="p-3 text-sm"><span class="px-2 py-1 text-xs font-bold rounded-full ${getEstadoClass(envio.estado)}">${envio.estado}</span></td>
+                    <td class="p-3 text-sm">
+                        <!-- Contenedor para edición inline -->
+                        <div class="inline-edit-container">
+                            <select class="inline-edit-estado select border border-gray-200 bg-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-orange-100" data-original-estado="${envio.estado}">
+                                <option value="PENDIENTE" ${envio.estado === 'PENDIENTE' ? 'selected' : ''}>Pendiente</option>
+                                <option value="ENVIADO" ${envio.estado === 'ENVIADO' ? 'selected' : ''}>Enviado</option>
+                                <option value="ENTREGADO" ${envio.estado === 'ENTREGADO' ? 'selected' : ''}>Entregado</option>
+                                <option value="REPROGRAMADO" ${envio.estado === 'REPROGRAMADO' ? 'selected' : ''}>Reprogramado</option>
+                            </select>
+                            <input type="date" class="inline-edit-fecha input border border-gray-200 bg-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-orange-100 oculto" value="${envio.fechaEnvio ? envio.fechaEnvio.substring(0, 10) : ''}" data-original-fecha="${envio.fechaEnvio ? envio.fechaEnvio.substring(0, 10) : ''}">
+                            <button class="inline-save-btn btn primary bg-accent text-white shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 inline-flex items-center justify-center gap-1 oculto">
+                                <i data-feather="save" class="w-3 h-3"></i>
+                            </button>
+                        </div>
+                    </td>                    
                     <td class="p-3 text-center"><button class="text-accent hover:text-accent-alt" title="Notificar al cliente"><i data-feather="send" class="w-4 h-4"></i></button></td>
                 `;
                 tbodyEnvios.appendChild(tr);
@@ -1101,7 +1058,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // --- Renderizar para tarjetas (Móvil) ---
                 const card = document.createElement('div');
                 const cardBgClass = isDuplicate ? 'bg-yellow-200/50' : 'bg-white';
-                card.className = `${cardBgClass} rounded-xl shadow p-4 border border-gray-200 space-y-3 cursor-pointer`; // Añadido cursor-pointer
+                card.className = `${cardBgClass} rounded-xl shadow p-4 border border-gray-200 space-y-3`; // Añadido cursor-pointer
                 card.dataset.id = envio.id;
                 card.innerHTML = `
                     <div class="flex justify-between items-start">
@@ -1112,7 +1069,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <p class="text-sm text-gray-500">${envio.distrito}</p>
                             </div>
                         </div>
-                        <span class="px-2 py-1 text-xs font-bold rounded-full ${getEstadoClass(envio.estado)}">${envio.estado}</span>
+                        <!-- <span class="px-2 py-1 text-xs font-bold rounded-full ${getEstadoClass(envio.estado)}">${envio.estado}</span> --> <!-- Estado original oculto -->
                     </div>
                     <div class="text-sm text-gray-600 space-y-2 pl-8">
                         <p><strong class="text-gray-500">Cliente:</strong> ${envio.cliente}</p>
@@ -1124,6 +1081,22 @@ document.addEventListener('DOMContentLoaded', () => {
                             <p><strong class="text-gray-500">Cobrar:</strong> ${envio.cobrar || 'N/A'}</p>
                         ` : ''}
                     </div>
+
+                    <!-- Contenedor para edición inline en móvil -->
+                    <div class="inline-edit-container">
+                        <label class="block text-xs text-gray-500 font-semibold mb-1">Estado:</label>
+                        <select class="inline-edit-estado select p-2 border border-gray-200 rounded-lg bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-orange-100" data-original-estado="${envio.estado}">
+                            <option value="PENDIENTE" ${envio.estado === 'PENDIENTE' ? 'selected' : ''}>Pendiente</option>
+                            <option value="ENVIADO" ${envio.estado === 'ENVIADO' ? 'selected' : ''}>Enviado</option>
+                            <option value="ENTREGADO" ${envio.estado === 'ENTREGADO' ? 'selected' : ''}>Entregado</option>
+                            <option value="REPROGRAMADO" ${envio.estado === 'REPROGRAMADO' ? 'selected' : ''}>Reprogramado</option>
+                        </select>
+                        <input type="date" class="inline-edit-fecha input p-2 border border-gray-200 rounded-lg bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-orange-100 oculto" value="${envio.fechaEnvio ? envio.fechaEnvio.substring(0, 10) : ''}" data-original-fecha="${envio.fechaEnvio ? envio.fechaEnvio.substring(0, 10) : ''}">
+                        <button class="inline-save-btn btn primary bg-accent text-white rounded-lg font-bold text-sm shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 inline-flex items-center justify-center gap-1 oculto py-2">
+                            <i data-feather="save" class="w-4 h-4"></i> Guardar Cambio
+                        </button>
+                    </div>
+
                     <div class="flex justify-end pt-2">
                         <button class="text-accent hover:text-accent-alt text-sm font-bold inline-flex items-center gap-1" title="Notificar al cliente">
                             <i data-feather="send" class="w-4 h-4"></i> Notificar
@@ -1431,6 +1404,146 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('a.nav-link[href="#cuenta"]').click();
     });
 
+
+    // --- LÓGICA DE EDICIÓN INLINE (NUEVA) ---
+
+    // Función para manejar el guardado de cambios inline
+    async function saveInlineChanges(buttonElement) {
+        buttonElement.disabled = true; // Deshabilita el botón mientras guarda
+        showToast('Guardando...');
+
+        const row = buttonElement.closest('tr[data-id], div[data-id]'); // Funciona para tabla y tarjeta
+        const id = parseInt(row.dataset.id);
+        const estadoSelect = row.querySelector('.inline-edit-estado');
+        const fechaInput = row.querySelector('.inline-edit-fecha');
+
+        const nuevoEstado = estadoSelect.value;
+        let nuevaFecha = fechaInput.value;
+
+        // Buscar el envío original en nuestro array local 'todosLosEnvios'
+        const envioOriginal = todosLosEnvios.find(e => e.id === id);
+        if (!envioOriginal) {
+            showToast('Error: No se encontró el envío original.');
+            buttonElement.disabled = false; // Rehabilita si hay error
+            return;
+        }
+
+        // Crear el payload copiando el original y actualizando solo lo necesario
+        // Usamos una copia profunda simple para evitar problemas si hay objetos anidados (aunque aquí no los hay)
+        const payload = JSON.parse(JSON.stringify(envioOriginal)); 
+        payload.estado = nuevoEstado; // Actualiza el estado
+
+        // Solo actualizar fecha si el estado es REPROGRAMADO
+        if (nuevoEstado === 'REPROGRAMADO') {
+            if (!nuevaFecha) {
+                 showToast('Selecciona una fecha para reprogramar.');
+                 buttonElement.disabled = false; // Rehabilita si falta fecha
+                 return; // Detener si falta la fecha
+            }
+            payload.fechaEnvio = nuevaFecha; // Actualiza la fecha
+        } else {
+            // Si el estado NO es REPROGRAMADO, asegurar que la fecha en el payload
+            // sea la original, NO la que pudiera estar en el input (si se mostró y luego se ocultó)
+            payload.fechaEnvio = (envioOriginal.fechaEnvio) ? envioOriginal.fechaEnvio.substring(0, 10) : '';
+        }
+
+        // Eliminar campos que no existen en el Sheet o que no queremos enviar (si los hubiera)
+        // delete payload.algunCampoExtraLocal; 
+
+        try {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                // Reutilizamos la acción 'updateShipment' que ya maneja todos los campos
+                body: JSON.stringify({ action: 'updateShipment', payload }), 
+            });
+            const result = await response.json(); // Espera y parsea la respuesta del script
+
+            if (result.status !== 'success') {
+                throw new Error(result.message || 'Error desconocido del script.');
+            }
+
+            // Éxito: Actualizar datos locales y UI
+            // Opción 1: Actualizar solo el array local y redibujar (más simple)
+            await fetchDataFromSheet(); // Recarga toda la tabla para asegurar consistencia
+
+            // Opción 2 (Más compleja, mejor UX si la tabla es enorme): 
+            // Actualizar el array local y solo la fila/tarjeta modificada
+            /*
+            const index = todosLosEnvios.findIndex(e => e.id === id);
+            if (index !== -1) {
+                // Actualizar el objeto en el array local con los datos guardados
+                todosLosEnvios[index] = { ...todosLosEnvios[index], estado: payload.estado, fechaEnvio: payload.fechaEnvio }; 
+            }
+            // Actualizar los atributos data-* en los inputs/selects de la fila/tarjeta editada
+            estadoSelect.dataset.originalEstado = payload.estado;
+            fechaInput.dataset.originalFecha = payload.fechaEnvio;
+            // Ocultar el botón guardar
+            buttonElement.classList.add('oculto');
+            buttonElement.disabled = false; // Rehabilita por si acaso
+            // Actualizar visualmente la celda/tarjeta (si es necesario más allá de los inputs)
+            // Por ejemplo, si tuvieras un badge de color aparte del select.
+            */
+
+            showToast('Envío actualizado.');
+            // No necesitamos re-habilitar el botón porque la tabla se redibuja completamente con fetchDataFromSheet()
+
+        } catch (error) {
+            console.error('Error updating shipment inline:', error);
+            showToast(`Error al guardar: ${error.message}`);
+            buttonElement.disabled = false; // Re-habilita en caso de error
+        }
+    }
+
+    // Listener delegado para cambios en Estado y Fecha inline
+    // Se asocia al contenedor principal de la sección de envíos para capturar eventos de tabla y tarjetas
+    document.getElementById('envios').addEventListener('change', (e) => {
+        // Si el cambio ocurrió en un select de estado
+        if (e.target.classList.contains('inline-edit-estado')) {
+            const selectEstado = e.target;
+            const container = selectEstado.closest('.inline-edit-container');
+            const fechaInput = container.querySelector('.inline-edit-fecha');
+            const saveBtn = container.querySelector('.inline-save-btn');
+            const originalEstado = selectEstado.dataset.originalEstado;
+            const nuevoEstado = selectEstado.value;
+
+            // Mostrar/ocultar input de fecha si es REPROGRAMADO
+            const esReprogramado = nuevoEstado === 'REPROGRAMADO';
+            fechaInput.classList.toggle('oculto', !esReprogramado);
+
+            // Determinar si hay cambios para mostrar el botón Guardar
+            const estadoCambiado = nuevoEstado !== originalEstado;
+            // Verificar si la fecha cambió SOLO si es relevante (estado es REPROGRAMADO)
+            // Usamos el valor actual del input de fecha para la comparación
+            const fechaCambiada = esReprogramado && (fechaInput.value !== fechaInput.dataset.originalFecha); 
+
+            saveBtn.classList.toggle('oculto', !(estadoCambiado || fechaCambiada));
+
+        } 
+        // Si el cambio ocurrió en un input de fecha
+        else if (e.target.classList.contains('inline-edit-fecha')) {
+            const fechaInput = e.target;
+            const container = fechaInput.closest('.inline-edit-container');
+            const saveBtn = container.querySelector('.inline-save-btn');
+            const selectEstado = container.querySelector('.inline-edit-estado'); // Necesitamos el estado actual también
+
+            // Mostrar botón Guardar si la fecha cambió O si el estado ya había cambiado
+            const fechaCambiada = fechaInput.value !== fechaInput.dataset.originalFecha;
+            const estadoCambiado = selectEstado.value !== selectEstado.dataset.originalEstado;
+
+             saveBtn.classList.toggle('oculto', !(fechaCambiada || estadoCambiado));
+        }
+    });
+
+    // Listener delegado para clics en el botón Guardar inline
+    document.getElementById('envios').addEventListener('click', (e) => {
+         // Asegurarse de que el clic fue en el botón o su ícono SVG/path interior
+         const button = e.target.closest('.inline-save-btn');
+         if (button) {
+             e.preventDefault(); // Evitar cualquier comportamiento por defecto del botón
+             saveInlineChanges(button);
+         }
+    });
+
     // --- LÓGICA DEL MODAL DE CONFIRMACIÓN ---
     const deleteModal = document.getElementById('deleteModal');
     const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
@@ -1474,147 +1587,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     cancelDeleteBtn.addEventListener('click', cerrarModalConfirmacion);
 
-    // --- LÓGICA DEL PANEL DE EDICIÓN (AÑADIDA) ---
-    const editPanelForm = {
-        id: document.getElementById('editId'),
-        cliente: document.getElementById('editCliente'),
-        nombre: document.getElementById('editNombre'),
-        telefono: document.getElementById('editTelefono'),
-        fechaEnvio: document.getElementById('editFechaEnvio'),
-        tipo: document.getElementById('editTipo'),
-        estado: document.getElementById('editEstado'),
-        distrito: document.getElementById('editDistrito'),
-        direccion: document.getElementById('editDireccion'),
-        referencia: document.getElementById('editReferencia'),
-        dni: document.getElementById('editDni'),
-        agencia: document.getElementById('editAgencia'),
-        detalle: document.getElementById('editDetalle'),
-        cobrar: document.getElementById('editCobrar')
-    };
-
-    const editCampos = {
-        delivery: document.getElementById('editCamposDelivery'),
-        agencia: document.getElementById('editCamposAgencia'),
-        dinsides: document.getElementById('editCamposDinsides')
-    };
-
-    function toggleEditFields(courier) {
-        editCampos.delivery.style.display = 'none';
-        editCampos.agencia.style.display = 'none';
-        editCampos.dinsides.style.display = 'none';
-
-        if (courier === 'DELIVERY') {
-            editCampos.delivery.style.display = 'block';
-        } else if (courier === 'DINSIDES') {
-            editCampos.agencia.style.display = 'block';
-            editCampos.dinsides.style.display = 'block';
-        } else if (courier === 'SHALOM' || courier === 'OLVA') {
-            editCampos.agencia.style.display = 'block';
-        }
-    }
-
-    editPanelForm.tipo.addEventListener('change', (e) => toggleEditFields(e.target.value));
-
-    function openEditPanel(id) {
-        const envio = todosLosEnvios.find(e => e.id === id);
-        if (!envio) {
-            showToast('Error: No se encontró el envío.');
-            return;
-        }
-
-        // Poblar el formulario
-        editPanelForm.id.value = envio.id;
-        editPanelForm.cliente.value = envio.cliente || '';
-        editPanelForm.nombre.value = envio.nombre || '';
-        editPanelForm.telefono.value = envio.telefono || '';
-        editPanelForm.fechaEnvio.value = envio.fechaEnvio ? envio.fechaEnvio.substring(0, 10) : '';
-        editPanelForm.tipo.value = envio.tipo || 'DELIVERY';
-        editPanelForm.estado.value = envio.estado || 'PENDIENTE';
-        editPanelForm.distrito.value = envio.distrito || '';
-        editPanelForm.direccion.value = envio.direccion || '';
-        editPanelForm.referencia.value = envio.referencia || '';
-        editPanelForm.dni.value = envio.dni || '';
-        editPanelForm.agencia.value = envio.agencia || '';
-        editPanelForm.detalle.value = envio.detalle || '';
-        editPanelForm.cobrar.value = envio.cobrar || '';
-
-        // Mostrar campos correctos
-        toggleEditFields(envio.tipo);
-
-        // Abrir el panel
-        editPanelOverlay.classList.remove('hidden');
-        editPanel.classList.remove('translate-x-full');
-        feather.replace(); // Recargar íconos
-    }
-
-    function closeEditPanel() {
-        editPanel.classList.add('translate-x-full');
-        editPanelOverlay.classList.add('hidden');
-        editForm.reset();
-    }
-
-    function handleRowClick(e) {
-        // No abrir si se hizo clic en un checkbox o un botón
-        if (e.target.closest('input[type="checkbox"]') || e.target.closest('button')) {
-            return;
-        }
-        
-        const row = e.target.closest('tr[data-id], div[data-id]');
-        if (row) {
-            const id = parseInt(row.dataset.id);
-            openEditPanel(id);
-        }
-    }
-
-    async function saveShipmentChanges() {
-        saveEditBtn.disabled = true;
-        showToast('Guardando cambios...');
-
-        // Recolectar datos del formulario
-        const payload = {
-            id: parseInt(editPanelForm.id.value),
-            cliente: editPanelForm.cliente.value,
-            nombre: editPanelForm.nombre.value,
-            telefono: editPanelForm.telefono.value,
-            fechaEnvio: editPanelForm.fechaEnvio.value,
-            tipo: editPanelForm.tipo.value,
-            estado: editPanelForm.estado.value,
-            distrito: editPanelForm.distrito.value,
-            direccion: editPanelForm.direccion.value,
-            referencia: editPanelForm.referencia.value,
-            dni: editPanelForm.dni.value,
-            agencia: editPanelForm.agencia.value,
-            detalle: editPanelForm.detalle.value,
-            cobrar: editPanelForm.cobrar.value
-        };
-
-        try {
-            const response = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'updateShipment', payload }),
-            });
-            await response.json();
-            
-            closeEditPanel();
-            await fetchDataFromSheet(); // Recarga los datos
-            showToast('Envío actualizado con éxito.');
-        } catch (error) {
-            console.error('Error updating shipment:', error);
-            showToast('Error al guardar los cambios.');
-        } finally {
-            saveEditBtn.disabled = false;
-        }
-    }
-
-    // Event listeners para el panel
-    tbodyEnvios.addEventListener('click', handleRowClick);
-    mobileCardContainer.addEventListener('click', handleRowClick);
-    closeEditPanelBtn.addEventListener('click', closeEditPanel);
-    cancelEditBtn.addEventListener('click', closeEditPanel);
-    editPanelOverlay.addEventListener('click', closeEditPanel);
-    saveEditBtn.addEventListener('click', saveShipmentChanges);
-
-
     // --- UTILIDADES ---
     const toast = document.getElementById('toast');
     let toastTimeout;
@@ -1636,4 +1608,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
