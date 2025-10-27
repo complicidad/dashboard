@@ -432,14 +432,7 @@
                                             <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider">Cliente</th>
                                             <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider">Courier</th>
                                             <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider col-responsive-hide">Destinatario</th>
-                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider col-responsive-hide">Teléfono</th>
-                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider col-responsive-hide col-delivery">Distrito</th>
-                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider col-responsive-hide col-delivery">Dirección</th>
-                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider col-responsive-hide col-delivery">Referencia</th>
-                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider col-responsive-hide col-agencia">DNI/CE</th>
-                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider col-responsive-hide col-agencia">Agencia</th>
-                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider col-responsive-hide col-dinsides col-hidden">Detalle</th>
-                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider col-responsive-hide col-dinsides col-hidden">Cobrar</th>
+                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider col-responsive-hide">Destino</th>
                                             <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider">Fecha Envío</th>
                                             <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider">Estado</th>
                                             <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider rounded-tr-xl">Notificar</th>
@@ -815,48 +808,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- LÓGICA DE LA TABLA Y FILTROS ---
 
-    function manejarVisibilidadColumnas(filtro, enviosMostrados) {
-        const columnasDelivery = document.querySelectorAll('.col-delivery');
-        const columnasAgencia = document.querySelectorAll('.col-agencia');
-        const columnasDinsides = document.querySelectorAll('.col-dinsides');
-
-        // Oculta todas las columnas especiales primero
-        columnasDelivery.forEach(col => col.classList.add('col-hidden'));
-        columnasAgencia.forEach(col => col.classList.add('col-hidden'));
-        columnasDinsides.forEach(col => col.classList.add('col-hidden'));
-
-        if (filtro) {
-            // Lógica existente si hay un filtro específico
-            if (filtro === 'SHALOM' || filtro === 'OLVA') {
-                columnasAgencia.forEach(col => col.classList.remove('col-hidden'));
-            } else if (filtro === 'DINSIDES') {
-                columnasAgencia.forEach(col => col.classList.remove('col-hidden')); // Muestra DNI/Agencia
-                columnasDinsides.forEach(col => col.classList.remove('col-hidden')); // Y Muestra Detalle/Cobrar
-            } else if (filtro === 'DELIVERY') {
-                columnasDelivery.forEach(col => col.classList.remove('col-hidden'));
-            }
-            // Si el filtro es "" (Todos), esta parte se salta
-        } else {
-            // NUEVA LÓGICA: Si el filtro es "Todos", inspecciona los datos mostrados
-            const hasDelivery = enviosMostrados.some(e => e.tipo === 'DELIVERY');
-            const hasAgencia = enviosMostrados.some(e => e.tipo === 'SHALOM' || e.tipo === 'OLVA');
-            const hasDinsides = enviosMostrados.some(e => e.tipo === 'DINSIDES');
-
-            if (hasDelivery) {
-                columnasDelivery.forEach(col => col.classList.remove('col-hidden'));
-            }
-            if (hasAgencia || hasDinsides) {
-                // Muestra DNI/Agencia si hay Shalom, Olva O Dinsides
-                columnasAgencia.forEach(col => col.classList.remove('col-hidden'));
-            }
-            if (hasDinsides) {
-                // Muestra Detalle/Cobrar solo si hay Dinsides
-                columnasDinsides.forEach(col => col.classList.remove('col-hidden'));
-            }
-        }
-    }
-
-
     function aplicarFiltros() {
         const hoy = new Date().toISOString().split('T')[0];
         const clienteFilter = filtroCliente.value.toLowerCase();
@@ -906,7 +857,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });        
         
         renderizarTabla(enviosFiltrados, duplicates);
-        manejarVisibilidadColumnas(filtroTipo.value, enviosFiltrados);
     }
 
     function renderizarTabla(envios, duplicates) {
@@ -949,15 +899,41 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td class="p-3 text-sm text-gray-700">${envio.fechaReg ? envio.fechaReg.substring(0, 10) : ''}</td>
                     <td class="p-3 text-sm text-gray-700">${envio.cliente}</td>
                     <td class="p-3 text-sm text-gray-700">${envio.tipo}</td>
-                    <td class="p-3 text-sm text-gray-700 col-responsive-hide">${envio.nombre}</td>
-                    <td class="p-3 text-sm text-gray-700 col-responsive-hide">${envio.telefono}</td>
-                    <td class="p-3 text-sm text-gray-700 col-responsive-hide col-delivery col-hidden">${envio.distrito}</td>
-                    <td class="p-3 text-sm text-gray-700 col-responsive-hide col-delivery col-hidden">${envio.direccion}</td>
-                    <td class="p-3 text-sm text-gray-700 col-responsive-hide col-delivery col-hidden">${envio.referencia}</td>
-                    <td class="p-3 text-sm text-gray-700 col-responsive-hide col-agencia col-hidden">${envio.dni}</td>
-                    <td class="p-3 text-sm text-gray-700 col-responsive-hide col-agencia col-hidden">${envio.agencia}</td>
-                    <td class="p-3 text-sm text-gray-700 col-responsive-hide col-dinsides col-hidden">${envio.detalle}</td>
-                    <td class="p-3 text-sm text-gray-700 col-responsive-hide col-dinsides col-hidden">${envio.cobrar}</td>
+                    <td class="p-3 text-sm text-gray-700 col-responsive-hide">
+                        <span class="font-bold text-gray-900">${envio.nombre || 'N/A'}</span>
+                        <span class="block text-sm text-gray-500">${envio.telefono || 'N/A'}</span>
+                        ${
+                            // El DNI se agrupa aquí según la solicitud
+                            (envio.dni)
+                            ? `<span class="block text-sm text-gray-500 mt-1 pt-1 border-t border-gray-100">${envio.dni}</span>`
+                            : ''
+                        }
+                    </td>
+                    <td class="p-3 text-sm text-gray-700 col-responsive-hide">
+                        ${
+                            // --- INICIO: Lógica de Destino Dinámico (sin DNI) ---
+                            (() => {
+                                if (envio.tipo === 'DELIVERY') {
+                                    return `
+                                        <span class="font-semibold text-gray-800">${envio.distrito || 'N/A'}</span>
+                                        <span class="block text-xs text-gray-500">${envio.direccion || 'N/A'}</span>
+                                        <span class="block text-xs text-gray-500 italic">${envio.referencia || 'N/A'}</span>
+                                    `;
+                                } else if (envio.tipo === 'DINSIDES') {
+                                    return `
+                                        <span class="font-semibold text-gray-800">${envio.agencia || 'N/A'}</span>
+                                        <span class="block text-xs text-gray-500 mt-1">${envio.detalle || 'N/A'}</span>
+                                        ${envio.cobrar ? `<span class="block text-xs font-bold text-red-600 mt-1">Cobrar: ${envio.cobrar}</span>` : ''}
+                                    `;
+                                } else { // Shalom, Olva, etc.
+                                    return `
+                                        <span class="font-semibold text-gray-800">${envio.agencia || 'N/A'}</span>
+                                    `;
+                                }
+                            })()
+                            // --- FIN: Lógica de Destino Dinámico ---
+                        }
+                    </td>
                     <td class="p-3 text-sm text-gray-700">${envio.fechaEnvio ? envio.fechaEnvio.substring(0, 10) : ''}</td>
                     <td class="p-3 text-sm">
                         <!-- Contenedor para edición inline -->
@@ -1546,3 +1522,8 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
+
+
+
+
