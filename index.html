@@ -913,17 +913,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${
                             // --- INICIO: Lógica de Destino Dinámico (sin DNI) ---
                             (() => {
-                                if (envio.tipo === 'DELIVERY') {
+                                if (envio.tipo === 'DELIVERY' || envio.tipo === 'DINSIDES') {
                                     return `
                                         <span class="font-semibold text-gray-800">${envio.distrito || 'N/A'}</span>
                                         <span class="block text-xs text-gray-500">${envio.direccion || 'N/A'}</span>
                                         <span class="block text-xs text-gray-500 italic">${envio.referencia || 'N/A'}</span>
-                                    `;
-                                } else if (envio.tipo === 'DINSIDES') {
-                                    return `
-                                        <span class="font-semibold text-gray-800">${envio.agencia || 'N/A'}</span>
-                                        <span class="block text-xs text-gray-500 mt-1">${envio.detalle || 'N/A'}</span>
-                                        ${envio.cobrar ? `<span class="block text-xs font-bold text-red-600 mt-1">Cobrar: ${envio.cobrar}</span>` : ''}
                                     `;
                                 } else { // Shalom, Olva, etc.
                                     return `
@@ -966,7 +960,15 @@ document.addEventListener('DOMContentLoaded', () => {
                             <input type="checkbox" class="rowCheck rounded border-gray-300 text-accent focus:ring-accent" data-id="${envio.id}">
                             <div>
                                 <p class="font-bold text-gray-800">${envio.nombre}</p>
-                                <p class="text-sm text-gray-500">${envio.distrito}</p>
+                                ${
+                                    (() => {
+                                        if (envio.tipo === 'DELIVERY' || envio.tipo === 'DINSIDES') {
+                                            return `<p class="text-sm text-gray-500">${envio.distrito || 'N/A'}</p>`;
+                                        } else { // Shalom, Olva, etc.
+                                            return `<p class="text-sm text-gray-500">${envio.agencia || 'N/A'}</p>`;
+                                        }
+                                    })()
+                                }
                             </div>
                         </div>
                         <!-- <span class="px-2 py-1 text-xs font-bold rounded-full ${getEstadoClass(envio.estado)}">${envio.estado}</span> --> <!-- Estado original oculto -->
@@ -975,11 +977,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p><strong class="text-gray-500">Cliente:</strong> ${envio.cliente}</p>
                         <p><strong class="text-gray-500">Courier:</strong> ${envio.tipo}</p>
                         <p><strong class="text-gray-500">Fecha Envío:</strong> ${envio.fechaEnvio ? envio.fechaEnvio.substring(0, 10) : ''}</p>
-                        <!-- Info Dinsides para móvil -->
-                        ${envio.tipo === 'DINSIDES' ? `
-                            <p><strong class="text-gray-500">Detalle:</strong> ${envio.detalle || 'N/A'}</p>
-                            <p><strong class="text-gray-500">Cobrar:</strong> ${envio.cobrar || 'N/A'}</p>
-                        ` : ''}
+                        <!-- Info Dinsides para móvil eliminada de aquí -->
                     </div>
 
                     <!-- Contenedor para edición inline en móvil -->
@@ -1151,30 +1149,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
             } else if (envio.tipo === 'DINSIDES') {
                 // HTML de Destino para Dinsides
+                // --- INICIO DE LA MODIFICACIÓN ---
+                const monto = parseFloat(envio.cobrar);
+                const montoDisplay = !isNaN(monto) && monto > 0 ? `S/. ${monto.toFixed(2)}` : 'S/. 0.00';
+
                 destinationHtml = `
                     <div class="label-section">
                         <div class="label-section-title">Destino:</div>
                         <p class="label-destination-text">
                             <strong>Distrito:</strong> ${envio.distrito || 'N/A'}<br>
-                            <strong>Fecha Entrega:</strong> ${envio.fechaEnvio ? envio.fechaEnvio.substring(0, 10) : 'N/A'}
+                            <strong>Fecha Entrega:</strong> ${envio.fechaEnvio ? envio.fechaEnvio.substring(0, 10) : 'N/A'}<br>
+                            <!-- Campos movidos y sin estilo especial -->
+                            <strong>Detalle:</strong> ${envio.detalle || 'Ropa'}<br>
+                            <strong>Cobrar:</strong> ${montoDisplay}
                         </p>
                     </div>
                 `;
-                // HTML de Detalles extra para Dinsides
-                detailsHtml = `
-                    <div class="label-section">
-                        <div class="label-section-title">Detalle del Envío:</div>
-                        <p class="label-destination-text">${envio.detalle || 'N/A'}</p>
-                    </div>
-                    ${envio.cobrar ? `
-                    <div class="label-section">
-                        <div class="label-amount-to-collect">
-                            <span>MONTO A COBRAR:</span><br>
-                            <strong>${envio.cobrar}</strong>
-                        </div>
-                    </div>
-                    ` : ''}
-                `;
+                
+                // Limpiamos detailsHtml ya que no lo necesitamos
+                detailsHtml = '';
+                // --- FIN DE LA MODIFICACIÓN ---
             } else { // Para otras agencias (Shalom, Olva)
                 destinationHtml = `
                     <div class="label-section">
@@ -1207,7 +1201,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
                             <span>${envio.tipo || 'N/A'}</span>
                         </div>
-                        <div class="label-qr-code">QR Code</div>
+                        <!-- <div class="label-qr-code">QR Code</div> -->
                     </div>
                 </div>
             `;
@@ -1522,6 +1516,11 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
+
+
+
+
 
 
 
