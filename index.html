@@ -10,9 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/feather-icons"></script>
     
-    <!-- Chart.js CDN (NUEVO) -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -327,12 +324,6 @@
                 <a href="#cuenta" class="nav-link flex items-center gap-3 p-3 rounded-lg font-semibold transition-colors duration-200">
                     <i data-feather="settings" class="w-5 h-5"></i><span>Mi Cuenta</span>
                 </a>
-                <a href="#compras" class="nav-link flex items-center gap-3 p-3 rounded-lg font-semibold transition-colors duration-200 text-gray-300 hover:bg-sidebar-hover hover:text-white">
-                <i data-feather="shopping-cart" class="w-5 h-5 flex-shrink-0"></i><span class="whitespace-nowrap overflow-hidden">Compras</span>
-                </a>
-                <a href="#ventas" class="nav-link flex items-center gap-3 p-3 rounded-lg font-semibold transition-colors duration-200 text-gray-300 hover:bg-sidebar-hover hover:text-white">
-                    <i data-feather="dollar-sign" class="w-5 h-5 flex-shrink-0"></i><span class="whitespace-nowrap overflow-hidden">Ventas</span>
-                </a>
             </nav>
 
             <div class="p-4 border-t border-gray-700 text-sm">
@@ -505,71 +496,33 @@
                 <!-- ======================= SECCIÓN REPORTES ======================= -->
                 <!-- CORRECCIÓN: Se eliminó la clase 'md:h-full' de la sección. -->
                 <section id="reportes" class="h-full">
-                        <!-- Contenedor de Filtros de Fecha -->
-                            <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-4 md:p-6 border border-gray-200 mb-6">
-                                <div class="flex flex-col md:flex-row md:items-end gap-4 flex-wrap">
-                                    <label class="text-xs text-gray-500 font-semibold">Fecha Inicio (Registro)
-                                        <input type="date" id="reportStartDate" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100 mt-1">
-                                    </label>
-                                    <label class="text-xs text-gray-500 font-semibold">Fecha Fin (Registro)
-                                        <input type="date" id="reportEndDate" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100 mt-1">
-                                    </label>
-                                    <button id="btnGenerateReport" class="btn primary bg-gradient-to-r from-accent to-accent-alt text-white py-2.5 px-4 rounded-xl font-bold text-sm shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200">Generar Reporte</button>
-                                    <button id="btnClearReportFilters" class="btn ghost bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 py-2.5 px-4 rounded-xl font-bold text-sm transition-all duration-200">Limpiar Fechas</button>
-                                </div>
+                    <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                            <div class="stat-card text-center bg-bg-soft p-5 rounded-xl border border-orange-100">
+                                <div class="value text-4xl font-bold text-accent" id="statTotal">128</div>
+                                <div class="label text-sm text-gray-500 mt-1">Envíos Totales</div>
                             </div>
-
-                            <!-- Contenedor de Resúmenes -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-                                <div class="stat-card text-center bg-white p-5 rounded-xl border border-gray-200 shadow">
-                                    <div class="value text-4xl font-bold text-accent" id="reportStatTotal">0</div>
-                                    <div class="label text-sm text-gray-500 mt-1">Envíos en Periodo</div>
-                                </div>
-                                <div class="stat-card text-center bg-white p-5 rounded-xl border border-gray-200 shadow">
-                                    <div class="value text-4xl font-bold text-badge-delivered" id="reportStatDelivered">0</div>
-                                    <div class="label text-sm text-gray-500 mt-1">Entregados</div>
-                                </div>
-                                <div class="stat-card text-center bg-white p-5 rounded-xl border border-gray-200 shadow">
-                                    <div class="value text-4xl font-bold text-badge-pending" id="reportStatPending">0</div>
-                                    <div class="label text-sm text-gray-500 mt-1">Pendientes Actuales</div> <!-- Ajustado texto -->
-                                </div>
-                                <div class="stat-card text-center bg-white p-5 rounded-xl border border-gray-200 shadow">
-                                    <div class="value text-4xl font-bold text-badge-rescheduled" id="reportStatRescheduled">0</div>
-                                    <div class="label text-sm text-gray-500 mt-1">Reprogramados</div>
-                                </div>
+                            <div class="stat-card text-center bg-bg-soft p-5 rounded-xl border border-orange-100">
+                                <div class="value text-4xl font-bold text-accent" id="statPendientes">15</div>
+                                <div class="label text-sm text-gray-500 mt-1">Pendientes</div>
                             </div>
-
-                            <!-- Contenedor de Gráficos -->
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                                                              
-                                <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200 lg:col-span-2 max-h-[300px]"> <!-- Altura mínima -->
-                                    <h3 class="text-lg font-bold text-gray-800 mb-4">Envíos a lo Largo del Tiempo</h3>
-                                    <canvas id="shipmentsOverTimeChart"></canvas>
-                                </div>
-                                                                       
-                                <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200 max-h-[300px]"> <!-- Altura mínima -->
-                                    <h3 class="text-lg font-bold text-gray-800 mb-4">Distribución por Distrito (Top 15)</h3>
-                                    <div class="relative h-full min-h-[250px]"> <!-- Contenedor relativo para canvas -->
-                                        <canvas id="shipmentsByDistrictChart"></canvas>
-                                    </div>
-                                </div>
-                                                                             
-                                <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200 max-h-[300px]"> <!-- Altura mínima -->
-                                    <h3 class="text-lg font-bold text-gray-800 mb-4">Uso de Couriers</h3>
-                                    <div class="max-w-md mx-auto relative h-full min-h-[250px]"> <!-- Contenedor relativo para canvas -->
-                                        <canvas id="shipmentsByCourierChart"></canvas>
-                                    </div>
-                                </div>
-                                                                            
+                            <div class="stat-card text-center bg-bg-soft p-5 rounded-xl border border-orange-100">
+                                <div class="value text-4xl font-bold text-accent" id="statCompletados">113</div>
+                                <div class="label text-sm text-gray-500 mt-1">Completados</div>
                             </div>
-                                                                            
-                            <footer class="p-4 bg-bg-soft flex justify-center items-center gap-2 text-gray-500 text-sm mt-6">
-                                <span>Powered by</span>
-                                <svg height="20" viewBox="0 0 90 22" xmlns="http://www.w3.org/2000/svg">
-                                    <text x="0" y="18" style="font-family: Quicksand, sans-serif; font-size: 20px; font-weight: 700; fill: #D96B4F;">Latam5S</text>
-                                </svg>
-                            </footer>
-                        </section>
+                            <div class="stat-card text-center bg-bg-soft p-5 rounded-xl border border-orange-100">
+                                <div class="value text-2xl font-bold text-accent" id="statCourier">Shalom</div>
+                                <div class="label text-sm text-gray-500 mt-1">Courier Más Usado</div>
+                            </div>
+                        </div>
+                    </div>
+                     <footer class="p-4 bg-bg-soft flex justify-center items-center gap-2 text-gray-500 text-sm md:mt-auto">
+                        <span>Powered by</span>
+                        <svg height="20" viewBox="0 0 90 22" xmlns="http://www.w3.org/2000/svg">
+                            <text x="0" y="18" style="font-family: Quicksand, sans-serif; font-size: 20px; font-weight: 700; fill: #D96B4F;">Latam5S</text>
+                        </svg>
+                    </footer>
+                </section>
 
                 <!-- ======================= SECCIÓN MENSAJES ======================= -->
                 <section id="mensajes">
@@ -764,193 +717,7 @@
                         </svg>
                     </footer>
                 </section>
-                <!-- ======================= SECCIÓN COMPRAS (NUEVA ESTRUCTURA) ======================= -->
-                <section id="compras">
-                    <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200 mb-6">
-                        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2"><i data-feather="plus-circle" class="w-5 h-5 text-accent"></i> Registrar Nueva Compra</h2>
-                        <form id="formNuevaCompra" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                            <div>
-                                <label for="compraFecha" class="block text-sm text-gray-500 font-semibold mb-1.5">Fecha Compra</label>
-                                <input type="date" id="compraFecha" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" required>
-                            </div>
-                             <div class="md:col-span-2">
-                                <label for="compraProducto" class="block text-sm text-gray-500 font-semibold mb-1.5">Nombre Producto/Servicio</label>
-                                <input type="text" id="compraProducto" placeholder="Ej: Cajas de cartón medianas" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" required>
-                            </div>
-                             <div>
-                                <label for="compraCantidad" class="block text-sm text-gray-500 font-semibold mb-1.5">Cantidad</label>
-                                <input type="number" id="compraCantidad" placeholder="10" min="1" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" required>
-                            </div>
-                            <div>
-                                <label for="compraPrecioTotal" class="block text-sm text-gray-500 font-semibold mb-1.5">Precio Total (S/.)</label>
-                                <input type="number" id="compraPrecioTotal" placeholder="150.00" step="0.01" min="0" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" required>
-                            </div>
-                             <div class="md:col-span-3">
-                                <label for="compraNotas" class="block text-sm text-gray-500 font-semibold mb-1.5">Notas Adicionales</label>
-                                <textarea id="compraNotas" rows="2" placeholder="Proveedor, N° factura, etc." class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100"></textarea>
-                            </div>
-                             <div class="md:col-span-3 flex justify-end">
-                                <button type="submit" id="btnGuardarCompra" class="btn primary bg-gradient-to-r from-accent to-accent-alt text-white shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 py-2.5 px-6 rounded-xl font-bold text-sm inline-flex items-center gap-2">
-                                    <i data-feather="save" class="w-4 h-4"></i> Guardar Compra
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                    
-                    <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200">
-                        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2"><i data-feather="list" class="w-5 h-5 text-accent"></i> Historial de Compras</h2>
-                         <!-- Próximamente: Filtros para la tabla de compras -->
-                        <div class="overflow-x-auto relative shadow-md shadow-gray-100 rounded-xl border border-gray-200">
-                             <table id="tablaCompras" class="w-full border-collapse bg-white text-sm text-left text-gray-500">
-                                <thead class="text-xs text-accent uppercase bg-amber-50">
-                                    <tr>
-                                        <th scope="col" class="p-3 rounded-tl-xl">Fecha</th>
-                                        <th scope="col" class="p-3">Producto/Servicio</th>
-                                        <th scope="col" class="p-3 text-right">Cantidad</th>
-                                        <th scope="col" class="p-3 text-right">Precio Total</th>
-                                        <th scope="col" class="p-3">Notas</th>
-                                        <th scope="col" class="p-3 rounded-tr-xl text-center">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tbodyCompras">
-                                    <!-- Filas de compras se insertarán aquí -->
-                                    <tr><td colspan="6" class="p-6 text-center text-gray-400">No hay compras registradas aún.</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <footer class="p-4 bg-bg-soft flex-shrink-0 flex justify-center items-center gap-2 text-gray-500 text-sm mt-6">
-                        <span>Powered by</span>
-                        <svg height="20" viewBox="0 0 90 22" xmlns="http://www.w3.org/2000/svg">
-                            <text x="0" y="18" style="font-family: Quicksand, sans-serif; font-size: 20px; font-weight: 700; fill: #D96B4F;">Latam5S</text>
-                        </svg>
-                    </footer>
-                </section>
-
-                <!-- ======================= SECCIÓN VENTAS (NUEVA ESTRUCTURA) ======================= -->
-                <section id="ventas">
-                     <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200 mb-6">
-                        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2"><i data-feather="plus-circle" class="w-5 h-5 text-accent"></i> Registrar Nueva Venta</h2>
-                        <form id="formNuevaVenta" class="space-y-6">
-                            <!-- Datos del Cliente -->
-                            <fieldset class="border border-gray-200 p-4 rounded-xl">
-                                <legend class="text-md font-semibold text-gray-700 px-2">Datos del Cliente</legend>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                     <div>
-                                        <label for="ventaClienteId" class="block text-sm text-gray-500 font-semibold mb-1.5">Cliente (Celular/ID)</label>
-                                        <input type="text" id="ventaClienteId" placeholder="Ej: 987654321" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" required>
-                                    </div>
-                                    <div>
-                                        <label for="ventaClienteNombre" class="block text-sm text-gray-500 font-semibold mb-1.5">Nombre Cliente</label>
-                                        <input type="text" id="ventaClienteNombre" placeholder="Ej: Ana García" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" required>
-                                    </div>
-                                </div>
-                            </fieldset>
-
-                            <!-- Productos Vendidos -->
-                            <fieldset class="border border-gray-200 p-4 rounded-xl">
-                                <legend class="text-md font-semibold text-gray-700 px-2">Productos Vendidos</legend>
-                                <!-- Formulario para añadir producto -->
-                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 border-b pb-4">
-                                     <div class="md:col-span-2">
-                                        <label for="ventaProductoNombre" class="block text-xs text-gray-500 font-semibold mb-1">Producto</label>
-                                        <input type="text" id="ventaProductoNombre" placeholder="Ej: Polo Reactivo" class="input p-2 border border-gray-200 rounded-lg bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-orange-100">
-                                    </div>
-                                    <div>
-                                        <label for="ventaProductoCantidad" class="block text-xs text-gray-500 font-semibold mb-1">Cantidad</label>
-                                        <input type="number" id="ventaProductoCantidad" value="1" min="1" class="input p-2 border border-gray-200 rounded-lg bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-orange-100">
-                                    </div>
-                                     <div>
-                                        <label for="ventaProductoPrecio" class="block text-xs text-gray-500 font-semibold mb-1">Precio Unit. (S/)</label>
-                                        <input type="number" id="ventaProductoPrecio" placeholder="45.00" step="0.01" min="0" class="input p-2 border border-gray-200 rounded-lg bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-orange-100">
-                                    </div>
-                                      <div>
-                                        <label for="ventaProductoColor" class="block text-xs text-gray-500 font-semibold mb-1">Color</label>
-                                        <input type="text" id="ventaProductoColor" placeholder="Negro" class="input p-2 border border-gray-200 rounded-lg bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-orange-100">
-                                    </div>
-                                      <div>
-                                        <label for="ventaProductoTalla" class="block text-xs text-gray-500 font-semibold mb-1">Talla</label>
-                                        <input type="text" id="ventaProductoTalla" placeholder="M" class="input p-2 border border-gray-200 rounded-lg bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-orange-100">
-                                    </div>
-                                     <div class="md:col-span-2 flex items-end">
-                                        <button type="button" id="btnAddProductoVenta" class="btn primary bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-4 rounded-lg font-bold text-sm inline-flex items-center gap-1 w-full md:w-auto justify-center">
-                                            <i data-feather="plus" class="w-4 h-4"></i> Añadir Producto
-                                        </button>
-                                    </div>
-                                </div>
-                                <!-- Lista de productos añadidos -->
-                                <div id="listaProductosVenta" class="space-y-2 mb-4">
-                                    <!-- Los productos se añadirán aquí dinámicamente -->
-                                    <p class="text-sm text-gray-400 text-center py-2">Aún no has añadido productos a esta venta.</p>
-                                </div>
-                            </fieldset>
-                            
-                             <!-- Datos Generales de la Venta -->
-                            <fieldset class="border border-gray-200 p-4 rounded-xl">
-                                <legend class="text-md font-semibold text-gray-700 px-2">Detalles Adicionales</legend>
-                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="ventaFecha" class="block text-sm text-gray-500 font-semibold mb-1.5">Fecha Venta</label>
-                                        <input type="date" id="ventaFecha" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" required>
-                                    </div>
-                                     <div>
-                                        <label for="ventaMedioPago" class="block text-sm text-gray-500 font-semibold mb-1.5">Medio de Pago</label>
-                                        <select id="ventaMedioPago" class="select p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
-                                            <option value="">Seleccionar...</option>
-                                            <option value="Efectivo">Efectivo</option>
-                                            <option value="Yape">Yape</option>
-                                            <option value="Plin">Plin</option>
-                                            <option value="Transferencia">Transferencia</option>
-                                            <option value="Tarjeta">Tarjeta</option>
-                                            <option value="Otro">Otro</option>
-                                        </select>
-                                    </div>
-                                     <div class="md:col-span-2">
-                                        <label for="ventaNotas" class="block text-sm text-gray-500 font-semibold mb-1.5">Notas Adicionales</label>
-                                        <textarea id="ventaNotas" rows="2" placeholder="Detalles, condiciones especiales, etc." class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100"></textarea>
-                                    </div>
-                                </div>
-                            </fieldset>
-
-                            <!-- Botón Guardar Venta -->
-                            <div class="flex justify-end pt-4">
-                                <button type="submit" id="btnGuardarVenta" class="btn primary bg-gradient-to-r from-accent to-accent-alt text-white shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 py-2.5 px-6 rounded-xl font-bold text-sm inline-flex items-center gap-2">
-                                    <i data-feather="save" class="w-4 h-4"></i> Guardar Venta
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-
-                     <div class="card bg-white rounded-xl shadow-lg shadow-gray-100 p-6 border border-gray-200 mt-6">
-                        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2"><i data-feather="list" class="w-5 h-5 text-accent"></i> Historial de Ventas</h2>
-                         <!-- Próximamente: Filtros para la tabla de ventas -->
-                        <div class="overflow-x-auto relative shadow-md shadow-gray-100 rounded-xl border border-gray-200">
-                             <table id="tablaVentas" class="w-full border-collapse bg-white text-sm text-left text-gray-500">
-                                <thead class="text-xs text-accent uppercase bg-amber-50">
-                                    <tr>
-                                        <th scope="col" class="p-3 rounded-tl-xl">Fecha</th>
-                                        <th scope="col" class="p-3">Cliente</th>
-                                        <th scope="col" class="p-3">Productos</th>
-                                        <th scope="col" class="p-3 text-right">Monto Total</th>
-                                        <th scope="col" class="p-3">Medio Pago</th>
-                                        <th scope="col" class="p-3">Notas</th>
-                                        <th scope="col" class="p-3 rounded-tr-xl text-center">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tbodyVentas">
-                                    <!-- Filas de ventas se insertarán aquí -->
-                                     <tr><td colspan="7" class="p-6 text-center text-gray-400">No hay ventas registradas aún.</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <footer class="p-4 bg-bg-soft flex-shrink-0 flex justify-center items-center gap-2 text-gray-500 text-sm mt-6">
-                        <span>Powered by</span>
-                        <svg height="20" viewBox="0 0 90 22" xmlns="http://www.w3.org/2000/svg">
-                            <text x="0" y="18" style="font-family: Quicksand, sans-serif; font-size: 20px; font-weight: 700; fill: #D96B4F;">Latam5S</text>
-                        </svg>
-                    </footer>
-                </section>
+                
             </main>
 
         </div>
@@ -976,7 +743,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwie7KsoCJdraDF7iwTmmS6CDZT6WTXiAPHHts6kk3UXRkm0C9Ze6tkMn6K50iIOhRbKw/exec"; // <--- AÑADE ESTA LÍNEA
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyhlKeKpyhBTtQTzYEdITXUErRjH9kmLACnaEAlmmXMDp1fVHJeVJx4N7Lw3dZgYShjfA/exec"; // <--- AÑADE ESTA LÍNEA
     feather.replace();
 
     // --- LÓGICA PARA EL MENÚ COLAPSABLE ---
@@ -1055,13 +822,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             sections.forEach(sec => sec.classList.remove('active'));
             const targetSection = document.getElementById(targetId);
-        if (targetSection) {
+            if (targetSection) {
                 targetSection.classList.add('active');
-                 // Si la sección es Reportes, inicializar/actualizar gráficos
-                 if (targetId === 'reportes') {
-                     // Llama a la función que genera el reporte con fechas por defecto o vacías
-                     generateReport();
-                 }
             }
             
             // Cierra el menú al hacer clic (ahora en todos los dispositivos)
@@ -1097,64 +859,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const fechaReprog = document.getElementById('fechaReprog');
     const btnAplicarLote = document.getElementById('btnAplicarLote');
     const goToAccountBtn = document.getElementById('goToAccountBtn');
-
-    // --- ELEMENTOS DEL DOM (Sección Reportes - NUEVO) ---
-    const reportStartDateInput = document.getElementById('reportStartDate');
-    const reportEndDateInput = document.getElementById('reportEndDate');
-    const btnGenerateReport = document.getElementById('btnGenerateReport');
-    const btnClearReportFilters = document.getElementById('btnClearReportFilters');
-    const reportStatTotalEl = document.getElementById('reportStatTotal');
-    const reportStatDeliveredEl = document.getElementById('reportStatDelivered');
-    const reportStatPendingEl = document.getElementById('reportStatPending');
-    const reportStatRescheduledEl = document.getElementById('reportStatRescheduled');
-
-
-    // --- ELEMENTOS DEL DOM (Sección Compras - NUEVO) ---
-    const formNuevaCompra = document.getElementById('formNuevaCompra');
-    const tbodyCompras = document.getElementById('tbodyCompras');
-    const btnGuardarCompra = document.getElementById('btnGuardarCompra');
-    
-    // --- ELEMENTOS DEL DOM (Sección Ventas - NUEVO) ---
-    const formNuevaVenta = document.getElementById('formNuevaVenta');
-    const btnAddProductoVenta = document.getElementById('btnAddProductoVenta');
-    const listaProductosVenta = document.getElementById('listaProductosVenta');
-    const tbodyVentas = document.getElementById('tbodyVentas');
-    const btnGuardarVenta = document.getElementById('btnGuardarVenta');
-    let productosEnVentaActual = []; // Array para guardar productos temporalmente
-
-
-    // Variables globales para los gráficos (NUEVO)
-    let shipmentsOverTimeChartInstance = null;
-    let shipmentsByDistrictChartInstance = null;
-    let shipmentsByCourierChartInstance = null;   
     
     let todosLosEnvios = []; // Variable global para almacenar todos los envíos.
-    let todasLasCompras = []; // NUEVO: Array para compras
-    let todasLasVentas = [];   // NUEVO: Array para ventas
 
     async function fetchDataFromSheet() {
         showToast('Cargando envíos...');
         try {
-            const response = await fetch(`${SCRIPT_URL}?action=getEnvios`); // Usamos doGet con action
+            const response = await fetch(SCRIPT_URL);
             if (!response.ok) {
                 throw new Error('Error al cargar los datos.');
             }
             const data = await response.json();
             // Procesa los datos: si el estado está vacío, lo establece como 'PENDIENTE'.
             // Luego, filtra los envíos para excluir los que están marcados como "ELIMINADO".
-            // (Dentro de fetchDataFromSheet, en el .map())
             todosLosEnvios = data.map(envio => ({
                 ...envio,
-                id: parseInt(envio.id, 10), // Asegurar que ID sea número
-                fechaReg: envio.fechaReg ? new Date(envio.fechaReg).toISOString().split('T')[0] : null, // Normalizar fecha registro
-                fechaEnvio: envio.fechaEnvio ? new Date(envio.fechaEnvio).toISOString().split('T')[0] : null, // Normalizar fecha envío
                 estado: envio.estado || 'PENDIENTE',
-                detalle: envio.detalle || '',
-                cobrar: envio.cobrar || ''
+                detalle: envio.detalle || '', // Asegura que existan
+                cobrar: envio.cobrar || ''    // Asegura que existan
             })).filter(envio => envio.estado !== 'ELIMINADO');
             
             aplicarFiltros();
-            generateReport(); // Genera reportes iniciales con todos los datos
             showToast('Envíos cargados.');
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -1162,7 +887,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // En caso de error, muestra la tabla vacía.
             todosLosEnvios = [];
             aplicarFiltros();
-            generateReport(); // Genera reportes vacíos o con error
         }
     }
     
@@ -1657,7 +1381,6 @@ document.addEventListener('DOMContentLoaded', () => {
             headerLogo.classList.add('hidden');
             logoPreview.classList.add('hidden');
         }
-        feather.replace();
     }
     
     logoInput.addEventListener('change', function() {
@@ -1821,204 +1544,6 @@ document.addEventListener('DOMContentLoaded', () => {
          }
     });
 
-
-    // --- LÓGICA DE REPORTES (NUEVO) ---
-    function generateReport() {
-        const startDate = reportStartDateInput.value;
-        const endDate = reportEndDateInput.value;
-
-        // Filtrar envíos según el rango de fechas (usando fecha de REGISTRO normalizada)
-        const filteredShipments = todosLosEnvios.filter(envio => {
-            if (!envio.fechaReg) return false; // Ignorar si no tiene fecha de registro
-            // Comparación directa de strings YYYY-MM-DD funciona bien
-            const startMatch = startDate ? envio.fechaReg >= startDate : true;
-            const endMatch = endDate ? envio.fechaReg <= endDate : true;
-            return startMatch && endMatch;
-        });
-
-        // 1. Actualizar Resúmenes
-        const total = filteredShipments.length;
-        // Contar estados DENTRO del periodo filtrado
-        const delivered = filteredShipments.filter(e => e.estado === 'ENTREGADO').length;
-        const pending = filteredShipments.filter(e => e.estado === 'PENDIENTE').length; // Pendientes *registrados* en el periodo
-        const rescheduled = filteredShipments.filter(e => e.estado === 'REPROGRAMADO').length;
-
-        reportStatTotalEl.textContent = total;
-        reportStatDeliveredEl.textContent = delivered;
-        reportStatPendingEl.textContent = pending; // Muestra pendientes registrados en el periodo
-        reportStatRescheduledEl.textContent = rescheduled;
-
-        // 2. Preparar datos para Gráfico de Envíos a lo Largo del Tiempo
-        const shipmentsByDate = {};
-        filteredShipments.forEach(envio => {
-            const date = envio.fechaReg; // Usa fecha de registro
-            if (!shipmentsByDate[date]) {
-                shipmentsByDate[date] = { total: 0, delivered: 0 };
-            }
-            shipmentsByDate[date].total++;
-            if (envio.estado === 'ENTREGADO') { // Puedes añadir más estados si quieres
-                shipmentsByDate[date].delivered++;
-            }
-        });
-
-        // Ordenar fechas
-        const sortedDates = Object.keys(shipmentsByDate).sort((a, b) => a.localeCompare(b));
-        const timeLabels = sortedDates;
-        const timeDataTotal = sortedDates.map(date => shipmentsByDate[date].total);
-        const timeDataDelivered = sortedDates.map(date => shipmentsByDate[date].delivered);
-
-        updateShipmentsOverTimeChart(timeLabels, timeDataTotal, timeDataDelivered);
-
-        // 3. Preparar datos para Gráfico por Distrito
-        const shipmentsByDistrict = {};
-        filteredShipments.forEach(envio => {
-            const district = (envio.distrito || 'Sin Distrito').trim(); // Limpia espacios
-            if (district) { // Solo cuenta si hay distrito
-                 shipmentsByDistrict[district] = (shipmentsByDistrict[district] || 0) + 1;
-            }
-        });
-        // Ordenar distritos por cantidad (descendente) y tomar top N (ej. 15)
-        const sortedDistricts = Object.entries(shipmentsByDistrict)
-            .sort(([, countA], [, countB]) => countB - countA)
-            .slice(0, 15); // Limita a los 15 más frecuentes
-
-        const districtLabels = sortedDistricts.map(([district]) => district);
-        const districtData = sortedDistricts.map(([, count]) => count);
-
-        updateShipmentsByDistrictChart(districtLabels, districtData);
-
-        // 4. Preparar datos para Gráfico por Courier
-        const shipmentsByCourier = {};
-        filteredShipments.forEach(envio => {
-            const courier = (envio.tipo || 'Sin Courier').trim();
-             if (courier) { // Solo cuenta si hay courier
-                shipmentsByCourier[courier] = (shipmentsByCourier[courier] || 0) + 1;
-             }
-        });
-        const courierLabels = Object.keys(shipmentsByCourier);
-        const courierData = Object.values(shipmentsByCourier);
-
-        // Colores base para el gráfico de pastel/dona
-         const courierColors = [
-            '#D96B4F', // accent
-            '#FF8B6A', // accent-alt
-            '#FBBF24', // amber-400 (ejemplo)
-            '#3B82F6', // blue-500 (ejemplo)
-            '#10B981', // emerald-500 (ejemplo)
-            '#8B5CF6', // violet-500 (ejemplo)
-            '#EC4899', // pink-500 (ejemplo)
-         ];
-
-        updateShipmentsByCourierChart(courierLabels, courierData, courierColors);
-    }
-
-    // Funciones para actualizar los gráficos (NUEVO)
-    function updateShipmentsOverTimeChart(labels, dataTotal, dataDelivered) {
-        const ctx = document.getElementById('shipmentsOverTimeChart')?.getContext('2d');
-        if (!ctx) return; // Salir si el canvas no existe
-        if (shipmentsOverTimeChartInstance) {
-            shipmentsOverTimeChartInstance.destroy(); // Destruye el gráfico anterior si existe
-        }
-        shipmentsOverTimeChartInstance = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Total Registrados',
-                    data: dataTotal,
-                    borderColor: '#FF8B6A', // accent-alt
-                    backgroundColor: 'rgba(255, 139, 106, 0.1)',
-                    tension: 0.1,
-                    fill: true,
-                }, {
-                    label: 'Entregados',
-                    data: dataDelivered,
-                    borderColor: '#1b7f3a', // badge-delivered text color
-                    backgroundColor: 'rgba(27, 127, 58, 0.1)',
-                    tension: 0.1,
-                    fill: true,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false, // Permite ajustar altura
-                scales: {
-                    y: { beginAtZero: true, suggestedMax: Math.max(...dataTotal, ...dataDelivered) + 1 } // Ajusta escala Y
-                },
-                plugins: { legend: { position: 'top' } }
-            }
-        });
-    }
-
-    function updateShipmentsByDistrictChart(labels, data) {
-        const ctx = document.getElementById('shipmentsByDistrictChart')?.getContext('2d');
-         if (!ctx) return;
-         if (shipmentsByDistrictChartInstance) {
-            shipmentsByDistrictChartInstance.destroy();
-        }
-        shipmentsByDistrictChartInstance = new Chart(ctx, {
-            type: 'bar', // Gráfico de barras
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Envíos por Distrito',
-                    data: data,
-                    backgroundColor: '#D96B4F', // accent
-                    borderColor: '#B95B3F', // Un tono más oscuro
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                indexAxis: 'y', // Barras horizontales
-                responsive: true,
-                 maintainAspectRatio: false, // Para ajustar altura
-                 scales: {
-                     x: { beginAtZero: true, suggestedMax: Math.max(...data) + 1 } // Ajusta escala X
-                 },
-                 plugins: { legend: { display: false } }
-            }
-        });
-    }
-
-    function updateShipmentsByCourierChart(labels, data, colors) {
-         const ctx = document.getElementById('shipmentsByCourierChart')?.getContext('2d');
-         if (!ctx) return;
-         if (shipmentsByCourierChartInstance) {
-            shipmentsByCourierChartInstance.destroy();
-        }
-        shipmentsByCourierChartInstance = new Chart(ctx, {
-            type: 'doughnut', // Gráfico de dona
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Uso de Couriers',
-                    data: data,
-                    backgroundColor: colors.slice(0, labels.length),
-                    hoverOffset: 4
-                }]
-            },
-             options: {
-                responsive: true,
-                 maintainAspectRatio: true, // Para ajustar tamaño
-                 plugins: {
-                     legend: {
-                         position: 'bottom',
-                         labels: { padding: 15 }
-                    }
-                }
-            }
-        });
-    }
-
-    // Event listeners para filtros de reporte (NUEVO)
-    btnGenerateReport.addEventListener('click', generateReport);
-    btnClearReportFilters.addEventListener('click', () => {
-        reportStartDateInput.value = '';
-        reportEndDateInput.value = '';
-        generateReport(); // Regenera con todos los datos
-        showToast('Filtros de fecha limpiados.');
-    });
-
     // --- LÓGICA DEL MODAL DE CONFIRMACIÓN ---
     const deleteModal = document.getElementById('deleteModal');
     const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
@@ -2075,446 +1600,10 @@ document.addEventListener('DOMContentLoaded', () => {
             toast.classList.add('opacity-0', 'translate-y-2');
         }, 2500);
     }
-    // --- LÓGICA SECCIÓN COMPRAS (NUEVO) ---
-    formNuevaCompra.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        btnGuardarCompra.disabled = true;
-        showToast('Guardando compra...');
-
-        const payload = {
-            // Usa los nombres exactos de las columnas de tu hoja "Compras"
-            FechaCompra: document.getElementById('compraFecha').value,
-            Producto: document.getElementById('compraProducto').value,
-            Cantidad: document.getElementById('compraCantidad').value,
-            PrecioTotal: document.getElementById('compraPrecioTotal').value,
-            Notas: document.getElementById('compraNotas').value
-        };
-
-        if (!payload.FechaCompra || !payload.Producto || !payload.Cantidad || !payload.PrecioTotal) {
-            showToast('Completa Fecha, Producto, Cantidad y Precio Total.');
-            btnGuardarCompra.disabled = false;
-            return;
-        }
-
-        try {
-            const response = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                // Enviamos 'action' y 'payload' al doPost del script
-                body: JSON.stringify({ action: 'addCompra', payload }),
-                // Podrías necesitar especificar 'Content-Type', aunque a veces Apps Script lo infiere
-                // headers: { 'Content-Type': 'application/json' },
-                mode: 'no-cors' // Necesario si Apps Script no está configurado para CORS (común)
-                            // O usa 'cors' si sí lo configuraste. 'no-cors' no permite leer la respuesta.
-            });
-
-            // Con 'no-cors', no podemos leer la respuesta directamente. Asumimos éxito si no hay error de red.
-            // await response.text(); // Intenta consumir el cuerpo de la respuesta aunque sea opaco
-
-            // --- Si SÍ puedes leer la respuesta (usando 'cors' y script configurado) ---
-            /*
-            if (!response.ok) {
-                let errorMsg = `Error ${response.status}: ${response.statusText}`;
-                try { const errData = await response.json(); errorMsg = errData.message || errorMsg; } catch(e){}
-                throw new Error(errorMsg);
-            }
-            const result = await response.json();
-            if (result.status !== 'success' || !result.newId) {
-                throw new Error(result.message || 'Error al guardar (respuesta inválida).');
-            }
-            showToast(`Compra registrada con ID: ${result.newId}`);
-            */
-            // --- Fin bloque si puedes leer respuesta ---
-
-            // --- Si usas 'no-cors' (no puedes leer respuesta) ---
-            showToast(`Compra enviada para guardar.`);
-            // --- Fin bloque 'no-cors' ---
-
-            formNuevaCompra.reset();
-            const today = new Date().toISOString().split('T')[0]; // Poner fecha actual por defecto tras guardar
-            document.getElementById('compraFecha').value = today;
-            await fetchCompras(); // Recargar tabla
-
-        } catch (error) {
-            console.error("Error guardando compra:", error);
-            // El error con 'no-cors' suele ser genérico ('Failed to fetch') si hay un problema en el script
-            showToast(`Error al enviar compra: ${error.message}. Verifica la consola y el script.`);
-        } finally {
-            btnGuardarCompra.disabled = false;
-        }
-    });
-    
-    // Función placeholder para cargar compras (a implementar)
-    async function fetchCompras() {
-        console.log("Cargando historial de compras...");
-        if (!tbodyCompras) return;
-        tbodyCompras.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-gray-400">Cargando compras...</td></tr>`;
-        try {
-            // Petición GET al script pidiendo las compras
-            const response = await fetch(`${SCRIPT_URL}?action=getCompras`);
-            if (!response.ok) {
-                let errorMsg = `Error ${response.status}: ${response.statusText}`;
-                try { const errData = await response.json(); errorMsg = errData.message || errorMsg; } catch(e){}
-                throw new Error(errorMsg);
-            }
-            const data = await response.json();
-
-            // Guardar en variable global y ordenar (asume que el script devuelve objetos con claves iguales a los headers)
-            todasLasCompras = data.map(c => ({
-                ...c,
-                // Asegurar formato fecha YYYY-MM-DD
-                FechaCompra: c.FechaCompra ? new Date(c.FechaCompra).toISOString().split('T')[0] : null
-            })).sort((a,b) => (b.FechaCompra || '').localeCompare(a.FechaCompra || ''));
-
-            renderTablaCompras(todasLasCompras);
-
-        } catch (error) {
-            console.error("Error cargando compras:", error);
-            tbodyCompras.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-red-500">Error al cargar compras: ${error.message}</td></tr>`;
-        } finally {
-            feather.replace();
-        }
-    }
-
-    // NUEVA: Función para renderizar la tabla de compras
-    function renderTablaCompras(compras) {
-        if (!tbodyCompras) return; // Salir si la tabla no existe en el DOM
-
-        if (!compras || compras.length === 0) {
-            tbodyCompras.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-gray-400">No hay compras registradas aún.</td></tr>`;
-            return;
-        }
-
-        tbodyCompras.innerHTML = compras.map(compra => `
-            <tr class="border-b hover:bg-gray-50 text-sm">
-                <td class="p-3">${compra.FechaCompra || ''}</td> 
-                <td class="p-3 font-medium text-gray-900">${compra.Producto || ''}</td> 
-                <td class="p-3 text-right">${compra.Cantidad || ''}</td> 
-                <td class="p-3 text-right">S/ ${parseFloat(compra.PrecioTotal || 0).toFixed(2)}</td> 
-                <td class="p-3 text-gray-500">${compra.Notas || ''}</td> 
-                <td class="p-3 text-center">
-                    <button class="action-btn text-red-500 hover:text-red-700" title="Eliminar Compra" onclick="eliminarCompra('${compra.ID}')">
-                        <i data-feather="trash-2" class="w-4 h-4"></i>
-                    </button>
-                </td>
-            </tr>
-        `).join('');
-        feather.replace(); // Renderizar iconos de acciones
-    }
-
-    // NUEVO: Función global para eliminar compra
-    window.eliminarCompra = async function(id) {
-        if (!confirm(`¿Estás seguro de eliminar la compra con ID ${id}?`)) return;
-
-        showToast(`Eliminando compra ${id}...`);
-        try {
-            const response = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'deleteCompra', payload: { id: id } }), // Envía el ID
-                mode: 'no-cors' // O 'cors' si está configurado
-            });
-
-            // --- Si usas 'no-cors' ---
-            showToast(`Solicitud para eliminar compra ${id} enviada.`);
-            // --- Fin bloque 'no-cors' ---
-
-            // --- Si SÍ puedes leer la respuesta ('cors') ---
-            /*
-            if (!response.ok) { throw new Error(`Error ${response.status}`); }
-            const result = await response.json();
-            if (result.status !== 'success') { throw new Error(result.message || 'Error al eliminar'); }
-            showToast(`Compra ${id} eliminada.`);
-            */
-            // --- Fin bloque 'cors' ---
-
-            await fetchCompras(); // Recargar tabla asumiendo que funcionó o para ver si sigue ahí
-
-        } catch (error) {
-            console.error("Error eliminando compra:", error);
-            showToast(`Error al eliminar compra: ${error.message}`);
-        }
-    }
-
-    // --- LÓGICA SECCIÓN VENTAS (NUEVO) ---
-    btnAddProductoVenta.addEventListener('click', () => {
-        // Leer datos del producto actual
-        const nombreEl = document.getElementById('ventaProductoNombre');
-        const cantidadEl = document.getElementById('ventaProductoCantidad');
-        const precioEl = document.getElementById('ventaProductoPrecio');
-        const colorEl = document.getElementById('ventaProductoColor');
-        const tallaEl = document.getElementById('ventaProductoTalla');
-
-        const nombre = nombreEl.value.trim();
-        const cantidad = parseInt(cantidadEl.value) || 1;
-        const precio = parseFloat(precioEl.value) || 0;
-        const color = colorEl.value.trim();
-        const talla = tallaEl.value.trim();
-
-        if (!nombre || precio <= 0) {
-            showToast('Ingresa el nombre y precio del producto.');
-            return;
-        }
-
-        // Añadir producto al array temporal
-        productosEnVentaActual.push({
-            id: Date.now(), // ID temporal simple
-            nombre,
-            cantidad,
-            precio,
-            color,
-            talla
-        });
-
-        // Actualizar la lista visual de productos
-        renderListaProductosVenta();
-
-        // Limpiar campos del producto
-        nombreEl.value = '';
-        cantidadEl.value = '1';
-        precioEl.value = '';
-        colorEl.value = '';
-        tallaEl.value = '';
-        nombreEl.focus(); // Poner foco de nuevo en nombre
-    });
-
-    function renderListaProductosVenta() {
-        if (productosEnVentaActual.length === 0) {
-            listaProductosVenta.innerHTML = '<p class="text-sm text-gray-400 text-center py-2">Aún no has añadido productos a esta venta.</p>';
-            return;
-        }
-
-        listaProductosVenta.innerHTML = productosEnVentaActual.map(prod => `
-            <div class="product-item flex justify-between items-center p-2 border-b border-gray-100 hover:bg-gray-50" data-id="${prod.id}">
-                <div class="text-sm">
-                    <span class="font-semibold text-gray-800">${prod.cantidad} x ${prod.nombre}</span>
-                    <span class="text-gray-500 text-xs"> 
-                        ${prod.color ? `(${prod.color}` : ''}
-                        ${prod.talla ? `${prod.color ? ', ' : '('}${prod.talla})` : `${prod.color ? ')' : ''}`}
-                    </span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="text-sm font-semibold text-gray-700">S/ ${(prod.cantidad * prod.precio).toFixed(2)}</span>
-                    <button type="button" class="remove-product-btn text-red-500 hover:text-red-700 p-1" title="Quitar producto">
-                        <i data-feather="x-circle" class="w-4 h-4"></i>
-                    </button>
-                </div>
-            </div>
-        `).join('');
-        feather.replace(); // Renderizar iconos de eliminar
-    }
-
-    // Listener para quitar productos de la venta actual
-    listaProductosVenta.addEventListener('click', (e) => {
-        const removeButton = e.target.closest('.remove-product-btn');
-        if (removeButton) {
-            const itemDiv = removeButton.closest('.product-item');
-            const productId = parseInt(itemDiv.dataset.id);
-            productosEnVentaActual = productosEnVentaActual.filter(p => p.id !== productId);
-            renderListaProductosVenta();
-        }
-    });
-
-    formNuevaVenta.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        btnGuardarVenta.disabled = true;
-        showToast('Guardando venta...');
-
-        const clienteId = document.getElementById('ventaClienteId').value.trim();
-        const clienteNombre = document.getElementById('ventaClienteNombre').value.trim();
-        const fechaVenta = document.getElementById('ventaFecha').value;
-        const medioPago = document.getElementById('ventaMedioPago').value;
-        const notas = document.getElementById('ventaNotas').value.trim();
-
-        if (!clienteId || !clienteNombre || !fechaVenta || productosEnVentaActual.length === 0) {
-            showToast('Completa datos del cliente, fecha y añade al menos un producto.');
-            btnGuardarVenta.disabled = false;
-            return;
-        }
-
-        const montoTotal = productosEnVentaActual.reduce((sum, prod) => sum + (prod.cantidad * prod.precio), 0);
-
-        const payload = {
-            // Usa los nombres exactos de las columnas de tu hoja "Ventas"
-            FechaVenta: fechaVenta,
-            ClienteID: clienteId,
-            ClienteNombre: clienteNombre,
-            Productos: JSON.stringify(productosEnVentaActual.map(p => ({
-                nombre: p.nombre, cantidad: p.cantidad, precio: p.precio,
-                color: p.color, talla: p.talla
-            }))),
-            MontoTotal: montoTotal.toFixed(2),
-            MedioPago: medioPago,
-            Notas: notas
-        };
-
-        try {
-            const response = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'addVenta', payload }),
-                mode: 'no-cors' // O 'cors'
-            });
-
-            // --- Si usas 'no-cors' ---
-            showToast(`Venta enviada para guardar.`);
-            // --- Fin 'no-cors' ---
-
-            // --- Si SÍ puedes leer la respuesta ('cors') ---
-            /*
-            if (!response.ok) {
-                let errorMsg = `Error ${response.status}: ${response.statusText}`;
-                try { const errData = await response.json(); errorMsg = errData.message || errorMsg; } catch(e){}
-                throw new Error(errorMsg);
-            }
-            const result = await response.json();
-            if (result.status !== 'success' || !result.newId) {
-                throw new Error(result.message || 'Error al guardar (respuesta inválida).');
-            }
-            showToast(`Venta registrada con ID: ${result.newId}`);
-            */
-            // --- Fin 'cors' ---
-
-            // Limpiar formulario y productos temporales
-            formNuevaVenta.reset();
-            document.getElementById('ventaProductoNombre').value = '';
-            document.getElementById('ventaProductoCantidad').value = '1';
-            document.getElementById('ventaProductoPrecio').value = '';
-            document.getElementById('ventaProductoColor').value = '';
-            document.getElementById('ventaProductoTalla').value = '';
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('ventaFecha').value = today;
-            productosEnVentaActual = [];
-            renderListaProductosVenta();
-
-            await fetchVentas(); // Recargar tabla
-
-        } catch (error) {
-            console.error("Error guardando venta:", error);
-            showToast(`Error al enviar venta: ${error.message}. Verifica la consola y el script.`);
-        } finally {
-            btnGuardarVenta.disabled = false;
-        }
-    });
-    async function fetchVentas() {
-        console.log("Cargando historial de ventas...");
-        if (!tbodyVentas) return;
-        tbodyVentas.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">Cargando ventas...</td></tr>`;
-        try {
-            const response = await fetch(`${SCRIPT_URL}?action=getVentas`); // GET con action
-            if (!response.ok) {
-                let errorMsg = `Error ${response.status}: ${response.statusText}`;
-                try { const errData = await response.json(); errorMsg = errData.message || errorMsg; } catch(e){}
-                throw new Error(errorMsg);
-            }
-            const data = await response.json();
-
-            todasLasVentas = data.map(v => ({
-                ...v,
-                // Normalizar fecha (Ajusta 'FechaVenta' al header exacto)
-                FechaVenta: v.FechaVenta ? new Date(v.FechaVenta).toISOString().split('T')[0] : null,
-                // Parsear productos (Ajusta 'Productos' al header exacto)
-                productosParsed: parseProductosJson(v.Productos)
-            })).sort((a,b) => (b.FechaVenta || '').localeCompare(a.FechaVenta || ''));
-
-            renderTablaVentas(todasLasVentas);
-
-        } catch (error) {
-            console.error("Error cargando ventas:", error);
-            tbodyVentas.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-red-500">Error al cargar ventas: ${error.message}</td></tr>`;
-        } finally {
-            feather.replace();
-        }
-    }
-
-    // NUEVO: Helper para parsear JSON de productos
-    function parseProductosJson(jsonString) {
-        if (!jsonString || typeof jsonString !== 'string') return []; 
-        try {
-            const parsed = JSON.parse(jsonString);
-            return Array.isArray(parsed) ? parsed : []; 
-        } catch (e) {
-            console.error("Error parsing productos JSON:", jsonString, e);
-            return [{ nombre: 'Error al leer', cantidad: 1, precio: 0 }]; // Indica error en UI
-        }
-    }
-
-    // NUEVA: Función para renderizar tabla de ventas
-    function renderTablaVentas(ventas) {
-        if (!tbodyVentas) return;
-
-         if (!ventas || ventas.length === 0) {
-            tbodyVentas.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">No hay ventas registradas aún.</td></tr>`;
-            return;
-        }
-
-        tbodyVentas.innerHTML = ventas.map(venta => {
-            const productos = venta.productosParsed || []; 
-            const productosHtml = productos.length > 0 
-                ? productos.map(p => `<li>${p.cantidad} x ${p.nombre || '?'} ${p.color || ''} ${p.talla || ''}</li>`).join('')
-                : '<li>N/A</li>'; 
-
-            // Asegúrate de que los nombres de propiedad coincidan EXACTAMENTE con tus encabezados de columna en Google Sheet
-            return `
-                <tr class="border-b hover:bg-gray-50 text-sm">
-                    <td class="p-3">${venta.FechaVenta || ''}</td> 
-                    <td class="p-3 font-medium text-gray-900">${venta.ClienteNombre || ''} <span class="text-gray-500 text-xs">(${venta.ClienteID || ''})</span></td> 
-                    <td class="p-3"><ul class="list-disc list-inside text-xs">${productosHtml}</ul></td>
-                    <td class="p-3 text-right font-semibold">S/ ${parseFloat(venta.MontoTotal || 0).toFixed(2)}</td> 
-                    <td class="p-3">${venta.MedioPago || ''}</td> 
-                    <td class="p-3 text-gray-500">${venta.Notas || ''}</td> 
-                    <td class="p-3 text-center">
-                        <button class="action-btn text-red-500 hover:text-red-700" title="Eliminar Venta" onclick="eliminarVenta('${venta.ID}')">
-                            <i data-feather="trash-2" class="w-4 h-4"></i>
-                        </button>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-        feather.replace();
-    }
-
-    // NUEVO: Función global para eliminar venta
-    window.eliminarVenta = async function(id) {
-        if (!confirm(`¿Estás seguro de eliminar la venta con ID ${id}?`)) return;
-
-        showToast(`Eliminando venta ${id}...`);
-        try {
-            const response = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'deleteVenta', payload: { id: id } }),
-                mode: 'no-cors' // O 'cors'
-            });
-
-            // --- Si usas 'no-cors' ---
-            showToast(`Solicitud para eliminar venta ${id} enviada.`);
-            // --- Fin 'no-cors' ---
-
-            // --- Si SÍ puedes leer la respuesta ('cors') ---
-            /*
-            if (!response.ok) { throw new Error(`Error ${response.status}`); }
-            const result = await response.json();
-            if (result.status !== 'success') { throw new Error(result.message || 'Error al eliminar'); }
-            showToast(`Venta ${id} eliminada.`);
-            */
-            // --- Fin 'cors' ---
-
-            await fetchVentas(); // Recargar tabla
-
-        } catch (error) {
-            console.error("Error eliminando venta:", error);
-            showToast(`Error al eliminar venta: ${error.message}`);
-        }
-    }
 
     // --- INICIALIZACIÓN ---
     syncBusinessInfo();
-    fetchDataFromSheet(); // Carga envíos y reportes
-    fetchCompras();       // Carga compras
-    fetchVentas();        // Carga ventas
-    // Establecer fecha actual por defecto en formularios (si no lo hiciste antes)
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('compraFecha').value = today;
-    document.getElementById('ventaFecha').value = today;
-
-    feather.replace(); // Llamada final
+    fetchDataFromSheet();
 });
 </script>
 </body>
