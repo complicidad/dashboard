@@ -1045,7 +1045,14 @@ function setupAuthListener() {
     // --- LÓGICA DE LA TABLA Y FILTROS ---
 
     function aplicarFiltros() {
-        const hoy = new Date().toISOString().split('T')[0];
+        
+        // --- INICIO: OBTENER FECHA DE HOY ---
+        const hoy = new Date();
+        const offset = hoy.getTimezoneOffset() * 60000; // Obtiene el desfase horario en milisegundos
+        const hoyLocal = new Date(hoy.getTime() - offset); // Ajusta a la zona horaria local
+        const hoyString = hoyLocal.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+        // --- FIN: OBTENER FECHA DE HOY ---
+
         const clienteFilter = filtroCliente.value.toLowerCase();
         const tipoFilter = filtroTipo.value;
         const mostrarSoloDuplicados = filtroDuplicados.checked;
@@ -1064,9 +1071,12 @@ function setupAuthListener() {
 
         const enviosFiltrados = todosLosEnvios.filter(envio => {
             const clienteMatch = !clienteFilter || String(envio.cliente).toLowerCase().includes(clienteFilter);
+            // --- INICIO: LÓGICA DE FILTRO DE FECHA MODIFICADA ---
             const fechaMatch = filtroFecha.value
-                ? (envio.fechaEnvio && envio.fechaEnvio.substring(0, 10) === filtroFecha.value) 
-                : true; // <--- CAMBIO: Mostrar todos si no hay filtro de fecha
+                ? (envio.fechaEnvioInput && envio.fechaEnvioInput === filtroFecha.value) // 1. Si el usuario filtra, usa su fecha
+                : (envio.fechaEnvioInput ? envio.fechaEnvioInput >= hoyString : false); // 2. Si no, muestra >= hoy
+            // --- FIN: LÓGICA DE FILTRO DE FECHA MODIFICADA ---
+
             const tipoMatch = !tipoFilter || envio.courier === tipoFilter;
             
             if (mostrarSoloDuplicados) {
@@ -1797,5 +1807,6 @@ if (firebaseReady) {
 <!-- ======================= FIN: PANTALLA DE LOGIN ======================= -->
 </body>
 </html>
+
 
 
