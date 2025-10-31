@@ -10,6 +10,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/feather-icons"></script>
     
+    <!-- === INICIO DEL CAMBIO: Añadir librería de Excel (SheetJS) === -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- === FIN DEL CAMBIO === -->
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -221,22 +225,7 @@ import {
                 line-height: 1.5;
                 color: #333;
             }
-            /* Estilo específico para el monto a cobrar */
-            .label-amount-to-collect {
-                background-color: #1f2937; /* sidebar-bg */
-                color: #ffffff;
-                padding: 8px 12px;
-                border-radius: 8px;
-                text-align: center;
-                margin-top: 8px;
-            }
-            .label-amount-to-collect span {
-                font-size: 12px;
-            }
-            .label-amount-to-collect strong {
-                font-size: 20px;
-                letter-spacing: 1px;
-            }
+
             .label-footer {
                 display: flex;
                 justify-content: space-between;
@@ -1057,8 +1046,6 @@ function setupAuthListener() {
                     id: doc.id, // ID del documento
                     ...data, // Copia el resto de los datos (nombre, cliente, etc.)
                     estado: data.estado || 'PENDIENTE',
-                    detalle: data.detalle || '', 
-                    cobrar: data.cobrar || '',
                     fechaReg: fechaReg.display,         // <--- Formato dd-mm-yyyy
                     fechaEnvioDisplay: fechaEnvio.display, // <--- Formato dd-mm-yyyy
                     fechaEnvioInput: fechaEnvio.input,     // <--- Formato YYYY-MM-DD (para el input)
@@ -1198,8 +1185,8 @@ function setupAuthListener() {
                         <span class="block text-sm text-gray-500">${envio.telefono || 'N/A'}</span>
                         ${
                             // El DNI se agrupa aquí según la solicitud
-                            (envio.dni)
-                            ? `<span class="block text-sm text-gray-500 mt-1 pt-1 border-t border-gray-100">${envio.dni}</span>`
+                            (envio.DNI)
+                            ? `<span class="block text-sm text-gray-500 mt-1 pt-1 border-t border-gray-100">${envio.DNI}</span>`
                             : ''
                         }
                     </td>
@@ -1451,9 +1438,6 @@ function setupAuthListener() {
             } else if (envio.courier === 'DINSIDES') {
                 // HTML de Destino para Dinsides
                 // --- INICIO DE LA MODIFICACIÓN ---
-                const monto = parseFloat(envio.cobrar);
-                const montoDisplay = !isNaN(monto) && monto > 0 ? `S/. ${monto.toFixed(2)}` : 'S/. 0.00';
-
                 destinationHtml = `
                     <div class="label-section">
                         <div class="label-section-title">Destino:</div>
@@ -1461,8 +1445,8 @@ function setupAuthListener() {
                             <strong>Distrito:</strong> ${envio.distrito || 'N/A'}<br>
                             <strong>Fecha Entrega:</strong> ${envio.fechaEnvioDisplay || ''}<br>
                             <!-- Campos movidos y sin estilo especial -->
-                            <strong>Detalle:</strong> ${envio.detalle || 'Ropa'}<br>
-                            <strong>Cobrar:</strong> ${montoDisplay}
+                            <strong>Detalle:</strong> Ropa<br>
+                            <strong>Cobrar:</strong> S/. 0,00<br>
                         </p>
                     </div>
                 `;
@@ -1475,7 +1459,7 @@ function setupAuthListener() {
                     <div class="label-section">
                         <div class="label-section-title">Destino:</div>
                         <p class="label-destination-text">
-                            <strong>DNI/CE:</strong> ${envio.dni || 'N/A'}<br>
+                            <strong>DNI/CE:</strong> ${envio.DNI || 'N/A'}<br>
                             <strong>Agencia:</strong> ${envio.agencia || 'N/A'}
                         </p>
                     </div>
@@ -1512,7 +1496,7 @@ function setupAuthListener() {
         window.print();
     });
 
-    // --- INICIO: LÓGICA DE EXPORTACIÓN DE DATOS SELECCIONADOS (MODIFICADA) ---
+    // --- INICIO: LÓGICA DE EXPORTACIÓN DE DATOS (REESCRITA PARA XLSX) ---
     templateLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault(); // Previene que el enlace intente navegar
@@ -1522,30 +1506,30 @@ function setupAuthListener() {
             const seleccionadosIds = obtenerIdsSeleccionados();
             if (seleccionadosIds.length === 0) {
                 showToast('Debes seleccionar al menos un envío para exportar.');
-                return; // Detiene la ejecución si no hay nada seleccionado
+                return;
             }
 
             // 2. DETERMINAR QUÉ TIPO DE COURIER EXPORTAR
             const templateId = e.target.id;
             let targetCourier = '';
-            let filename = 'exportacion_filtrada.csv';
+            let filename = 'exportacion_filtrada.xlsx'; // <-- CAMBIO A .xlsx
 
             switch (templateId) {
                 case 'btnTplDelivery':
                     targetCourier = 'DELIVERY';
-                    filename = 'exportacion_delivery.csv';
+                    filename = 'exportacion_delivery.xlsx'; // <-- CAMBIO A .xlsx
                     break;
                 case 'btnTplShalom':
                     targetCourier = 'SHALOM';
-                    filename = 'exportacion_shalom.csv';
+                    filename = 'exportacion_shalom.xlsx'; // <-- CAMBIO A .xlsx
                     break;
                 case 'btnTplOlva':
                     targetCourier = 'OLVA';
-                    filename = 'exportacion_olva.csv';
+                    filename = 'exportacion_olva.xlsx'; // <-- CAMBIO A .xlsx
                     break;
                 case 'btnTplDinsides':
                     targetCourier = 'DINSIDES';
-                    filename = 'exportacion_dinsides.csv';
+                    filename = 'exportacion_dinsides.xlsx'; // <-- CAMBIO A .xlsx
                     break;
                 default:
                     showToast('Tipo de plantilla no reconocido.');
@@ -1557,50 +1541,60 @@ function setupAuthListener() {
                 seleccionadosIds.includes(envio.id) && envio.courier === targetCourier
             );
 
-            // 4. VERIFICAR SI LA NUEVA LISTA ESTÁ VACÍA (REQUISITO NUEVO)
+            // 4. VERIFICAR SI LA NUEVA LISTA ESTÁ VACÍA
             if (enviosSeleccionados.length === 0) {
                 showToast(`No se encontró ningún envío de tipo "${targetCourier}" en tu selección.`);
-                return; // Detiene la ejecución si no hay nada que exportar
+                return;
             }
 
             showToast(`Exportando ${enviosSeleccionados.length} envío(s) de tipo ${targetCourier}...`);
 
-            // 5. DEFINIR LAS CABECERAS (Usamos un export completo)
+            // 5. DEFINIR LAS CABECERAS
             const headers = [
                 'ID', 'Fecha Reg.', 'Cliente', 'Courier', 'Destinatario', 'Teléfono', 
                 'DNI', 'Distrito', 'Dirección', 'Referencia', 'Agencia', 
-                'Detalle', 'Cobrar', 'Fecha Envío', 'Estado'
+                'Fecha Envío', 'Estado'
             ];
 
-            let csvContent = headers.join(',') + '\n'; // Crea la primera fila (cabeceras)
+            // 6. PREPARAR DATOS (Array de Arrays)
+            const dataToExport = [headers]; // Primera fila es la cabecera
 
-            // 6. CREAR LAS FILAS DE DATOS
             enviosSeleccionados.forEach(envio => {
+                // SheetJS maneja los tipos de datos, no necesitamos "escapeCSV"
                 const row = [
-                    escapeCSV(envio.id),
-                    escapeCSV(envio.fechaReg),
-                    escapeCSV(envio.cliente),
-                    escapeCSV(envio.courier),
-                    escapeCSV(envio.nombre),
-                    escapeCSV(envio.telefono),
-                    escapeCSV(envio.dni),
-                    escapeCSV(envio.distrito),
-                    escapeCSV(envio.direccion),
-                    escapeCSV(envio.referencia),
-                    escapeCSV(envio.agencia),
-                    escapeCSV(envio.detalle),
-                    escapeCSV(envio.cobrar),
-                    escapeCSV(envio.fechaEnvioDisplay), // Usamos la fecha formateada
-                    escapeCSV(envio.estado)
+                    envio.id,
+                    envio.fechaReg,
+                    envio.cliente,
+                    envio.courier,
+                    envio.nombre,
+                    envio.telefono,
+                    envio.DNI,
+                    envio.distrito,
+                    envio.direccion,
+                    envio.referencia,
+                    envio.agencia,
+                    envio.fechaEnvioDisplay, // Usamos la fecha formateada
+                    envio.estado
                 ];
-                csvContent += row.join(',') + '\n'; // Añade la fila al contenido
+                dataToExport.push(row); // Añade la fila de datos
             });
 
-            // 7. DESCARGAR EL ARCHIVO
-            downloadCSV(filename, csvContent); // Usa el nombre de archivo dinámico
+            // 7. GENERAR Y DESCARGAR EL ARCHIVO XLSX
+            try {
+                const wb = XLSX.utils.book_new(); // Crear un nuevo libro de trabajo
+                const ws = XLSX.utils.aoa_to_sheet(dataToExport); // Crear hoja desde Array de Arrays
+                XLSX.utils.book_append_sheet(wb, ws, 'Envios'); // Añadir hoja al libro
+                
+                // Generar y disparar la descarga
+                XLSX.writeFile(wb, filename); 
+            
+            } catch (error) {
+                console.error("Error al generar el XLSX:", error);
+                showToast("Error al generar el archivo Excel.");
+            }
         });
     });
-    // --- FIN: LÓGICA DE EXPORTACIÓN DE DATOS SELECCIONADOS ---
+    // --- FIN: LÓGICA DE EXPORTACIÓN DE DATOS ---
 
 
     btnAplicarFiltros.addEventListener('click', aplicarFiltros);
@@ -1873,34 +1867,10 @@ if (logoSrc) {
     const toast = document.getElementById('toast');
     let toastTimeout;
 
-    // --- INICIO: FUNCIÓN DE AYUDA CSV ---
-    // Función para "escapar" datos que puedan romper el CSV (ej. comas, comillas)
-    const escapeCSV = (str) => {
-        if (str === null || str === undefined) return '""'; // Maneja nulos o indefinidos
-        const s = String(str);
-        if (s.includes(',') || s.includes('"') || s.includes('\n')) {
-            // Si contiene caracteres problemáticos, lo rodea con comillas
-            // y duplica cualquier comilla interna
-            return `"${s.replace(/"/g, '""')}"`;
-        }
-        return s; // Devuelve el string tal cual
-    };
-    // --- FIN: FUNCIÓN DE AYUDA CSV ---
-
-    // --- INICIO: FUNCIÓN DE DESCARGA CSV ---
-    function downloadCSV(filename, csvContent) {
-        // Añadimos un BOM (\uFEFF) para que Excel reconozca tildes y ñ (UTF-8)
-        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", filename);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-    // --- FIN: FUNCIÓN DE DESCARGA CSV ---
+    // --- INICIO: FUNCIONES CSV ELIMINADAS ---
+    // La función escapeCSV ya no es necesaria, SheetJS maneja los tipos.
+    // La función downloadCSV ya no es necesaria, SheetJS usa XLSX.writeFile.
+    // --- FIN: FUNCIONES CSV ELIMINADAS ---
 
     function showToast(msg){
         clearTimeout(toastTimeout);
@@ -1970,4 +1940,5 @@ if (firebaseReady) {
 <!-- ======================= FIN: PANTALLA DE LOGIN ======================= -->
 </body>
 </html>
+
 
