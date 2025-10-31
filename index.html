@@ -1512,24 +1512,97 @@ function setupAuthListener() {
         window.print();
     });
 
+    // --- INICIO: LÓGICA DE EXPORTACIÓN DE DATOS SELECCIONADOS (MODIFICADA) ---
     templateLinks.forEach(link => {
         link.addEventListener('click', (e) => {
-            e.preventDefault(); // Previene que el enlace intente navegar a otra página
+            e.preventDefault(); // Previene que el enlace intente navegar
+            plantillasMenu.classList.add('hidden'); // Cierra el menú
 
+            // 1. VERIFICAR SI HAY SELECCIÓN
             const seleccionadosIds = obtenerIdsSeleccionados();
             if (seleccionadosIds.length === 0) {
-                showToast('Debes seleccionar al menos un envío para descargar la plantilla.');
-                plantillasMenu.classList.add('hidden'); // Cierra el menú
-                return;
+                showToast('Debes seleccionar al menos un envío para exportar.');
+                return; // Detiene la ejecución si no hay nada seleccionado
             }
 
-            // Aquí iría la lógica futura para descargar el archivo
-            const templateName = e.target.textContent;
-            console.log(`Descargando ${templateName} para los envíos:`, seleccionadosIds);
-            showToast(`Descargando ${templateName}...`);
-            plantillasMenu.classList.add('hidden'); // Cierra el menú
+            // 2. DETERMINAR QUÉ TIPO DE COURIER EXPORTAR
+            const templateId = e.target.id;
+            let targetCourier = '';
+            let filename = 'exportacion_filtrada.csv';
+
+            switch (templateId) {
+                case 'btnTplDelivery':
+                    targetCourier = 'DELIVERY';
+                    filename = 'exportacion_delivery.csv';
+                    break;
+                case 'btnTplShalom':
+                    targetCourier = 'SHALOM';
+                    filename = 'exportacion_shalom.csv';
+                    break;
+                case 'btnTplOlva':
+                    targetCourier = 'OLVA';
+                    filename = 'exportacion_olva.csv';
+                    break;
+                case 'btnTplDinsides':
+                    targetCourier = 'DINSIDES';
+                    filename = 'exportacion_dinsides.csv';
+                    break;
+                default:
+                    showToast('Tipo de plantilla no reconocido.');
+                    return;
+            }
+
+            // 3. FILTRAR LOS SELECCIONADOS POR TIPO DE COURIER
+            const enviosSeleccionados = todosLosEnvios.filter(envio => 
+                seleccionadosIds.includes(envio.id) && envio.courier === targetCourier
+            );
+
+            // 4. VERIFICAR SI LA NUEVA LISTA ESTÁ VACÍA (REQUISITO NUEVO)
+            if (enviosSeleccionados.length === 0) {
+                showToast(`No se encontró ningún envío de tipo "${targetCourier}" en tu selección.`);
+                return; // Detiene la ejecución si no hay nada que exportar
+            }
+
+            showToast(`Exportando ${enviosSeleccionados.length} envío(s) de tipo ${targetCourier}...`);
+
+            // 5. DEFINIR LAS CABECERAS (Usamos un export completo)
+            const headers = [
+                'ID', 'Fecha Reg.', 'Cliente', 'Courier', 'Destinatario', 'Teléfono', 
+                'DNI', 'Distrito', 'Dirección', 'Referencia', 'Agencia', 
+                'Detalle', 'Cobrar', 'Fecha Envío', 'Estado'
+            ];
+
+            let csvContent = headers.join(',') + '\n'; // Crea la primera fila (cabeceras)
+
+            // 6. CREAR LAS FILAS DE DATOS
+            enviosSeleccionados.forEach(envio => {
+                const row = [
+                    escapeCSV(envio.id),
+                    escapeCSV(envio.fechaReg),
+                    escapeCSV(envio.cliente),
+                    escapeCSV(envio.courier),
+                    escapeCSV(envio.nombre),
+                    escapeCSV(envio.telefono),
+                    escapeCSV(envio.dni),
+                    escapeCSV(envio.distrito),
+                    escapeCSV(envio.direccion),
+                    escapeCSV(envio.referencia),
+                    escapeCSV(envio.agencia),
+                    escapeCSV(envio.detalle),
+                    escapeCSV(envio.cobrar),
+                    escapeCSV(envio.fechaEnvioDisplay), // Usamos la fecha formateada
+                    escapeCSV(envio.estado)
+                ];
+                csvContent += row.join(',') + '\n'; // Añade la fila al contenido
+            });
+
+            // 7. DESCARGAR EL ARCHIVO
+            downloadCSV(filename, csvContent); // Usa el nombre de archivo dinámico
         });
-    });      
+    });
+    // --- FIN: LÓGICA DE EXPORTACIÓN DE DATOS SELECCIONADOS ---
+
+
     btnAplicarFiltros.addEventListener('click', aplicarFiltros);
     filtroCliente.addEventListener('keyup', (e) => { if(e.key === 'Enter') aplicarFiltros() });
 
@@ -1799,6 +1872,36 @@ if (logoSrc) {
     // --- UTILIDADES ---
     const toast = document.getElementById('toast');
     let toastTimeout;
+
+    // --- INICIO: FUNCIÓN DE AYUDA CSV ---
+    // Función para "escapar" datos que puedan romper el CSV (ej. comas, comillas)
+    const escapeCSV = (str) => {
+        if (str === null || str === undefined) return '""'; // Maneja nulos o indefinidos
+        const s = String(str);
+        if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+            // Si contiene caracteres problemáticos, lo rodea con comillas
+            // y duplica cualquier comilla interna
+            return `"${s.replace(/"/g, '""')}"`;
+        }
+        return s; // Devuelve el string tal cual
+    };
+    // --- FIN: FUNCIÓN DE AYUDA CSV ---
+
+    // --- INICIO: FUNCIÓN DE DESCARGA CSV ---
+    function downloadCSV(filename, csvContent) {
+        // Añadimos un BOM (\uFEFF) para que Excel reconozca tildes y ñ (UTF-8)
+        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+    // --- FIN: FUNCIÓN DE DESCARGA CSV ---
+
     function showToast(msg){
         clearTimeout(toastTimeout);
         toast.textContent = msg;
@@ -1867,6 +1970,4 @@ if (firebaseReady) {
 <!-- ======================= FIN: PANTALLA DE LOGIN ======================= -->
 </body>
 </html>
-
-
 
