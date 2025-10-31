@@ -809,6 +809,42 @@ async function handleLogout() {
     }
 }
 
+// --- INICIO: LÓGICA DE WHATSAPP ---
+function handleNotifyClick(id) {
+    // 1. Encontrar el envío
+    const envio = todosLosEnvios.find(e => e.id === id);
+    if (!envio) {
+        showToast('Error: No se encontró el envío.');
+        return;
+    }
+
+    // 2. Validar el teléfono
+    if (!envio.telefono) {
+        showToast('Este envío no tiene un número de teléfono asignado.');
+        return;
+    }
+
+    // 3. Obtener nombre del negocio (desde localStorage)
+    const businessName = localStorage.getItem('businessName') || 'Tu Emprendimiento';
+
+    // 4. Crear el mensaje
+    // (Personaliza este mensaje como quieras)
+    const mensaje = `¡Hola ${envio.nombre}! Te escribe ${businessName} para informarte sobre tu envío. Estado actual: *${envio.estado}*.`;
+
+    // 5. Formatear número de teléfono
+    // (Esto elimina espacios y añade el prefijo 51 de Perú si es un número de 9 dígitos)
+    // ¡Ajusta el '51' si tu código de país es otro!
+    let numeroFormateado = envio.telefono.replace(/[^\d]/g, ''); // Quita todo lo que no sea dígito
+    if (numeroFormateado.length === 9 && !numeroFormateado.startsWith('51')) {
+        numeroFormateado = '51' + numeroFormateado;
+    }
+
+    // 6. Crear y abrir la URL
+    const whatsappUrl = `https://wa.me/${numeroFormateado}?text=${encodeURIComponent(mensaje)}`;
+    window.open(whatsappUrl, '_blank');
+}
+// --- FIN: LÓGICA DE WHATSAPP ---
+
 // "Escucha" los cambios de estado de autenticación
 function setupAuthListener() {
     onAuthStateChanged(auth, (user) => {
@@ -1071,11 +1107,23 @@ function setupAuthListener() {
 
         const enviosFiltrados = todosLosEnvios.filter(envio => {
             const clienteMatch = !clienteFilter || String(envio.cliente).toLowerCase().includes(clienteFilter);
-            // --- INICIO: LÓGICA DE FILTRO DE FECHA MODIFICADA ---
-            const fechaMatch = filtroFecha.value
-                ? (envio.fechaEnvioInput && envio.fechaEnvioInput === filtroFecha.value) // 1. Si el usuario filtra, usa su fecha
-                : (envio.fechaEnvioInput ? envio.fechaEnvioInput >= hoyString : false); // 2. Si no, muestra >= hoy
-            // --- FIN: LÓGICA DE FILTRO DE FECHA MODIFICADA ---
+            // --- INICIO: LÓGICA DE FILTRO DE FECHA (Inteligente) ---
+            let fechaMatch;
+            const fechaFiltroUsuario = filtroFecha.value; // La fecha que puso el usuario
+            const otroFiltroActivo = clienteFilter || tipoFilter; // ¿Filtró por cliente o courier?
+
+            if (fechaFiltroUsuario) {
+                // 1. Si el usuario PUSO una fecha, filtra por esa fecha
+                fechaMatch = (envio.fechaEnvioInput && envio.fechaEnvioInput === fechaFiltroUsuario);
+            } else if (otroFiltroActivo) {
+                // 2. Si el usuario NO puso fecha, PERO SÍ filtró por cliente o courier...
+                fechaMatch = true; // ...ignora la fecha y muestra todo (para ese cliente/courier)
+            } else {
+                // 3. Si el usuario NO puso fecha Y TAMPOCO filtró por cliente o courier...
+                // ...aplica el filtro por defecto (>= hoy)
+                fechaMatch = (envio.fechaEnvioInput ? envio.fechaEnvioInput >= hoyString : false);
+            }
+            // --- FIN: LÓGICA DE FILTRO DE FECHA (Inteligente) ---
 
             const tipoMatch = !tipoFilter || envio.courier === tipoFilter;
             
@@ -1191,7 +1239,11 @@ function setupAuthListener() {
                             </button>
                         </div>
                     </td>                    
-                    <td class="p-3 text-center"><button class="text-accent hover:text-accent-alt" title="Notificar al cliente"><i data-feather="send" class="w-4 h-4"></i></button></td>
+                    <td class="p-3 text-center">
+                        <button data-id="${envio.id}" class="btn-notify text-green-600 hover:text-green-800" title="Notificar por WhatsApp">
+                            <i data-feather="send" class="w-4 h-4"></i>
+                        </button>
+                    </td>
                 `;
                 tbodyEnvios.appendChild(tr);
 
@@ -1242,7 +1294,7 @@ function setupAuthListener() {
                     </div>
 
                     <div class="flex justify-end pt-2">
-                        <button class="text-accent hover:text-accent-alt text-sm font-bold inline-flex items-center gap-1" title="Notificar al cliente">
+                        <button data-id="${envio.id}" class="btn-notify text-green-600 hover:text-green-800 text-sm font-bold inline-flex items-center gap-1" title="Notificar por WhatsApp">
                             <i data-feather="send" class="w-4 h-4"></i> Notificar
                         </button>
                     </div>
@@ -1685,6 +1737,14 @@ if (logoSrc) {
              e.preventDefault(); // Evitar cualquier comportamiento por defecto del botón
              saveInlineChanges(button);
          }
+
+        // --- INICIO: Conectar Botón de WhatsApp ---
+        const notifyButton = e.target.closest('.btn-notify');
+        if (notifyButton) {
+            e.preventDefault();
+            handleNotifyClick(notifyButton.dataset.id); // Pasa el ID a la función
+        }
+        // --- FIN: Conectar Botón de WhatsApp ---
     });
 
     // --- LÓGICA DEL MODAL DE CONFIRMACIÓN ---
