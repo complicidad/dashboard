@@ -483,7 +483,7 @@ import {
                                             <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider">Destino</th>
                                             <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider">Fecha Envío</th>
                                             <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider">Estado</th>
-                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider rounded-tr-xl">Notificar</th>
+                                            <th class="p-3 text-left text-xs font-bold text-accent uppercase tracking-wider rounded-tr-xl">Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody id="tbodyEnvios"></tbody>
@@ -702,6 +702,95 @@ import {
             </div>
         </div>
     </div>
+
+    <!-- === INICIO: NUEVO MODAL DE EDICIÓN === -->
+    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg text-left">
+            <h3 class="text-lg leading-6 font-bold text-gray-900 flex items-center gap-2" id="edit-modal-title">
+                <i data-feather="edit-2" class="w-5 h-5 text-accent"></i>
+                Editar Envío
+            </h3>
+            
+            <!-- Formulario de Edición -->
+            <form id="editForm" class="mt-4 space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+                <input type="hidden" id="editEnvioId">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Columna Izquierda -->
+                    <div class="space-y-4">
+                        <div>
+                            <label for="editCliente" class="block text-sm text-gray-500 font-semibold mb-1.5">Cliente (Celular)</label>
+                            <input type="text" id="editCliente" class="input p-2.5 border border-gray-300 rounded-xl bg-gray-100 cursor-not-allowed w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" readonly>
+                        </div>
+                        <div>
+                            <label for="editNombre" class="block text-sm text-gray-500 font-semibold mb-1.5">Destinatario (Nombre)</label>
+                            <input type="text" id="editNombre" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                        </div>
+                        <div>
+                            <label for="editTelefono" class="block text-sm text-gray-500 font-semibold mb-1.5">Destinatario (Teléfono)</label>
+                            <input type="text" id="editTelefono" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                        </div>
+                        <div>
+                            <label for="editDNI" class="block text-sm text-gray-500 font-semibold mb-1.5">Destinatario (DNI)</label>
+                            <input type="text" id="editDNI" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                        </div>
+                        <div>
+                            <label for="editCourier" class="block text-sm text-gray-500 font-semibold mb-1.5">Courier</label>
+                            <select id="editCourier" class="select p-2.5 border border-gray-300 rounded-xl bg-gray-100 cursor-not-allowed w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100" disabled>
+                                <option value="SHALOM">Shalom</option>
+                                <option value="OLVA">Olva</option>
+                                <option value="DINSIDES">Dinsides</option>
+                                <option value="DELIVERY">Delivery Propio</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Columna Derecha -->
+                    <div class="space-y-4">
+                        <div>
+                            <label for="editDistrito" class="block text-sm text-gray-500 font-semibold mb-1.5">Distrito</label>
+                            <input type="text" id="editDistrito" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                        </div>
+                        <div>
+                            <label for="editDireccion" class="block text-sm text-gray-500 font-semibold mb-1.5">Dirección</label>
+                            <input type="text" id="editDireccion" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                        </div>
+                        <div>
+                            <label for="editReferencia" class="block text-sm text-gray-500 font-semibold mb-1.5">Referencia</label>
+                            <input type="text" id="editReferencia" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                        </div>
+                        <div>
+                            <label for="editAgencia" class="block text-sm text-gray-500 font-semibold mb-1.5">Agencia</gabel>
+                            <input type="text" id="editAgencia" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción Y Checkbox -->
+                <div class="mt-6 flex flex-col md:flex-row justify-between items-center gap-4 pt-4 border-t border-gray-100">
+
+                    <!-- === INICIO: CHECKBOX A AÑADIR === -->
+                    <div class="w-full md:w-auto">
+                        <label for="editActualizarPerfil" class="flex items-center text-sm text-gray-700 font-medium cursor-pointer">
+                            <input type="checkbox" id="editActualizarPerfil" class="rounded border-gray-300 text-accent focus:ring-accent mr-2">
+                            <span>Actualizar perfil de cliente</span>
+                        </label>
+                        <p class="text-xs text-gray-500 ml-6 md:ml-0"> (Para futuros envíos)</p>
+                    </div>
+                    <!-- === FIN: CHECKBOX A AÑADIR === -->
+
+                    <!-- Botones (existentes) -->
+                    <div class="flex justify-end gap-4 w-full md:w-auto">
+                        <button type="button" id="cancelEditBtn" class="inline-flex justify-center rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-bold text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 transition-all duration-200">Cancelar</button>
+                        <button type="submit" id="confirmEditBtn" class="inline-flex justify-center rounded-xl border border-transparent bg-accent px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-accent-alt focus:outline-none focus:ring-2 focus:ring-accent-alt focus:ring-offset-2 transition-all duration-200">Guardar Cambios</button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+    <!-- === FIN: NUEVO MODAL DE EDICIÓN === -->
+
     <!-- Contenedor oculto para las etiquetas de impresión -->
     <div id="print-container" class="print-container"></div>
 
@@ -1058,7 +1147,14 @@ function setupAuthListener() {
 
         }, (error) => {
             console.error("Error al escuchar los envíos:", error);
-            showToast("Error: No se pudieron cargar los envíos.");
+            // --- INICIO: LÓGICA DE SESIÓN EXPIRADA ---
+            if (error.code === 'permission-denied') {
+                showToast('Tu sesión de admin ha caducado. Inicia sesión de nuevo.');
+                handleLogout(); // Forzar cierre de sesión
+            } else {
+                showToast("Error: No se pudieron cargar los envíos.");
+            }
+            // --- FIN: LÓGICA DE SESIÓN EXPIRADA ---
             todosLosEnvios = [];
             aplicarFiltros();
         });
@@ -1220,17 +1316,27 @@ function setupAuthListener() {
                                 <option value="REPROGRAMADO" ${envio.estado === 'REPROGRAMADO' ? 'selected' : ''}>Reprogramado</option>
                                 <option value="ELIMINAR" class="text-red-600 font-semibold">Eliminar...</option>
                             </select>
-                            <input type="date" class="inline-edit-fecha input border border-gray-200 bg-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-orange-100 oculto" value="${envio.fechaEnvioDisplay || ''}" data-original-fecha="${envio.fechaEnvioDisplay || ''}">
+                            <input type="date" class="inline-edit-fecha input border border-gray-200 bg-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-orange-100 oculto" value="${envio.fechaEnvioInput || ''}" data-original-fecha="${envio.fechaEnvioInput || ''}">
                             <button class="inline-save-btn btn primary bg-accent text-white shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 inline-flex items-center justify-center gap-1 oculto">
                                 <i data-feather="save" class="w-3 h-3"></i>
                             </button>
                         </div>
                     </td>                    
                     <td class="p-3 text-center">
-                        <button data-id="${envio.id}" class="btn-notify text-green-600 hover:text-green-800" title="Notificar por WhatsApp">
-                            <i data-feather="send" class="w-4 h-4"></i>
-                        </button>
+                        <!-- Contenedor Flex para alinear botones -->
+                        <div class="flex justify-center items-center gap-2">
+                            <!-- NUEVO Botón de Editar -->
+                            <button data-id="${envio.id}" class="btn-edit-full text-blue-600 hover:text-blue-800" title="Editar Envío Completo">
+                                <i data-feather="edit-2" class="w-4 h-4"></i>
+                            </button>
+
+                            <!-- Botón de Notificar (existente) -->
+                            <button data-id="${envio.id}" class="btn-notify text-green-600 hover:text-green-800" title="Notificar por WhatsApp">
+                                <i data-feather="send" class="w-4 h-4"></i>
+                            </button>
+                        </div>
                     </td>
+
                 `;
                 tbodyEnvios.appendChild(tr);
 
@@ -1274,13 +1380,19 @@ function setupAuthListener() {
                             <option value="ENTREGADO" ${envio.estado === 'ENTREGADO' ? 'selected' : ''}>Entregado</option>
                             <option value="REPROGRAMADO" ${envio.estado === 'REPROGRAMADO' ? 'selected' : ''}>Reprogramado</option>
                         </select>
-                        <input type="date" class="inline-edit-fecha input p-2 border border-gray-200 rounded-lg bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-orange-100 oculto" value="${envio.fechaEnvioDisplay || ''}" data-original-fecha="${envio.fechaEnvioDisplay || ''}">
+                        <input type="date" class="inline-edit-fecha input p-2 border border-gray-200 rounded-lg bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-orange-100 oculto" value="${envio.fechaEnvioInput || ''}" data-original-fecha="${envio.fechaEnvioInput || ''}">
                         <button class="inline-save-btn btn primary bg-accent text-white rounded-lg font-bold text-sm shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5 transition-all duration-200 inline-flex items-center justify-center gap-1 oculto py-2">
                             <i data-feather="save" class="w-4 h-4"></i> Guardar Cambio
                         </button>
                     </div>
 
-                    <div class="flex justify-end pt-2">
+                    <div class="flex justify-end items-center pt-2 gap-4">
+                        <!-- NUEVO Botón de Editar -->
+                        <button data-id="${envio.id}" class="btn-edit-full text-blue-600 hover:text-blue-800 text-sm font-bold inline-flex items-center gap-1" title="Editar Envío Completo">
+                            <i data-feather="edit-2" class="w-4 h-4"></i> Editar
+                        </button>
+                        
+                        <!-- Botón de Notificar (existente) -->
                         <button data-id="${envio.id}" class="btn-notify text-green-600 hover:text-green-800 text-sm font-bold inline-flex items-center gap-1" title="Notificar por WhatsApp">
                             <i data-feather="send" class="w-4 h-4"></i> Notificar
                         </button>
@@ -1362,6 +1474,7 @@ function setupAuthListener() {
                 showToast('Debes seleccionar una fecha para reprogramar.');
                 return;
             }
+            // CORRECCIÓN: El campo en Firestore se llama fechaEnvio (formato YYYY-MM-DD)
             updates = { estado: 'REPROGRAMADO', fechaEnvio: fechaReprog.value };
         } else { // Para 'ENVIADO', 'ENTREGADO', 'PENDIENTE'
             updates = { estado: accion };
@@ -1696,7 +1809,7 @@ if (logoSrc) {
         const fechaInput = row.querySelector('.inline-edit-fecha');
 
         const nuevoEstado = estadoSelect.value;
-        let nuevaFecha = fechaInput.value;
+        let nuevaFecha = fechaInput.value; // Formato YYYY-MM-DD
 
         // Buscar el envío original en nuestro array local 'todosLosEnvios'
         const envioOriginal = todosLosEnvios.find(e => e.id === id);
@@ -1707,8 +1820,13 @@ if (logoSrc) {
         }
 
         // Crear el payload copiando el original y actualizando solo lo necesario
-        const payload = JSON.parse(JSON.stringify(envioOriginal)); 
-        payload.estado = nuevoEstado; // Actualiza el estado
+        // ATENCIÓN: Esta lógica usa los datos de 'todosLosEnvios', que tienen
+        // el formato 'fechaEnvioInput' (YYYY-MM-DD) y 'fechaEnvioDisplay' (dd-mm-yyyy)
+        
+        const datosParaActualizar = {
+            estado: nuevoEstado,
+            fechaEnvio: envioOriginal.fechaEnvioInput // Por defecto, mantiene la fecha original
+        };
 
         // Solo actualizar fecha si el estado es REPROGRAMADO
         if (nuevoEstado === 'REPROGRAMADO') {
@@ -1717,21 +1835,12 @@ if (logoSrc) {
                  buttonElement.disabled = false; // Rehabilita si falta fecha
                  return; // Detener si falta la fecha
             }
-            payload.fechaEnvio = nuevaFecha; // Actualiza la fecha
-        } else {
-            payload.fechaEnvio = (envioOriginal.fechaEnvio) ? envioOriginal.fechaEnvio.substring(0, 10) : '';
+            datosParaActualizar.fechaEnvio = nuevaFecha; // Actualiza la fecha (YYYY-MM-DD)
         }
         
         // ======================= REEMPLAZO: DE GOOGLE SCRIPT A FIRESTORE =======================
         try {
             const docRef = doc(enviosCollectionRef, id); // Referencia al documento
-            // Corrección: Usar updateDoc para no borrar los datos del cliente
-            // Creamos un objeto solo con los campos que se guardan en /envios
-            const datosParaActualizar = {
-                estado: payload.estado,
-                fechaEnvio: payload.fechaEnvio
-            };
-
             await updateDoc(docRef, datosParaActualizar); // updateDoc actualiza, no sobrescribe
 
             // onSnapshot se encargará de actualizar la UI automáticamente.
@@ -1812,6 +1921,20 @@ if (logoSrc) {
             handleNotifyClick(notifyButton.dataset.id); // Pasa el ID a la función
         }
         // --- FIN: Conectar Botón de WhatsApp ---
+
+        // --- INICIO: Conectar Botón de Edición Completa ---
+        const editButton = e.target.closest('.btn-edit-full');
+        if (editButton) {
+            e.preventDefault();
+            const envioId = editButton.dataset.id;
+            const envio = todosLosEnvios.find(e => e.id === envioId);
+            if (envio) {
+                abrirModalEdicion(envio);
+            } else {
+                showToast('Error: No se encontró el envío para editar.');
+            }
+        }
+        // --- FIN: Conectar Botón de Edición Completa ---
     });
 
     // --- LÓGICA DEL MODAL DE CONFIRMACIÓN ---
@@ -1820,6 +1943,113 @@ if (logoSrc) {
     const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
     const modalMessage = document.getElementById('modalMessage');
     let idsParaEliminar = []; // Ahora contendrá strings
+
+    // --- INICIO: ELEMENTOS Y LÓGICA DEL MODAL DE EDICIÓN ---
+    const editModal = document.getElementById('editModal');
+    const editForm = document.getElementById('editForm');
+    const confirmEditBtn = document.getElementById('confirmEditBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    const editActualizarPerfil = document.getElementById('editActualizarPerfil');
+    
+    // Inputs del formulario de edición
+    const editEnvioId = document.getElementById('editEnvioId');
+    const editCliente = document.getElementById('editCliente');
+    const editNombre = document.getElementById('editNombre');
+    const editTelefono = document.getElementById('editTelefono');
+    const editDNI = document.getElementById('editDNI');
+    const editCourier = document.getElementById('editCourier');
+    const editDistrito = document.getElementById('editDistrito');
+    const editDireccion = document.getElementById('editDireccion');
+    const editReferencia = document.getElementById('editReferencia');
+    const editAgencia = document.getElementById('editAgencia');
+
+    function abrirModalEdicion(envio) {
+        // Rellenar el formulario con los datos del envío
+        editEnvioId.value = envio.id;
+        editCliente.value = envio.cliente || '';
+        editNombre.value = envio.nombre || '';
+        editTelefono.value = envio.telefono || '';
+        editDNI.value = envio.DNI || ''; // Asegúrate que el nombre del campo coincida
+        editCourier.value = envio.courier || 'DELIVERY'; // Asigna un valor por defecto si no existe
+        editDistrito.value = envio.distrito || '';
+        editDireccion.value = envio.direccion || '';
+        editReferencia.value = envio.referencia || '';
+        editAgencia.value = envio.agencia || '';
+
+        // Mostrar el modal
+        editModal.classList.remove('hidden');
+    }
+
+    function cerrarModalEdicion() {
+        editModal.classList.add('hidden');
+        editForm.reset(); // Limpia el formulario
+        editActualizarPerfil.checked = false; // Desmarca el checkbox
+    }
+
+    async function guardarCambiosEdicion(e) {
+        e.preventDefault(); // Previene que el formulario se envíe
+        const id = editEnvioId.value;
+        const clienteId = editCliente.value; // El ID del cliente (teléfono)
+        
+        if (!id || !clienteId) {
+            showToast('Error: ID de envío o Cliente no encontrado.');
+            return;
+        }
+
+        // 1. Crear el objeto con los datos actualizados para /envios
+        const updatesEnvio = {
+            // No incluimos 'cliente' porque es readonly
+            nombre: editNombre.value,
+            telefono: editTelefono.value,
+            DNI: editDNI.value,
+            // courier: editCourier.value, // <-- CAMBIO: Eliminado
+            distrito: editDistrito.value,
+            direccion: editDireccion.value,
+            referencia: editReferencia.value,
+            agencia: editAgencia.value
+        };
+
+        showToast('Guardando cambios...');
+        try {
+            // --- ESCRITURA 1: Actualizar el Historial (/envios) ---
+            const docRefEnvio = doc(enviosCollectionRef, id);
+            await updateDoc(docRefEnvio, updatesEnvio);
+
+            // --- ESCRITURA 2: Actualizar el Perfil (/clientes) (Opcional) ---
+            if (editActualizarPerfil.checked) {
+                // Creamos un objeto solo con los datos del *perfil*
+                // (excluimos 'courier' que es específico del envío)
+                const updatesPerfil = {
+                    nombre: editNombre.value,
+                    telefono: editTelefono.value,
+                    DNI: editDNI.value,
+                    distrito: editDistrito.value,
+                    direccion: editDireccion.value,
+                    referencia: editReferencia.value,
+                    agencia: editAgencia.value // Guardamos agencia también
+                };
+                
+                // Usamos el clienteId (teléfono) como ID del documento en /clientes
+                const docRefCliente = doc(db, 'clientes', clienteId);
+                // Usamos setDoc con 'merge' para crear o actualizar el perfil
+                await setDoc(docRefCliente, updatesPerfil, { merge: true }); 
+                showToast('Envío y Perfil actualizados.');
+            } else {
+                showToast('Envío actualizado con éxito.');
+            }
+
+            cerrarModalEdicion();
+            // onSnapshot se encargará de actualizar la UI automáticamente
+        } catch (error) {
+            console.error("Error al actualizar el envío:", error);
+            showToast("Error al guardar los cambios.");
+        }
+    }
+
+    // Conectar botones del nuevo modal
+    cancelEditBtn.addEventListener('click', cerrarModalEdicion);
+    editForm.addEventListener('submit', guardarCambiosEdicion);
+    // --- FIN: LÓGICA DEL MODAL DE EDICIÓN ---
 
     function abrirModalConfirmacion(ids) {
         idsParaEliminar = ids;
@@ -1868,7 +2098,7 @@ if (logoSrc) {
     let toastTimeout;
 
     // --- INICIO: FUNCIONES CSV ELIMINADAS ---
-    // La función escapeCSV ya no es necesaria, SheetJS maneja los tipos.
+    // La función escapeCSV ya no es necesaria, SheetJS maneja los tipos de datos.
     // La función downloadCSV ya no es necesaria, SheetJS usa XLSX.writeFile.
     // --- FIN: FUNCIONES CSV ELIMINADAS ---
 
@@ -1940,5 +2170,4 @@ if (firebaseReady) {
 <!-- ======================= FIN: PANTALLA DE LOGIN ======================= -->
 </body>
 </html>
-
 
