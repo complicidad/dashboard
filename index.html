@@ -72,7 +72,8 @@ import {
         query, 
         where, 
         writeBatch,
-        setLogLevel
+        setLogLevel,
+        enableIndexedDbPersistence
       } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 // Hacemos las funciones de Firebase accesibles globalmente para el script principal
@@ -87,7 +88,7 @@ import {
         onAuthStateChanged,
         // --- FIN DE FUNCIONES AÑADIDAS ---
         getFirestore,
-        doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, writeBatch, setLogLevel
+        doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, writeBatch, setLogLevel, enableIndexedDbPersistence
       };
     </script>
     <!-- ======================= FIN: SDK de Firebase ======================= -->
@@ -409,7 +410,7 @@ import {
                                 <div class="flex flex-col md:flex-row justify-between md:items-end gap-4 border-b border-gray-200 pb-4 mb-4 flex-wrap">
                                     <!-- Grupo de Filtros (Izquierda) -->
                                     <div class="flex flex-col md:flex-row md:items-end gap-2 flex-wrap">
-                                        <label class="text-xs text-gray-500 font-semibold md:w-36">Cliente (Celular)<input type="text" id="filtroCliente" placeholder="Ej: 987654321" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100 mt-1" /></label>
+                                        <label class="text-xs text-gray-500 font-semibold md:w-36">Cliente (N° Exacto)<input type="text" id="filtroCliente" placeholder="N° exacto (987654321)" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100 mt-1" /></label>
                                         <label class="text-xs text-gray-500 font-semibold md:w-36">Fecha de Envío<input type="date" id="filtroFecha" class="input p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100 mt-1" /></label>
                                         <label class="text-xs text-gray-500 font-semibold md:w-36"">Courier
                                             <select id="filtroTipo" class="select p-2.5 border border-gray-200 rounded-xl bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-3 focus:ring-orange-100 mt-1">
@@ -812,7 +813,8 @@ const {
     onAuthStateChanged,
     // --- FIN DE FUNCIONES AÑADIDAS ---
     getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, 
-    onSnapshot, collection, query, where, writeBatch, setLogLevel
+    onSnapshot, collection, query, where, writeBatch, setLogLevel,
+    enableIndexedDbPersistence // <-- AÑADE ESTA LÍNEA
 } = window.firebase;
 
 // Función para inicializar Firebase (SIN AUTENTICACIÓN)
@@ -832,6 +834,22 @@ async function initFirebase() {
         // 2. Inicializar Firebase
         app = initializeApp(firebaseConfig);
         db = getFirestore(app);
+
+        // --- INICIO: HABILITAR PERSISTENCIA (CACHÉ) ---
+        try {
+            await enableIndexedDbPersistence(db);
+            console.log("¡Persistencia (Caché) habilitada!");
+        } catch (err) {
+            if (err.code == 'failed-precondition') {
+                // Esto pasa si el usuario tiene múltiples pestañas abiertas
+                console.warn("Error al habilitar persistencia: Múltiples pestañas abiertas.");
+            } else if (err.code == 'unimplemented') {
+                // El navegador no soporta caché (muy raro hoy en día)
+                console.warn("Error: El navegador no soporta persistencia (caché).");
+            }
+        }
+        // --- FIN: HABILITAR PERSISTENCIA ---
+
         auth = getAuth(app);
         setLogLevel('debug'); // Habilitar logs de Firestore
 
@@ -1098,12 +1116,12 @@ function setupAuthListener() {
 
         showToast('Conectando a Firestore...');
         
-        // --- INICIO: LÓGICA DE CONSULTA HÍBRIDA (CAMINO B - Paso 4) ---
+        // --- INICIO: LÓGICA DE CONSULTA (Fecha + Cliente) ---
         showToast('Consultando base de datos...');
 
-        // 1. Lee los valores de los filtros de NUBE (los que son '==' exactos)
+        // 1. Lee los valores de los filtros de NUBE (Fecha y Cliente)
         const fechaVal = filtroFecha.value;
-        const tipoVal = filtroTipo.value;
+        const clienteVal = filtroCliente.value; // <-- NUEVO
 
         // 2. Define la consulta base (siempre excluye ELIMINADO)
         let queryConstraints = [where("estado", "!=", "ELIMINADO")];
@@ -1113,18 +1131,20 @@ function setupAuthListener() {
             // 'fechaEnvio' se guarda como YYYY-MM-DD
             queryConstraints.push(where("fechaEnvio", "==", fechaVal));
         }
-        if (tipoVal) {
-            queryConstraints.push(where("courier", "==", tipoVal));
+        if (clienteVal) {
+            // 'cliente' debe ser una coincidencia EXACTA
+            queryConstraints.push(where("cliente", "==", clienteVal)); // <-- NUEVO
         }
+        // (El filtro de 'tipoVal' / Courier se ha eliminado de aquí)
 
         // 4. LÓGICA POR DEFECTO: Si no hay filtros de NUBE, filtra por PENDIENTE
-        if (!fechaVal && !tipoVal) {
+        if (!fechaVal && !clienteVal) { // <-- MODIFICADO
             queryConstraints.push(where("estado", "==", "PENDIENTE"));
         }
 
         // 5. Crea la consulta final
         const q = query(enviosCollectionRef, ...queryConstraints);
-        // --- FIN: LÓGICA DE CONSULTA HÍBRIDA ---
+        // --- FIN: LÓGICA DE CONSULTA ---
 
         unsubscribeEnvios = onSnapshot(q, (snapshot) => {
             // Mapeamos los datos y añadimos el ID de Firestore
@@ -1206,7 +1226,6 @@ function setupAuthListener() {
         // --- FIN: OBTENER FECHA DE HOY ---
 
         const clienteFilter = filtroCliente.value.toLowerCase();
-        const tipoFilter = filtroTipo.value;
         const mostrarSoloDuplicados = filtroDuplicados.checked;
 
         // --- Lógica para detectar duplicados en TODA la base de datos ---
@@ -1221,22 +1240,27 @@ function setupAuthListener() {
             }
         });
 
-        // --- INICIO: LÓGICA DE FILTRO DE NAVEGADOR (Paso 8) ---
-        // (Filtros de Nube como Fecha, Courier y Pendiente ya se aplicaron)
+        // --- INICIO: LÓGICA DE FILTRO DE NAVEGADOR (Paso 3) ---
+        // (Filtros de Nube como Fecha y Cliente ya se aplicaron)
+
+        // 1. Lee los filtros de NAVEGADOR (Courier y Duplicados)
+        const tipoFilter = filtroTipo.value; // <-- NUEVO
+
         const enviosFiltrados = todosLosEnvios.filter(envio => {
 
-            // 1. Aplicar filtros de NAVEGADOR (los que son "contains" o complejos)
-            const clienteMatch = !clienteFilter || String(envio.cliente).toLowerCase().includes(clienteFilter);
+            // 2. Aplicar filtro de Courier
+            const tipoMatch = !tipoFilter || envio.courier === tipoFilter; // <-- NUEVO
 
-            // 2. Aplicar filtro de Duplicados (si está activo)
+            // 3. Aplicar filtro de Duplicados (si está activo)
             if (mostrarSoloDuplicados) {
                 const key = `${envio.cliente}-${envio.fechaEnvioDisplay || ''}`;
                 const esDuplicado = duplicates.has(key);
-                return esDuplicado && clienteMatch;
+                // (El 'clienteMatch' ya no es necesario aquí)
+                return esDuplicado && tipoMatch; // <-- MODIFICADO
             }
 
             // Retorno final
-            return clienteMatch;
+            return tipoMatch; // <-- MODIFICADO
         });
         // --- FIN: LÓGICA DE FILTRO DE NAVEGADOR ---
           
