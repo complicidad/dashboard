@@ -939,7 +939,7 @@ function setupAuthListener() {
             loginScreen.style.display = 'none';
 
             // Inicia la carga de datos
-            setupEnviosListener();
+            ejecutarConsultaEnvios();
 
             // Actualiza los datos del negocio (esto ya lo hacías)
             syncBusinessInfo();
@@ -1079,10 +1079,18 @@ function setupAuthListener() {
     const goToAccountBtn = document.getElementById('goToAccountBtn');
     
     let todosLosEnvios = []; // Variable global para almacenar todos los envíos.
+    let unsubscribeEnvios = null; // Para detener el listener anterior
 
     // ======================= REEMPLAZO: DE GOOGLE SCRIPT A FIRESTORE =======================
     // Esta función reemplaza a fetchDataFromSheet y usa onSnapshot para tiempo real
-    function setupEnviosListener() {
+    function ejecutarConsultaEnvios() {
+
+        // --- INICIO: Detener listener anterior (Paso 3) ---
+        if (unsubscribeEnvios) {
+            unsubscribeEnvios(); // Detiene el listener anterior
+        }
+        // --- FIN: Detener listener anterior ---
+
         if (!enviosCollectionRef) {
             showToast("Error: La conexión a la base de datos no está lista.");
             return;
@@ -1090,10 +1098,35 @@ function setupAuthListener() {
 
         showToast('Conectando a Firestore...');
         
-        // Creamos una consulta que filtra los eliminados (lógica movida de la función anterior)
-        const q = query(enviosCollectionRef, where("estado", "!=", "ELIMINADO"));
+        // --- INICIO: LÓGICA DE CONSULTA HÍBRIDA (CAMINO B - Paso 4) ---
+        showToast('Consultando base de datos...');
 
-        onSnapshot(q, (snapshot) => {
+        // 1. Lee los valores de los filtros de NUBE (los que son '==' exactos)
+        const fechaVal = filtroFecha.value;
+        const tipoVal = filtroTipo.value;
+
+        // 2. Define la consulta base (siempre excluye ELIMINADO)
+        let queryConstraints = [where("estado", "!=", "ELIMINADO")];
+
+        // 3. Añade filtros de NUBE (los que son '==' y ahorran cuota)
+        if (fechaVal) {
+            // 'fechaEnvio' se guarda como YYYY-MM-DD
+            queryConstraints.push(where("fechaEnvio", "==", fechaVal));
+        }
+        if (tipoVal) {
+            queryConstraints.push(where("courier", "==", tipoVal));
+        }
+
+        // 4. LÓGICA POR DEFECTO: Si no hay filtros de NUBE, filtra por PENDIENTE
+        if (!fechaVal && !tipoVal) {
+            queryConstraints.push(where("estado", "==", "PENDIENTE"));
+        }
+
+        // 5. Crea la consulta final
+        const q = query(enviosCollectionRef, ...queryConstraints);
+        // --- FIN: LÓGICA DE CONSULTA HÍBRIDA ---
+
+        unsubscribeEnvios = onSnapshot(q, (snapshot) => {
             // Mapeamos los datos y añadimos el ID de Firestore
 // --- INICIO DE LA MODIFICACIÓN (Formato de Fechas) ---
             todosLosEnvios = snapshot.docs.map(doc => {
@@ -1188,36 +1221,24 @@ function setupAuthListener() {
             }
         });
 
+        // --- INICIO: LÓGICA DE FILTRO DE NAVEGADOR (Paso 8) ---
+        // (Filtros de Nube como Fecha, Courier y Pendiente ya se aplicaron)
         const enviosFiltrados = todosLosEnvios.filter(envio => {
+
+            // 1. Aplicar filtros de NAVEGADOR (los que son "contains" o complejos)
             const clienteMatch = !clienteFilter || String(envio.cliente).toLowerCase().includes(clienteFilter);
-            // --- INICIO: LÓGICA DE FILTRO DE FECHA (Inteligente) ---
-            let fechaMatch;
-            const fechaFiltroUsuario = filtroFecha.value; // La fecha que puso el usuario
-            const otroFiltroActivo = clienteFilter || tipoFilter; // ¿Filtró por cliente o courier?
 
-            if (fechaFiltroUsuario) {
-                // 1. Si el usuario PUSO una fecha, filtra por esa fecha
-                fechaMatch = (envio.fechaEnvioInput && envio.fechaEnvioInput === fechaFiltroUsuario);
-            } else if (otroFiltroActivo) {
-                // 2. Si el usuario NO puso fecha, PERO SÍ filtró por cliente o courier...
-                fechaMatch = true; // ...ignora la fecha y muestra todo (para ese cliente/courier)
-            } else {
-                // 3. Si el usuario NO puso fecha Y TAMPOCO filtró por cliente o courier...
-                // ...aplica el filtro por defecto (>= hoy)
-                fechaMatch = (envio.fechaEnvioInput ? envio.fechaEnvioInput >= hoyString : false);
-            }
-            // --- FIN: LÓGICA DE FILTRO DE FECHA (Inteligente) ---
-
-            const tipoMatch = !tipoFilter || envio.courier === tipoFilter;
-            
+            // 2. Aplicar filtro de Duplicados (si está activo)
             if (mostrarSoloDuplicados) {
                 const key = `${envio.cliente}-${envio.fechaEnvioDisplay || ''}`;
                 const esDuplicado = duplicates.has(key);
-                return esDuplicado && clienteMatch && fechaMatch && tipoMatch;
+                return esDuplicado && clienteMatch;
             }
 
-            return clienteMatch && fechaMatch && tipoMatch;
+            // Retorno final
+            return clienteMatch;
         });
+        // --- FIN: LÓGICA DE FILTRO DE NAVEGADOR ---
           
         // Ordena los envíos filtrados antes de mostrarlos
         enviosFiltrados.sort((a, b) => {
@@ -1710,7 +1731,7 @@ function setupAuthListener() {
     // --- FIN: LÓGICA DE EXPORTACIÓN DE DATOS ---
 
 
-    btnAplicarFiltros.addEventListener('click', aplicarFiltros);
+    btnAplicarFiltros.addEventListener('click', ejecutarConsultaEnvios);
     filtroCliente.addEventListener('keyup', (e) => { if(e.key === 'Enter') aplicarFiltros() });
 
     btnLimpiarFiltros.addEventListener('click', () => {
@@ -1721,7 +1742,7 @@ function setupAuthListener() {
         filtroDuplicados.checked = false; // También resetea el nuevo checkbox
 
         // 2. Vuelve a renderizar la tabla con todos los datos
-        aplicarFiltros();
+        ejecutarConsultaEnvios();
 
         // 3. Muestra una notificación de confirmación
         showToast('Filtros limpiados.');
