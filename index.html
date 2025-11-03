@@ -915,7 +915,7 @@ function handleNotifyClick(id) {
     }
 
     // 2. Validar el teléfono
-    if (!envio.telefono) {
+    if (!envio.cliente) {
         showToast('Este envío no tiene un número de teléfono asignado.');
         return;
     }
@@ -979,7 +979,7 @@ _Atte. CompliEnvíos_ 🥰
     // 5. Formatear número de teléfono
     // (Esto elimina espacios y añade el prefijo 51 de Perú si es un número de 9 dígitos)
     // ¡Ajusta el '51' si tu código de país es otro!
-    let numeroFormateado = envio.telefono.replace(/[^\d]/g, ''); // Quita todo lo que no sea dígito
+    let numeroFormateado = envio.cliente.replace(/[^\d]/g, ''); // Quita todo lo que no sea dígito
     if (numeroFormateado.length === 9 && !numeroFormateado.startsWith('51')) {
         numeroFormateado = '51' + numeroFormateado;
     }
