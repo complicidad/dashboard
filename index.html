@@ -929,6 +929,25 @@ function handleNotifyClick(id) {
     const courier = (envio.courier || 'OTRO').toUpperCase();
 
     if (courier === 'DELIVERY' || courier === 'DINSIDES') {
+        
+        // --- INICIO: CÁLCULO DE FECHA DE PAGO (¡FIX!) ---
+        // (Esta variable 'diaPago' faltaba y causaba un error)
+        let diaPago = 'N/A';
+        if (envio.fechaEnvioInput) { // ej: "2025-10-31"
+            try {
+                // Usamos T12:00:00 para evitar problemas de zona horaria (UTC)
+                const fecha = new Date(envio.fechaEnvioInput + 'T12:00:00');
+                // Calcular día de pago (un día antes)
+                const fechaPago = new Date(fecha);
+                fechaPago.setDate(fecha.getDate() - 1);
+                // Formato: "30-oct"
+                diaPago = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' }).format(fechaPago);
+            } catch (e) {
+                console.error("Error al parsear fecha para plantilla: ", e);
+            }
+        }
+        // --- FIN: CÁLCULO DE FECHA DE PAGO ---
+
         // Bloque de destino para Delivery
         destinoBlock = `* _Distrito: ${envio.distrito || 'N/A'}_
 * _Dirección: ${envio.direccion || 'N/A'}_
@@ -2245,4 +2264,6 @@ if (firebaseReady) {
 <!-- ======================= FIN: PANTALLA DE LOGIN ======================= -->
 </body>
 </html>
+
+
 
