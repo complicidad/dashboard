@@ -933,6 +933,8 @@ function handleNotifyClick(id) {
         // --- INICIO: CÁLCULO DE FECHA DE PAGO (¡FIX!) ---
         // (Esta variable 'diaPago' faltaba y causaba un error)
         let diaPago = 'N/A';
+        let distritoMostrado = envio.distrito || 'N/A';
+        let tarifaMostrada = 'S/. 00'; // <--- Valor por defecto si no se encuentra
         if (envio.fechaEnvioInput) { // ej: "2025-10-31"
             try {
                 // Usamos T12:00:00 para evitar problemas de zona horaria (UTC)
@@ -946,16 +948,24 @@ function handleNotifyClick(id) {
                 console.error("Error al parsear fecha para plantilla: ", e);
             }
         }
+        
+        if (envio.distrito && envio.distrito.includes('|')) {
+                    const partes = envio.distrito.split('|');
+                    distritoMostrado = partes[0].trim(); // Ej: "La Molina"
+                    tarifaMostrada = partes[1].trim();  // Ej: "S/. 10.00"
+                }
+
+
         // --- FIN: CÁLCULO DE FECHA DE PAGO ---
 
         // Bloque de destino para Delivery
-        destinoBlock = `* _Distrito: ${envio.distrito || 'N/A'}_
+destinoBlock = `* _Distrito: ${distritoMostrado}_
 * _Dirección: ${envio.direccion || 'N/A'}_
 * _Referencia: ${envio.referencia || '(Sin referencia)'}_
 
 *Pago del DELIVERY* 💚
 * _Día de pago: ${diaPago} (máx. 6pm)_
-* _Tarifa plana: S/. 12_
+* _tarifa plana: ${tarifaMostrada}_
 * _Yape: 981391159 - 975100450_
 * _Titular: Rosalinda Barzola_`;
     } else { // SHALOM, OLVA, y otros
