@@ -27,7 +27,7 @@
                         'bg-soft': '#fffaf6',
                         'badge-pending': '#9a6200',
                         'badge-sent': '#D96B4F',
-                        'badge-delivered': '#1b7f3a',
+                        'badge-notificado': '#1b7f3a', // <-- CAMBIO DE 'delivered' A 'notificado'
                         'badge-rescheduled': '#8e44ad',
                         'brand-accent': '#D96B4F',
                         // Colores para el nuevo menú lateral
@@ -438,10 +438,10 @@ import {
                                             </button>
                                             <div id="plantillasDropdownMenu" class="origin-top-right absolute right-0 mt-2 w-56 rounded-xl shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none hidden z-10">
                                                 <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="plantillasDropdownBtn">
-                                                    <a href="#" id="btnTplDelivery" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem">Plantilla DELIVERY (.csv)</a>
-                                                    <a href="#" id="btnTplShalom" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem">Plantilla SHALOM (.csv)</a>
-                                                    <a href="#" id="btnTplOlva" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem">Plantilla OLVA (.csv)</a>
-                                                    <a href="#" id="btnTplDinsides" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem">Plantilla DINSIDES (.csv)</a>
+                                                    <a href="#" id="btnTplDelivery" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem">Plantilla DELIVERY (.xlsx)</a>
+                                                    <a href="#" id="btnTplShalom" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem">Plantilla SHALOM (.xlsx)</a>
+                                                    <a href="#" id="btnTplOlva" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem">Plantilla OLVA (.xlsx)</a>
+                                                    <a href="#" id="btnTplDinsides" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem">Plantilla DINSIDES (.xlsx)</a>
                                                 </div>
                                             </div>
                                         </div>
@@ -460,7 +460,7 @@ import {
                                         <option value="" selected>Acción en lote…</option>
                                         <option value="PENDIENTE">Marcar como Pendiente</option>
                                         <option value="ENVIADO">Marcar como Enviado</option>
-                                        <option value="ENTREGADO">Marcar como Entregado</option>
+                                        <option value="NOTIFICADO">Marcar como Notificado</option> <!-- <-- CAMBIO DE 'Entregado' A 'Notificado' -->
                                         <option value="REPROGRAMADO">Reprogramar</option>
                                         <option value="ELIMINAR" class="text-red-600 font-semibold">Eliminar Seleccionados</option>
                                     </select>
@@ -851,6 +851,7 @@ async function initFirebase() {
         // --- FIN: HABILITAR PERSISTENCIA ---
 
         auth = getAuth(app);
+        // setLogLevel('debug'); // Logs deshabilitados para producción
         setLogLevel('debug'); // Habilitar logs de Firestore
 
         console.log("Firebase initialized.");
@@ -934,7 +935,7 @@ function handleNotifyClick(id) {
         // (Esta variable 'diaPago' faltaba y causaba un error)
         let diaPago = 'N/A';
         let distritoMostrado = envio.distrito || 'N/A';
-        let tarifaMostrada = 'S/. 00'; // <--- Valor por defecto si no se encuentra
+        let tarifaMostrada = 'S/. 12'; // <--- Valor por defecto si no se encuentra
         if (envio.fechaEnvioInput) { // ej: "2025-10-31"
             try {
                 // Usamos T12:00:00 para evitar problemas de zona horaria (UTC)
@@ -965,7 +966,7 @@ destinoBlock = `* _Distrito: ${distritoMostrado}_
 
 *Pago del DELIVERY* 💚
 * _Día de pago: ${diaPago} (máx. 6pm)_
-* _Tarifa plana: ${tarifaMostrada}_
+* _tarifa plana: ${tarifaMostrada}_
 * _Yape: 981391159 - 975100450_
 * _Titular: Rosalinda Barzola_`;
     } else { // SHALOM, OLVA, y otros
@@ -975,7 +976,7 @@ destinoBlock = `* _Distrito: ${distritoMostrado}_
     }
 
     // Plantilla final ordenada por UX
-    const mensaje = `*Hola bonita* 😊💖
+    const mensaje = `*¡Hola bonita!* 😊💖
 _Tu pedido ya está programado 💫_
 
 *Envío por ${envio.courier || 'N/A'}* 📦
@@ -1310,16 +1311,30 @@ function setupAuthListener() {
             // 2. Aplicar filtro de Courier
             const tipoMatch = !tipoFilter || envio.courier === tipoFilter; // <-- NUEVO
 
+            // --- INICIO: NUEVA LÓGICA DE FILTRO "PENDIENTE" POR DEFECTO ---
+            // Revisa si CUALQUIER filtro está activo
+            const algunFiltroActivo = clienteFilter || filtroFecha.value || tipoFilter || mostrarSoloDuplicados;
+            
+            let estadoMatch;
+            if (algunFiltroActivo) {
+                // Si el usuario usa CUALQUIER filtro, se ignora el estado (se muestran todos)
+                estadoMatch = true;
+            } else {
+                // Si NINGÚN filtro está activo, muestra solo "PENDIENTE"
+                estadoMatch = (envio.estado === 'PENDIENTE');
+            }
+            // --- FIN: NUEVA LÓGICA DE FILTRO "PENDIENTE" ---
+
             // 3. Aplicar filtro de Duplicados (si está activo)
             if (mostrarSoloDuplicados) {
                 const key = `${envio.cliente}-${envio.fechaEnvioDisplay || ''}`;
                 const esDuplicado = duplicates.has(key);
                 // (El 'clienteMatch' ya no es necesario aquí)
-                return esDuplicado && tipoMatch; // <-- MODIFICADO
+                return esDuplicado && tipoMatch && estadoMatch; // <-- MODIFICADO
             }
 
             // Retorno final
-            return tipoMatch; // <-- MODIFICADO
+            return tipoMatch && estadoMatch; // <-- MODIFICADO
         });
         // --- FIN: LÓGICA DE FILTRO DE NAVEGADOR ---
           
@@ -1361,7 +1376,7 @@ function setupAuthListener() {
                     switch (estado) {
                         case 'PENDIENTE': return 'bg-yellow-100 text-badge-pending';
                         case 'ENVIADO': return 'bg-orange-100 text-badge-sent';
-                        case 'ENTREGADO': return 'bg-green-100 text-badge-delivered';
+                        case 'NOTIFICADO': return 'bg-green-100 text-badge-notificado'; // <-- CAMBIO DE 'Entregado' A 'Notificado'
                         case 'REPROGRAMADO': return 'bg-purple-100 text-badge-rescheduled';
                         default: return 'bg-gray-100 text-gray-800';
                     }
@@ -1416,7 +1431,7 @@ function setupAuthListener() {
                             <select class="inline-edit-estado select border border-gray-200 bg-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-orange-100" data-original-estado="${envio.estado}">
                                 <option value="PENDIENTE" ${envio.estado === 'PENDIENTE' ? 'selected' : ''}>Pendiente</option>
                                 <option value="ENVIADO" ${envio.estado === 'ENVIADO' ? 'selected' : ''}>Enviado</option>
-                                <option value="ENTREGADO" ${envio.estado === 'ENTREGADO' ? 'selected' : ''}>Entregado</option>
+                                <option value="NOTIFICADO" ${envio.estado === 'NOTIFICADO' ? 'selected' : ''}>Notificado</option> <!-- <-- CAMBIO DE 'Entregado' A 'Notificado' -->
                                 <option value="REPROGRAMADO" ${envio.estado === 'REPROGRAMADO' ? 'selected' : ''}>Reprogramado</option>
                                 <option value="ELIMINAR" class="text-red-600 font-semibold">Eliminar...</option>
                             </select>
@@ -1481,7 +1496,7 @@ function setupAuthListener() {
                         <select class="inline-edit-estado select p-2 border border-gray-200 rounded-lg bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-orange-100" data-original-estado="${envio.estado}">
                             <option value="PENDIENTE" ${envio.estado === 'PENDIENTE' ? 'selected' : ''}>Pendiente</option>
                             <option value="ENVIADO" ${envio.estado === 'ENVIADO' ? 'selected' : ''}>Enviado</option>
-                            <option value="ENTREGADO" ${envio.estado === 'ENTREGADO' ? 'selected' : ''}>Entregado</option>
+                            <option value="NOTIFICADO" ${envio.estado === 'NOTIFICADO' ? 'selected' : ''}>Notificado</option> <!-- <-- CAMBIO DE 'Entregado' A 'Notificado' -->
                             <option value="REPROGRAMADO" ${envio.estado === 'REPROGRAMADO' ? 'selected' : ''}>Reprogramado</option>
                         </select>
                         <input type="date" class="inline-edit-fecha input p-2 border border-gray-200 rounded-lg bg-white w-full text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-orange-100 oculto" value="${envio.fechaEnvioInput || ''}" data-original-fecha="${envio.fechaEnvioInput || ''}">
@@ -1580,7 +1595,7 @@ function setupAuthListener() {
             }
             // CORRECCIÓN: El campo en Firestore se llama fechaEnvio (formato YYYY-MM-DD)
             updates = { estado: 'REPROGRAMADO', fechaEnvio: fechaReprog.value };
-        } else { // Para 'ENVIADO', 'ENTREGADO', 'PENDIENTE'
+        } else { // Para 'ENVIADO', 'NOTIFICADO', 'PENDIENTE'
             updates = { estado: accion };
         }
 
@@ -1700,7 +1715,7 @@ function setupAuthListener() {
                     </div>
                     <div class="label-footer">
                         <div class="label-courier-info">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
                             <span>${envio.courier || 'N/A'}</span>
                         </div>
                         <!-- <div class="label-qr-code">QR Code</div> -->
@@ -2106,7 +2121,7 @@ if (logoSrc) {
             nombre: editNombre.value,
             telefono: editTelefono.value,
             DNI: editDNI.value,
-            // courier: editCourier.value, // <-- CAMBIO: Eliminado
+            // courier: editCourier.value, // <--- CAMBIO: Eliminado
             distrito: editDistrito.value,
             direccion: editDireccion.value,
             referencia: editReferencia.value,
@@ -2274,6 +2289,4 @@ if (firebaseReady) {
 <!-- ======================= FIN: PANTALLA DE LOGIN ======================= -->
 </body>
 </html>
-
-
 
