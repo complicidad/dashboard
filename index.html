@@ -923,9 +923,33 @@ function handleNotifyClick(id) {
     // 3. Obtener nombre del negocio (desde localStorage)
     const businessName = localStorage.getItem('businessName') || 'Tu Emprendimiento';
 
-    // 4. Crear el mensaje
-    // (Personaliza este mensaje como quieras)
-    const mensaje = `¡Hola ${envio.nombre}! Te escribe ${businessName} para informarte sobre tu envío. Estado actual: *${envio.estado}*.`;
+    // 4. Crear el mensaje (Formato Dinámico y Profesional)
+    
+    let destinoBlock = ''; // Bloque dinámico para el destino
+    const courier = (envio.courier || 'OTRO').toUpperCase();
+
+    if (courier === 'DELIVERY' || courier === 'DINSIDES') {
+        // Bloque de destino para Delivery
+        destinoBlock = `* _Distrito: ${envio.distrito || 'N/A'}_
+* _Dirección: ${envio.direccion || 'N/A'}_
+* _Referencia: ${envio.referencia || '(Sin referencia)'}_`;
+    } else { // SHALOM, OLVA, y otros
+        // Bloque de destino para Agencias
+        destinoBlock = `* _DNI: ${envio.DNI || 'N/A'}_
+* _Agencia (Destino): ${envio.agencia || 'N/A'}_`;
+    }
+
+    // Plantilla final ordenada por UX
+    const mensaje = `*¡Hola ${envio.nombre}! 👋*
+_Tu pedido ya está programado 💫_
+
+*Envío por ${envio.courier || 'N/A'}* 📦
+* _Fecha de envío: ${envio.fechaEnvioDisplay || 'Por programar'}_
+* _Destinatario: ${envio.nombre || 'N/A'} (${envio.telefono || 'N/A'})_
+${destinoBlock}
+
+*Confirma tu envío con un "Ok"* 👍
+`;
 
     // 5. Formatear número de teléfono
     // (Esto elimina espacios y añade el prefijo 51 de Perú si es un número de 9 dígitos)
