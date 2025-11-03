@@ -932,7 +932,13 @@ function handleNotifyClick(id) {
         // Bloque de destino para Delivery
         destinoBlock = `* _Distrito: ${envio.distrito || 'N/A'}_
 * _Dirección: ${envio.direccion || 'N/A'}_
-* _Referencia: ${envio.referencia || '(Sin referencia)'}_`;
+* _Referencia: ${envio.referencia || '(Sin referencia)'}_
+
+*Pago del DELIVERY* 💚
+* _Día de pago: ${diaPago} (máx. 6pm)_
+* _tarifa plana: S/. 12_
+* _Yape: 981391159 - 975100450_
+* _Titular: Rosalinda Barzola_`;
     } else { // SHALOM, OLVA, y otros
         // Bloque de destino para Agencias
         destinoBlock = `* _DNI: ${envio.DNI || 'N/A'}_
@@ -940,7 +946,7 @@ function handleNotifyClick(id) {
     }
 
     // Plantilla final ordenada por UX
-    const mensaje = `*¡Hola ${envio.nombre}! 👋*
+    const mensaje = `*¡Hola bonita!* 😊💖
 _Tu pedido ya está programado 💫_
 
 *Envío por ${envio.courier || 'N/A'}* 📦
@@ -948,7 +954,7 @@ _Tu pedido ya está programado 💫_
 * _Destinatario: ${envio.nombre || 'N/A'} (${envio.telefono || 'N/A'})_
 ${destinoBlock}
 
-*Confirma tu envío con un "Ok"* 👍
+_Atte. CompliEnvíos_ 🥰
 `;
 
     // 5. Formatear número de teléfono
