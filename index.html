@@ -418,7 +418,9 @@
                                         <th class="px-4 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Producto</th>
                                         <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Cant.</th>
                                         <th class="px-4 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Total</th>
+                                        <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Pago</th>
                                         <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Estado</th>
+                                        <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">F. Envío</th>
                                         <th class="px-4 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider"></th>
                                     </tr>
                                 </thead>
@@ -1058,6 +1060,7 @@
                         </div>
                     </td>
                     <td class="px-4 py-4 whitespace-nowrap text-center">${estadoHtml}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-center text-sm font-medium text-brand-muted dark:text-gray-400">${item.fechaEnvio ? item.fechaEnvio : '-'}</td>
                     <td class="px-4 py-4 whitespace-nowrap text-right">
                         <button onclick="deleteSaleItemAPI('${item.id}')" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-colors" title="Eliminar Venta">
                             <i data-feather="trash-2" class="w-4 h-4"></i>
